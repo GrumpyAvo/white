@@ -7,15 +7,15 @@
     <div class="page-sub">used by the header marquee, footer tagline, and guestbook status</div>
   </div>
   <form method="post" action="{{ url_for('admin.settings_admin') }}" style="max-width:600px">
-    {% for key in ['site_title', 'site_tagline', 'site_footer', 'marquee_text', 'guestbook_open'] %}
+    {% for key, label in fields %}
     <div class="editor-field">
-      <label>{{ key.replace('_', ' ').title() }}</label>
+      <label>{{ label }}</label>
       {% if key == 'guestbook_open' %}
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
-          <input type="checkbox" name="{{ key }}" {% if settings.get(key) %}checked{% endif %} /> Guestbook open for new messages
+          <input type="checkbox" name="{{ key }}" {% if (current.get(key) or 'true') != 'false' %}checked{% endif %} /> Guestbook open for new messages
         </label>
       {% else %}
-        <input type="text" name="{{ key }}" value="{{ settings.get(key) or '' }}" />
+        <input type="text" name="{{ key }}" value="{{ current.get(key) or '' }}" />
       {% endif %}
     </div>
     {% endfor %}

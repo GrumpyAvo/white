@@ -51,7 +51,7 @@ ensure_db()
 # Public pages with dedicated templates (bespoke UI beyond plain sections)
 DEDICATED = {"books": "books.html", "pics": "pics.html", "music": "music.html", "guestbook": "guestbook.html"}
 # Slugs served by the generic sections template
-GENERIC = {"about", "life", "studies", "links"}
+GENERIC = {"about", "studies", "links"}
 
 
 # ── Jinja filters ──────────────────────────────────────────────────────────────
@@ -179,7 +179,8 @@ def base_ctx(slug, page_name=None):
         "nav": load_nav(),
         "page_slug": slug,
         "page_name": page_name or slug,
-        "visitor_count": visitors_for(slug),
+        "visitor_count": visitors_for("site"),
+        "meta_description": settings.get("site_tagline") or "",
         "recent_posts": recent,
         "gb_latest": dict(gb) if gb else None,
         "now_playing": now,
@@ -355,16 +356,33 @@ def search():
     q = (request.args.get("q") or "").strip()
     results = {"posts": [], "books": []}
     if q:
-        like = "%" + q + "%"
-        results["posts"] = [post_row_to_dict(r) for r in db.query(
-            "SELECT p.*, t.slug AS tab_slug, t.name AS tab_name"
-            " FROM posts p LEFT JOIN tabs t ON p.tab_id=t.id"
-            " WHERE p.published=1 AND p.status!='hidden'"
-            " AND (p.title LIKE ? OR p.excerpt LIKE ? OR p.content LIKE ?)"
-            " ORDER BY p.created_at DESC LIMIT 20", (like, like, like))]
-        results["books"] = [dict(r) for r in db.query(
-            "SELECT * FROM books WHERE status='published'"
-            " AND (title LIKE ? OR author LIKE ?) LIMIT 10", (like, like))]
+        # Token-based fuzzy match: every word of the query must appear
+        # somewhere in the title / subtitle / excerpt / content / tags / page.
+        tokens = [t for t in re.split(r"[^\w]+", q.lower()) if t]
+        if tokens:
+            post_where = " AND ".join(
+                "(p.title LIKE ? OR p.subtitle LIKE ? OR p.excerpt LIKE ?"
+                " OR p.content LIKE ? OR p.tags LIKE ? OR t.name LIKE ?)"
+                for _ in tokens
+            )
+            post_params = []
+            for t in tokens:
+                like = "%" + t + "%"
+                post_params += [like, like, like, like, like, like]
+            results["posts"] = [post_row_to_dict(r) for r in db.query(
+                "SELECT p.*, t.slug AS tab_slug, t.name AS tab_name"
+                " FROM posts p LEFT JOIN tabs t ON p.tab_id=t.id"
+                " WHERE p.published=1 AND p.status!='hidden' AND ("
+                + post_where + ")"
+                " ORDER BY p.created_at DESC LIMIT 20", post_params)]
+            book_where = " AND ".join("(title LIKE ? OR author LIKE ?)" for _ in tokens)
+            book_params = []
+            for t in tokens:
+                like = "%" + t + "%"
+                book_params += [like, like]
+            results["books"] = [dict(r) for r in db.query(
+                "SELECT * FROM books WHERE status='published' AND ("
+                + book_where + ") LIMIT 10", book_params)]
     ctx = base_ctx("search", "Search")
     ctx["q"] = q
     ctx["results"] = results
@@ -425,10 +443,21 @@ def papers(filename):
     return send_from_directory(os.path.join(app.root_path, "papers"), filename)
 
 
+@app.errorhandler(404)
+def not_found(_e):
+    ctx = base_ctx("404", "Not Found")
+    return render_template("404.html", **ctx), 404
+
+
 # ── API (ported from the old Vercel backend) ───────────────────────────────────
 @app.route("/api/now-playing")
 def api_now_playing():
     return jsonify(spotify.now_playing())
+
+
+@app.route("/api/top-stats")
+def api_top_stats():
+    return jsonify(spotify.top_stats())
 
 
 @app.route("/api/visitors")

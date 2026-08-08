@@ -8,9 +8,23 @@
   <div class="vinyl-large{% if not (now_playing and now_playing.isPlaying) %} vinyl-paused{% endif %}" id="vinyl"></div>
   <div class="now-playing-info">
     <div class="np-label" id="np-label">◈ {% if now_playing and now_playing.isPlaying %}now playing{% else %}not playing{% endif %}</div>
-    <div class="np-song" id="np-song">{% if now_playing and now_playing.isPlaying %}{{ now_playing.title }}{% else %}nothing on right now{% endif %}</div>
+    <div class="np-song" id="np-song">{% if now_playing and now_playing.isPlaying %}<a href="{{ now_playing.songUrl }}" target="_blank">{{ now_playing.title }}</a>{% else %}nothing on right now{% endif %}</div>
     <div class="np-artist" id="np-artist">{% if now_playing and now_playing.isPlaying %}{{ now_playing.artist }}{% else %}open spotify and it'll appear here{% endif %}</div>
+    {% if now_playing and now_playing.isPlaying %}
+    <div class="np-bar-wrap"><div class="np-bar" id="np-bar" style="width:{% if now_playing.duration %}{{ (now_playing.progress / now_playing.duration * 100) | round(1) }}{% else %}0{% endif %}%"></div></div>
+    <div class="np-time"><span id="np-progress">{{ now_playing.progress }}</span><span id="np-duration">{{ now_playing.duration }}</span></div>
+    {% endif %}
   </div>
+</div>
+
+<div class="section-heading">★ top artists this month</div>
+<div class="artists-grid" id="artists-grid">
+  <div class="loading-state" style="grid-column:1/-1">loading your top artists...</div>
+</div>
+
+<div class="section-heading">★ top tracks this month</div>
+<div class="track-list" id="tracks-list">
+  <div class="loading-state">loading your top tracks...</div>
 </div>
 
 <div class="section-heading" id="shelf-heading" style="display:flex">★ my music shelf</div>
@@ -38,21 +52,87 @@
 {% block extra_scripts %}
 <script>
 (function(){
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function fmt(ms){var s=Math.floor((ms||0)/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+
   var vinyl = document.getElementById('vinyl');
   var label = document.getElementById('np-label');
   var song = document.getElementById('np-song');
   var artist = document.getElementById('np-artist');
+  var bar = document.getElementById('np-bar');
+  var prog = document.getElementById('np-progress');
+  var dur = document.getElementById('np-duration');
+  var progressInterval;
+
   function render(d){
     var playing = !!(d && d.isPlaying);
     if (vinyl) vinyl.classList.toggle('vinyl-paused', !playing);
     if (label) label.textContent = '◈ ' + (playing ? 'now playing' : 'not playing');
-    if (song) song.textContent = playing ? d.title : 'nothing on right now';
     if (artist) artist.textContent = playing ? d.artist : "open spotify and it'll appear here";
+    if (song) song.innerHTML = playing
+      ? (d.songUrl ? '<a href="'+esc(d.songUrl)+'" target="_blank">'+esc(d.title)+'</a>' : esc(d.title))
+      : 'nothing on right now';
+    clearInterval(progressInterval);
+    if (playing && bar && d.duration) {
+      var local = d.progress || 0;
+      bar.style.display = '';
+      var update = function(){
+        var pct = Math.min(100, (local / d.duration) * 100);
+        bar.style.width = pct + '%';
+        if (prog) prog.textContent = fmt(local);
+        if (dur) dur.textContent = fmt(d.duration);
+        local += 1000;
+        if (local > d.duration) clearInterval(progressInterval);
+      };
+      update();
+      progressInterval = setInterval(update, 1000);
+    } else if (bar) {
+      bar.style.display = 'none';
+    }
   }
-  function refresh(){
+
+  function refreshNowPlaying(){
     fetch('/api/now-playing').then(function(r){ return r.json(); }).then(render).catch(function(){});
   }
-  setInterval(refresh, 15000);
+
+  function renderStats(d){
+    var grid = document.getElementById('artists-grid');
+    if (grid && d.artists && d.artists.length) {
+      grid.innerHTML = d.artists.map(function(a, i){
+        return '<a class="artist-card" href="'+esc(a.url)+'" target="_blank">'+
+          '<span class="artist-rank'+(i===0?' gold':'')+'">'+(i+1)+'</span>'+
+          '<div class="artist-img">'+(a.image?'<img src="'+esc(a.image)+'" alt="'+esc(a.name)+'" />':'🎤')+'</div>'+
+          '<div class="artist-name">'+esc(a.name)+'</div>'+
+          '<div class="artist-genre">'+esc((a.genres||[]).join(' · '))+'</div></a>';
+      }).join('');
+    } else if (grid) {
+      grid.innerHTML = '<div class="loading-state" style="grid-column:1/-1">no data yet — listen more on spotify!</div>';
+    }
+
+    var list = document.getElementById('tracks-list');
+    if (list && d.tracks && d.tracks.length) {
+      list.innerHTML = d.tracks.map(function(t, i){
+        return '<a class="track-row" href="'+esc(t.url)+'" target="_blank">'+
+          '<div class="track-num'+(i===0?' top':'')+'">'+(i+1)+'</div>'+
+          (t.image
+            ? '<img class="track-thumb" src="'+esc(t.image)+'" alt="'+esc(t.name)+'" />'
+            : '<div class="track-thumb-placeholder">♫</div>')+
+          '<div><div class="track-info-name">'+esc(t.name)+'</div>'+
+          '<div class="track-info-artist">'+esc(t.artist)+'</div></div></a>';
+      }).join('');
+    } else if (list) {
+      list.innerHTML = '<div class="loading-state">no data yet — listen more on spotify!</div>';
+    }
+  }
+
+  function refreshStats(){
+    fetch('/api/top-stats').then(function(r){ return r.json(); }).then(renderStats).catch(function(){});
+  }
+
+  setInterval(refreshNowPlaying, 15000);
+  refreshNowPlaying();
+  refreshStats();
+  setInterval(refreshStats, 300000);
 })();
 </script>
 {% endblock %}

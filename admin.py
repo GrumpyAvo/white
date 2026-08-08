@@ -149,14 +149,15 @@ def _list_sql(entity):
 
 
 def _columns(entity):
+    """Return (key, header) pairs — list.html unpacks them as (key, label)."""
     return {
-        "posts": [("Title", "title"), ("Page", "tab_name"), ("Status", "status"), ("Date", "created_at")],
-        "books": [("Title", "title"), ("Author", "author"), ("Rating", "rating"), ("Status", "status")],
-        "music": [("Title", "title"), ("Artist", "artist"), ("Type", "type"), ("Status", "status")],
-        "photos": [("URL", "url"), ("Album", "album"), ("Caption", "caption"), ("Visible", "visible")],
-        "links": [("Label", "label"), ("URL", "url"), ("Category", "category"), ("Visible", "visible")],
-        "tabs": [("Name", "name"), ("Slug", "slug"), ("Type", "page_type"), ("Visible", "visible")],
-        "sections": [("Type", "type"), ("Title", "title"), ("Page", "tab_name"), ("Visible", "visible")],
+        "posts": [("title", "Title"), ("tab_name", "Page"), ("status", "Status"), ("created_at", "Date")],
+        "books": [("title", "Title"), ("author", "Author"), ("rating", "Rating"), ("status", "Status")],
+        "music": [("title", "Title"), ("artist", "Artist"), ("type", "Type"), ("status", "Status")],
+        "photos": [("url", "URL"), ("album", "Album"), ("caption", "Caption"), ("visible", "Visible")],
+        "links": [("label", "Label"), ("url", "URL"), ("category", "Category"), ("visible", "Visible")],
+        "tabs": [("name", "Name"), ("slug", "Slug"), ("page_type", "Page type"), ("visible", "Visible")],
+        "sections": [("type", "Type"), ("title", "Title"), ("tab_name", "Page"), ("visible", "Visible")],
     }[entity]
 
 
@@ -201,7 +202,7 @@ def dashboard():
         "SELECT COUNT(*) AS n FROM guestbook_entries WHERE status='pending'")["n"]
     counts["pending_users"] = db.query_one(
         "SELECT COUNT(*) AS n FROM pending_users WHERE status='pending'")["n"]
-    return render_template("admin/dashboard.html", counts=counts)
+    return render_template("admin/dashboard.html", counts=counts, active="dashboard")
 
 
 @admin_bp.route("/<entity>")
@@ -213,8 +214,10 @@ def list_entity(entity):
     return render_template(
         "admin/list.html",
         entity=entity,
+        entity_label=entity.replace("_", " ").title(),
         columns=_columns(entity),
         rows=rows,
+        active=entity,
     )
 
 
@@ -260,6 +263,7 @@ def edit_entity(entity, item_id=None):
         record=record,
         fields=ENTITY_FIELDS[entity],
         tabs=db.query("SELECT id, name FROM tabs ORDER BY position"),
+        active=entity,
     )
 
 
@@ -289,7 +293,7 @@ def guestbook_admin():
         return redirect(url_for("admin.guestbook_admin"))
     entries = [dict(r) for r in db.query(
         "SELECT * FROM guestbook_entries ORDER BY created_at DESC")]
-    return render_template("admin/guestbook.html", entries=entries)
+    return render_template("admin/guestbook.html", entries=entries, active="guestbook")
 
 
 @admin_bp.route("/users", methods=["GET", "POST"])
@@ -308,12 +312,13 @@ def users_admin():
             flash("Done", "ok")
         return redirect(url_for("admin.users_admin"))
     users = [dict(r) for r in db.query("SELECT * FROM pending_users ORDER BY created_at DESC")]
-    return render_template("admin/users.html", users=users)
+    return render_template("admin/users.html", users=users, active="users")
 
 
 SETTING_FIELDS = [
     ("site_title", "Site title"),
     ("site_tagline", "Tagline"),
+    ("site_footer", "Footer tagline"),
     ("marquee_text", "Marquee text"),
     ("posts_per_page", "Posts per page"),
     ("guestbook_open", "Guestbook open (true/false)"),
@@ -325,7 +330,10 @@ SETTING_FIELDS = [
 def settings_admin():
     if request.method == "POST":
         for key, _label in SETTING_FIELDS:
-            value = _form_value(key) or ""
+            if key == "guestbook_open":
+                value = "true" if _form_value(key) else "false"
+            else:
+                value = _form_value(key) or ""
             db.execute(
                 "INSERT INTO site_settings(key,value) VALUES(?,?)"
                 " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
@@ -334,7 +342,7 @@ def settings_admin():
         flash("Settings saved", "ok")
         return redirect(url_for("admin.settings_admin"))
     current = {r["key"]: r["value"] for r in db.query("SELECT key, value FROM site_settings")}
-    return render_template("admin/settings.html", fields=SETTING_FIELDS, current=current)
+    return render_template("admin/settings.html", fields=SETTING_FIELDS, current=current, active="settings")
 
 
 @admin_bp.route("/import", methods=["GET", "POST"])
@@ -358,4 +366,4 @@ def import_admin():
             n = fns[which]()
             flash("Import done: %s added %s" % (which, n), "ok")
         return redirect(url_for("admin.import_admin"))
-    return render_template("admin/import.html")
+    return render_template("admin/import.html", active="import")

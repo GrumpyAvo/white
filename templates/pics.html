@@ -13,7 +13,7 @@
     </div>
     <div class="gallery" id="gallery">
       {% for p in items %}
-        <img src="{{ p.url }}" alt="{{ p.caption or '' }}" loading="lazy" data-idx="{{ loop.index0 }}" data-album="{{ p.album or 'misc' }}" onclick="openLBIdx({{ loop.index0 }})" title="{{ p.caption or p.album or '' }}" />
+        <img src="{{ p.url }}" alt="{{ p.caption or '' }}" loading="lazy" decoding="async" data-idx="{{ loop.index0 }}" data-album="{{ p.album or 'misc' }}" onclick="openLBIdx({{ loop.index0 }})" title="{{ p.caption or p.album or '' }}" />
       {% endfor %}
     </div>
   {% else %}

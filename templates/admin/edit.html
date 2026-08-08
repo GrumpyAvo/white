@@ -10,7 +10,7 @@
   {% if error %}<div class="editor-error">{{ error }}</div>{% endif %}
   <form method="post" action="{{ url_for('admin.edit_entity', entity=entity, item_id=(record.id if record else None)) }}" style="max-width:900px;padding-bottom:80px">
     {% for field in fields %}
-      {% set fname, label, ftype, options = field[0], field[1], field[2], (field[3] if field|length > 3 else None) %}
+      {% set fname, label, ftype, options = field[0], field[1], field[2], (field[2].split(':', 1)[1].split(',') if field[2].startswith('select:') else None) %}
       <div class="editor-field">
         <label>{{ label }}</label>
         {% if ftype == 'textarea' %}
@@ -19,7 +19,7 @@
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
             <input type="checkbox" name="{{ fname }}" {% if record and record[fname] %}checked{% endif %} /> Yes
           </label>
-        {% elif ftype == 'select' %}
+        {% elif ftype.startswith('select') %}
           <select name="{{ fname }}">
             {% for opt in (options or []) %}<option value="{{ opt }}" {% if record and record[fname] == opt %}selected{% endif %}>{{ opt }}</option>{% endfor %}
           </select>

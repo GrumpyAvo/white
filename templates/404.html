@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}404 · not found · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="text-block" style="padding:80px 0;text-align:center;">
+  <div style="font-family:'Blowpis','Syne',sans-serif;font-weight:800;font-size:5rem;color:var(--accent1);">404</div>
+  <h1 style="font-family:'Blowpis','Syne',sans-serif;font-size:1.4rem;margin:8px 0 16px;">this page wandered off</h1>
+  <p style="color:var(--muted);max-width:420px;margin:0 auto 24px;">The page you're looking for doesn't exist, was moved, or was never built. Maybe it went to get a snack.</p>
+  <p><a class="read-more" href="{{ url_for('home') }}" style="display:inline-block;padding:10px 24px;border:1.5px solid var(--dark);text-decoration:none;color:var(--dark);font-family:'Blowpis','Syne',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;font-size:12px;">back home</a></p>
+</div>
+{% endblock %}
