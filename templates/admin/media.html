@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block title %}media · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Media</div>
+    <div class="page-sub">{{ rows|length }} files · drag & drop to upload</div>
+  </div>
+  <div class="dropzone" id="dropzone">📎 drop files here (mp3, mp4, webm, images, pdf…) or click to browse</div>
+  <div class="upload-feedback" id="upload-feedback" style="display:none"></div>
+  <div class="media-grid">
+    {% for m in rows %}
+      <div class="media-card">
+        {% if m.content_type and m.content_type.startswith('image/') %}
+          <img src="{{ m.url }}" alt="{{ m.filename }}" />
+        {% elif m.content_type and m.content_type.startswith('video/') %}
+          <div class="media-icon">🎬</div>
+        {% elif m.content_type and m.content_type.startswith('audio/') %}
+          <div class="media-icon">🎵</div>
+        {% else %}
+          <div class="media-icon">📄</div>
+        {% endif %}
+        <div class="media-name" title="{{ m.filename }}">{{ m.filename }}</div>
+        <div class="media-meta">{{ (m.size / 1024) | round(1) }} KB</div>
+        <div class="media-actions">
+          <input type="text" value="{{ m.url }}" readonly onclick="this.select()" title="click to copy" />
+          <form method="post" action="{{ url_for('admin.delete_media', item_id=m.id) }}" style="display:inline" onsubmit="return confirm('Delete this file?')">
+            <button class="qa-btn danger" type="submit">✕</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty" style="grid-column:1/-1">No files yet — drop something above.</div>
+    {% endfor %}
+  </div>
+</div>
+<input type="file" id="file-input" style="display:none" />
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/admin-upload.js') }}"></script>
+{% endblock %}

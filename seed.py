@@ -112,7 +112,7 @@ def seed_sections(seed=None):
         tid = tabs.get(s["slug"])
         if not tid:
             continue
-        if db.query_one("SELECT id FROM sections WHERE tab_id=? LIMIT 1", (tid,)):
+        if db.query_one("SELECT id FROM sections WHERE tab_id=? AND type=? LIMIT 1", (tid, s["type"])):
             continue
         import json as _json
 

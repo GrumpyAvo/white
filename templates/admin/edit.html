@@ -8,6 +8,10 @@
     <div class="spacer"></div>
   </div>
   {% if error %}<div class="editor-error">{{ error }}</div>{% endif %}
+
+  <div class="dropzone" id="dropzone">📎 drop a file here (mp3, mp4, image, pdf…) or click to browse</div>
+  <div class="upload-feedback" id="upload-feedback" style="display:none"></div>
+
   <form method="post" action="{{ url_for('admin.edit_entity', entity=entity, item_id=(record.id if record else None)) }}" style="max-width:900px;padding-bottom:80px">
     {% for field in fields %}
       {% set fname, label, ftype, options = field[0], field[1], field[2], (field[2].split(':', 1)[1].split(',') if field[2].startswith('select:') else None) %}
@@ -28,6 +32,11 @@
             <option value="">— none —</option>
             {% for t in tabs %}<option value="{{ t.id }}" {% if record and record['tab_id'] == t.id %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
           </select>
+        {% elif fname == 'url' or fname.endswith('_url') %}
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="{{ label }}" style="flex:1" />
+            <button type="button" class="qa-btn upload-pick-btn" data-target="{{ fname }}">📎 upload</button>
+          </div>
         {% else %}
           <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="{{ label }}" />
         {% endif %}
@@ -37,4 +46,9 @@
     <button type="submit" class="save-btn">💾 Save</button>
   </form>
 </div>
+<input type="file" id="file-input" style="display:none" />
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/admin-upload.js') }}"></script>
 {% endblock %}

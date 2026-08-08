@@ -8,3 +8,6 @@ venv/
 # SQLite database (regenerated on deploy)
 white.db
 *.sqlite3
+
+# Local media uploads (persist via Upstash when configured)
+uploads/

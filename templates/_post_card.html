@@ -5,13 +5,12 @@
   <div class="post-body">
     <div class="post-meta"><span>{{ p.created_at | fmtdate }}</span></div>
     <h2 class="post-title">
-      {% if p.tab_slug %}<a href="{{ url_for('page_view', slug=p.tab_slug) }}#post-{{ p.id }}">{{ p.title }}</a>
-      {% else %}<a href="#post-{{ p.id }}">{{ p.title }}</a>{% endif %}
+      <a href="{{ url_for('post_view', post_id=p.id) }}">{{ p.title }}</a>
     </h2>
     {% if p.subtitle %}<div style="font-size:13px;color:var(--muted);margin-bottom:8px">{{ p.subtitle }}</div>{% endif %}
-    <p class="post-excerpt">{{ (p.excerpt or p.content or '')[:200] }}…</p>
+    <p class="post-excerpt">{{ (p.excerpt or p.content or '')[:200] }}{% if (p.excerpt or p.content or '')|length > 200 %}…{% endif %}</p>
     {% if p.tags %}<div style="margin-bottom:14px">{% for t in p.tags[:3] %}<span style="background:var(--panel);border:1px solid var(--border);font-size:10px;padding:2px 7px;margin-right:4px">{{ t }}</span>{% endfor %}</div>{% endif %}
-    <a href="{% if p.tab_slug %}{{ url_for('page_view', slug=p.tab_slug) }}#post-{{ p.id }}{% else %}#post-{{ p.id }}{% endif %}" class="read-more">keep reading →</a>
+    <a href="{{ url_for('post_view', post_id=p.id) }}" class="read-more">keep reading →</a>
   </div>
 </article>
 {% endmacro %}

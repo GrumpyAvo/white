@@ -1,12 +1,14 @@
 """Admin panel: password login + CRUD for every content table + seeder."""
 import json
 import os
+import uuid
 from functools import wraps
 
 from flask import (
     Blueprint,
     abort,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -14,11 +16,21 @@ from flask import (
     url_for,
 )
 
+import backup
 import db
+import storage
 
 admin_bp = Blueprint("admin", __name__)
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+
+ALLOWED_EXT = {
+    ".mp3", ".wav", ".ogg", ".flac", ".m4a",
+    ".mp4", ".webm", ".mov", ".mkv", ".avi",
+    ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg",
+    ".pdf", ".txt", ".zip",
+}
+MAX_UPLOAD = 50 * 1024 * 1024
 
 
 def require_admin(f):
@@ -192,17 +204,23 @@ def logout():
     return redirect(url_for("home"))
 
 
+@admin_bp.route("")
 @admin_bp.route("/")
 @require_admin
 def dashboard():
     counts = {}
-    for entity in ["tabs", "posts", "books", "music", "photos", "links", "guestbook_entries", "pending_users"]:
+    for entity in ["tabs", "posts", "books", "music", "photos", "links", "guestbook_entries", "pending_users", "media"]:
         counts[entity] = db.query_one("SELECT COUNT(*) AS n FROM %s" % entity)["n"]
-    counts["pending_guestbook"] = db.query_one(
+    counts["pending_gb"] = db.query_one(
         "SELECT COUNT(*) AS n FROM guestbook_entries WHERE status='pending'")["n"]
     counts["pending_users"] = db.query_one(
         "SELECT COUNT(*) AS n FROM pending_users WHERE status='pending'")["n"]
-    return render_template("admin/dashboard.html", counts=counts, active="dashboard")
+    recent = [dict(r) for r in db.query(
+        "SELECT p.id, p.title, p.created_at, p.status, t.slug AS tab_slug"
+        " FROM posts p LEFT JOIN tabs t ON p.tab_id=t.id"
+        " ORDER BY p.created_at DESC LIMIT 8")]
+    return render_template(
+        "admin/dashboard.html", counts=counts, recent=recent, active="dashboard")
 
 
 @admin_bp.route("/<entity>")
@@ -255,6 +273,7 @@ def edit_entity(entity, item_id=None):
             ph = ", ".join("?" for _ in data)
             db.execute("INSERT INTO %s (%s) VALUES (%s)" % (entity, cols, ph), list(data.values()))
             flash("Created", "ok")
+        backup.snapshot()
         return redirect(url_for("admin.list_entity", entity=entity))
 
     return render_template(
@@ -272,8 +291,93 @@ def edit_entity(entity, item_id=None):
 def delete_entity(entity, item_id):
     if entity in ENTITY_FIELDS:
         db.execute("DELETE FROM %s WHERE id=?" % entity, (item_id,))
+        backup.snapshot()
         flash("Deleted", "ok")
     return redirect(url_for("admin.list_entity", entity=entity))
+
+
+@admin_bp.route("/<entity>/<int:item_id>/toggle", methods=["POST"])
+@require_admin
+def toggle_entity(entity, item_id):
+    """Quick show/hide flip from the list view."""
+    if entity == "posts":
+        row = db.query_one("SELECT status FROM posts WHERE id=?", (item_id,))
+        if row:
+            new = "hidden" if row["status"] != "hidden" else "live"
+            db.execute("UPDATE posts SET status=? WHERE id=?", (new, item_id))
+            flash("Post now %s" % ("hidden" if new == "hidden" else "visible"), "ok")
+    elif entity in ("books", "music"):
+        row = db.query_one("SELECT status FROM %s WHERE id=?" % entity, (item_id,))
+        if row:
+            new = "draft" if row["status"] == "published" else "published"
+            db.execute("UPDATE %s SET status=? WHERE id=?" % entity, (new, item_id))
+            flash("%s now %s" % (entity, new), "ok")
+    elif entity in ("photos", "links"):
+        row = db.query_one("SELECT visible FROM %s WHERE id=?" % entity, (item_id,))
+        if row:
+            new = 0 if row["visible"] else 1
+            db.execute("UPDATE %s SET visible=? WHERE id=?" % entity, (new, item_id))
+            flash("%s now %s" % (entity, "hidden" if not new else "visible"), "ok")
+    backup.snapshot()
+    return redirect(url_for("admin.list_entity", entity=entity))
+
+
+@admin_bp.route("/upload", methods=["POST"])
+@require_admin
+def upload():
+    f = request.files.get("file")
+    if not f or not f.filename:
+        return jsonify({"error": "no file provided"}), 400
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in ALLOWED_EXT:
+        return jsonify({"error": "unsupported file type: %s" % ext}), 400
+    blob = f.read()
+    if len(blob) > MAX_UPLOAD:
+        return jsonify({"error": "file too large (max 50MB)"}), 400
+    name = uuid.uuid4().hex[:12] + ext
+    os.makedirs(storage.UPLOAD_DIR, exist_ok=True)
+    with open(os.path.join(storage.UPLOAD_DIR, name), "wb") as fh:
+        fh.write(blob)
+    if storage.durable():
+        try:
+            if len(blob) <= storage.MAX_MEDIA:
+                storage.save_media(name, blob)
+            else:
+                flash("File stored locally only (over %dMB — won't survive a redeploy)" % (storage.MAX_MEDIA // (1024 * 1024)), "error")
+        except Exception:
+            pass
+    media_id = db.execute(
+        "INSERT INTO media(filename,url,content_type,size,created_at) VALUES(?,?,?,?,?)",
+        (name, "/uploads/" + name, f.mimetype or "application/octet-stream", len(blob), db.now_iso()),
+    )
+    backup.snapshot()
+    return jsonify({"id": media_id, "url": "/uploads/" + name, "filename": f.filename, "size": len(blob)})
+
+
+@admin_bp.route("/media")
+@require_admin
+def media_library():
+    rows = [dict(r) for r in db.query("SELECT * FROM media ORDER BY created_at DESC")]
+    return render_template("admin/media.html", rows=rows, active="media")
+
+
+@admin_bp.route("/media/<int:item_id>/delete", methods=["POST"])
+@require_admin
+def delete_media(item_id):
+    row = db.query_one("SELECT * FROM media WHERE id=?", (item_id,))
+    if row:
+        path = os.path.join(storage.UPLOAD_DIR, row["filename"])
+        if os.path.exists(path):
+            os.remove(path)
+        if storage.durable():
+            try:
+                storage.delete_media(row["filename"])
+            except Exception:
+                pass
+        db.execute("DELETE FROM media WHERE id=?", (item_id,))
+        backup.snapshot()
+        flash("Deleted", "ok")
+    return redirect(url_for("admin.media_library"))
 
 
 @admin_bp.route("/guestbook", methods=["GET", "POST"])
@@ -289,6 +393,7 @@ def guestbook_admin():
                 db.execute("UPDATE guestbook_entries SET status='rejected' WHERE id=?", (item_id,))
             else:
                 db.execute("DELETE FROM guestbook_entries WHERE id=?", (item_id,))
+            backup.snapshot()
             flash("Done", "ok")
         return redirect(url_for("admin.guestbook_admin"))
     entries = [dict(r) for r in db.query(
@@ -340,6 +445,7 @@ def settings_admin():
                 (key, value),
             )
         flash("Settings saved", "ok")
+        backup.snapshot()
         return redirect(url_for("admin.settings_admin"))
     current = {r["key"]: r["value"] for r in db.query("SELECT key, value FROM site_settings")}
     return render_template("admin/settings.html", fields=SETTING_FIELDS, current=current, active="settings")

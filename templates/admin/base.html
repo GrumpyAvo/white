@@ -20,6 +20,7 @@
       <a class="nav-item {% if active == 'photos' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='photos') }}">photos</a>
       <a class="nav-item {% if active == 'links' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='links') }}">links</a>
       <a class="nav-item {% if active == 'guestbook' %}active{% endif %}" href="{{ url_for('admin.guestbook_admin') }}">guestbook</a>
+      <a class="nav-item {% if active == 'media' %}active{% endif %}" href="{{ url_for('admin.media_library') }}">media</a>
       <a class="nav-item {% if active == 'tabs' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='tabs') }}">pages</a>
       <a class="nav-item {% if active == 'sections' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='sections') }}">sections</a>
       <a class="nav-item {% if active == 'users' %}active{% endif %}" href="{{ url_for('admin.users_admin') }}">users</a>

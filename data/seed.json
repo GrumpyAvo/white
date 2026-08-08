@@ -425,6 +425,14 @@
    "config": {
     "content": ""
    }
+  },
+  {
+   "slug": "about",
+   "type": "posts",
+   "title": "Updates",
+   "config": {
+    "limit": 10
+   }
   }
  ],
  "settings": {}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="page-title">{{ post.title }}</div>
+<div class="page-subtitle">
+  {% if post.tab_name %}{{ post.tab_name }} · {% endif %}{{ post.created_at | fmtdate }}
+  {% if post.subtitle %} · {{ post.subtitle }}{% endif %}
+</div>
+{% if post.image_url %}<img src="{{ post.image_url }}" alt="{{ post.title }}" class="post-image" style="border:1.5px solid var(--dark);margin-bottom:24px;max-width:720px" />{% endif %}
+<div class="text-block">{{ post.content | md | safe }}</div>
+{% if post.tags %}
+  <div style="margin:20px 0">
+    {% for t in post.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+  </div>
+{% endif %}
+<div style="margin-top:28px">
+  {% if post.tab_slug %}<a href="{{ url_for('page_view', slug=post.tab_slug) }}" class="read-more">← back to {{ post.tab_name }}</a>{% endif %}
+</div>
+{% endblock %}

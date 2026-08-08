@@ -4,35 +4,42 @@
 <div class="page active">
   <div class="page-header">
     <div class="page-title">Dashboard</div>
-    <div class="page-sub">Welcome back.</div>
+    <div class="page-sub">Welcome back, Ricardo.</div>
   </div>
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">Posts</div><div class="stat-value">{{ counts.posts }}</div></div>
-    <div class="stat-card"><div class="stat-label">Books</div><div class="stat-value">{{ counts.books }}</div></div>
-    <div class="stat-card"><div class="stat-label">Music</div><div class="stat-value">{{ counts.music }}</div></div>
-    <div class="stat-card"><div class="stat-label">Photos</div><div class="stat-value">{{ counts.photos }}</div></div>
-    <div class="stat-card"><div class="stat-label">Links</div><div class="stat-value">{{ counts.links }}</div></div>
-    <div class="stat-card"><div class="stat-label">Guestbook (approved)</div><div class="stat-value">{{ counts.guestbook }}</div></div>
-    <div class="stat-card"><div class="stat-label">Pending messages</div><div class="stat-value">{{ counts.pending_gb }}</div></div>
-    <div class="stat-card"><div class="stat-label">Pending users</div><div class="stat-value">{{ counts.pending_users }}</div></div>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='posts') }}"><div class="stat-label">Posts</div><div class="stat-value">{{ counts.posts }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='books') }}"><div class="stat-label">Books</div><div class="stat-value">{{ counts.books }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='music') }}"><div class="stat-label">Music</div><div class="stat-value">{{ counts.music }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='photos') }}"><div class="stat-label">Photos</div><div class="stat-value">{{ counts.photos }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='links') }}"><div class="stat-label">Links</div><div class="stat-value">{{ counts.links }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.guestbook_admin') }}"><div class="stat-label">Guestbook</div><div class="stat-value">{{ counts.guestbook_entries }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.media_library') }}"><div class="stat-label">Media files</div><div class="stat-value">{{ counts.media }}</div></a>
+    <a class="stat-card" href="{{ url_for('admin.list_entity', entity='tabs') }}"><div class="stat-label">Pages</div><div class="stat-value">{{ counts.tabs }}</div></a>
   </div>
   <div class="quick-actions">
     <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity='posts') }}">＋ New Post</a>
     <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity='books') }}">＋ New Book</a>
     <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity='music') }}">＋ New Music</a>
     <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity='photos') }}">＋ New Photo</a>
-    <a class="qa-btn" href="{{ url_for('admin.import_admin') }}">⇪ Import Data</a>
+    <a class="qa-btn" href="{{ url_for('admin.media_library') }}">📎 Upload Media</a>
   </div>
   <div class="section-label">Recent Posts</div>
   <div class="data-table">
     <div class="table-head posts-head"><span>Title</span><span>Page</span><span>Date</span><span>Status</span><span>Actions</span></div>
     {% for p in recent %}
     <div class="table-row">
-      <span>{{ p.title }}</span><span>{{ p.tab_slug or '—' }}</span><span>{{ p.created_at[:10] }}</span><span>{{ p.status }}</span>
-      <span><a href="{{ url_for('admin.edit_entity', entity='posts', item_id=p.id) }}">edit</a></span>
+      <span>{{ p.title }}</span><span>{{ p.tab_slug or '—' }}</span><span>{{ p.created_at[:10] if p.created_at else '—' }}</span>
+      <span><span class="status-pill {{ p.status or 'live' }}">{{ p.status or 'live' }}</span></span>
+      <span class="row-actions">
+        <a class="qa-btn" href="{{ url_for('post_view', post_id=p.id) }}" target="_blank">view</a>
+        <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity='posts', item_id=p.id) }}">edit</a>
+        <form method="post" action="{{ url_for('admin.toggle_entity', entity='posts', item_id=p.id) }}" style="display:inline">
+          <button class="qa-btn" type="submit" title="toggle visibility">{{ 'show' if p.status == 'hidden' else 'hide' }}</button>
+        </form>
+      </span>
     </div>
     {% else %}
-    <div class="table-row"><span colspan="5">No posts yet.</span></div>
+    <div class="table-row"><span>No posts yet — write something!</span></div>
     {% endfor %}
   </div>
 </div>

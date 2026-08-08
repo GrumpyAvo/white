@@ -24,10 +24,23 @@
           <span>{{ row[key] }}</span>
         {% endif %}
       {% endfor %}
-      <span>
-        <a class="qa-btn" style="display:inline-block;margin:0 4px" href="{{ url_for('admin.edit_entity', entity=entity, item_id=row.id) }}">edit</a>
+      <span class="row-actions">
+        {% if entity == 'posts' %}
+          <a class="qa-btn" href="{{ url_for('post_view', post_id=row.id) }}" target="_blank">view</a>
+        {% endif %}
+        <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity=entity, item_id=row.id) }}">edit</a>
+        <form method="post" action="{{ url_for('admin.toggle_entity', entity=entity, item_id=row.id) }}" style="display:inline">
+          {% if entity == 'posts' %}
+            {% set hidden = row.status == 'hidden' %}
+          {% elif entity in ('books', 'music') %}
+            {% set hidden = row.status != 'published' %}
+          {% else %}
+            {% set hidden = row.visible == 0 %}
+          {% endif %}
+          <button class="qa-btn" type="submit" title="toggle visibility">{{ 'show' if hidden else 'hide' }}</button>
+        </form>
         <form method="post" action="{{ url_for('admin.delete_entity', entity=entity, item_id=row.id) }}" style="display:inline" onsubmit="return confirm('Delete this {{ entity.rstrip('s') }}?')">
-          <button class="qa-btn" style="display:inline-block;margin:0" type="submit">✕</button>
+          <button class="qa-btn danger" type="submit">✕</button>
         </form>
       </span>
     </div>

@@ -22,8 +22,10 @@ from flask import (
     url_for,
 )
 
+import backup
 import db
 import spotify
+import storage
 from admin import admin_bp
 
 # ── App ────────────────────────────────────────────────────────────────────────
@@ -34,15 +36,17 @@ app.register_blueprint(admin_bp, url_prefix="/admin")
 
 def ensure_db():
     """Create tables on boot (Render's disk is ephemeral — a fresh deploy
-    starts empty). Seed defaults only when the DB has never been seeded."""
+    starts empty). Restore from durable storage when available, else seed."""
     import sqlite3
 
     db.init_db()
     try:
         if not db.query_one("SELECT id FROM tabs LIMIT 1"):
-            import seed as seed_mod
+            if not backup.restore():
+                import seed as seed_mod
 
-            seed_mod.seed_all()
+                seed_mod.seed_all()
+            backup.restore_media_files()
     except sqlite3.OperationalError:
         pass
 
@@ -313,6 +317,22 @@ def render_page(slug, template):
     tab, sections = load_sections(slug)
     if not tab:
         abort(404)
+    # Any post assigned to this page shows here, even without a configured
+    # posts section (so a post placed on "about" actually appears there).
+    if tab["page_type"] in ("standard", "posts") and not any(s["type"] == "posts" for s in sections):
+        rows = db.query(
+            "SELECT p.*, t.slug AS tab_slug, t.name AS tab_name"
+            " FROM posts p LEFT JOIN tabs t ON p.tab_id=t.id"
+            " WHERE p.published=1 AND p.status!='hidden' AND p.tab_id=?"
+            " ORDER BY p.pinned DESC, p.created_at DESC LIMIT 20", (tab["id"],))
+        if rows:
+            sections.append({
+                "id": -1,
+                "type": "posts",
+                "title": tab["name"],
+                "cfg": {"limit": 20},
+                "items": [post_row_to_dict(r) for r in rows],
+            })
     ctx = base_ctx(slug, tab["name"])
     ctx["tab"] = dict(tab)
     if sections:
@@ -441,12 +461,31 @@ def guestbook():
                 " VALUES(?,?,?,'approved',?)",
                 (name, message, website or None, db.now_iso()),
             )
+            backup.snapshot()
             ctx["flash_msg"] = "Thanks for signing \u2726 your message is now live!"
     entries = [dict(r) for r in db.query(
         "SELECT * FROM guestbook_entries WHERE status='approved'"
         " ORDER BY created_at DESC LIMIT 50")]
     ctx["entries"] = entries
     return render_template("guestbook.html", **ctx)
+
+
+@app.route("/post/<int:post_id>")
+def post_view(post_id):
+    row = db.query_one(
+        "SELECT p.*, t.slug AS tab_slug, t.name AS tab_name"
+        " FROM posts p LEFT JOIN tabs t ON p.tab_id=t.id WHERE p.id=?", (post_id,))
+    if not row:
+        abort(404)
+    post = post_row_to_dict(row)
+    ctx = base_ctx("post", post.get("tab_name") or "Post")
+    ctx["post"] = post
+    return render_template("post.html", **ctx)
+
+
+@app.route("/uploads/<path:filename>")
+def uploads(filename):
+    return send_from_directory(storage.UPLOAD_DIR, filename)
 
 
 @app.route("/ballas")
