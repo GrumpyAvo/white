@@ -18,11 +18,25 @@ PLAYER_URL = "https://api.spotify.com/v1/me/player/currently-playing"
 TOP_ARTISTS_URL = "https://api.spotify.com/v1/me/top/artists"
 TOP_TRACKS_URL = "https://api.spotify.com/v1/me/top/tracks"
 
-# Tiny `.env` loader (stdlib only) so local dev works without extra deps.
-_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-if os.path.exists(_ENV_PATH):
-    with open(_ENV_PATH, "r", encoding="utf-8") as _fh:
-        for _line in _fh:
+# Credential discovery, in order of precedence (first found wins):
+#   1. Real environment variables (Render "Environment" vars).
+#   2. A `.env` file next to this module (local dev) or at /etc/secrets/.env
+#      (Render "Secret Files" mounted as a single .env).
+#   3. Individual files named after each variable in the module dir or in
+#      /etc/secrets/ (Render "Secret Files" created one-per-key).
+_SPOTIFY_ENV_KEYS = ("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "SPOTIFY_REFRESH_TOKEN")
+
+
+def _apply_env():
+    base = os.path.dirname(os.path.abspath(__file__))
+
+    for path in (os.path.join(base, ".env"), "/etc/secrets/.env"):
+        try:
+            with open(path, "r", encoding="utf-8") as _fh:
+                text = _fh.read()
+        except OSError:
+            continue
+        for _line in text.splitlines():
             _line = _line.strip()
             if not _line or _line.startswith("#") or "=" not in _line:
                 continue
@@ -31,6 +45,21 @@ if os.path.exists(_ENV_PATH):
             _val = _val.strip().strip('"').strip("'")
             if _key and _key not in os.environ:
                 os.environ[_key] = _val
+
+    for _key in _SPOTIFY_ENV_KEYS:
+        if _key in os.environ:
+            continue
+        for _dir in (base, "/etc/secrets"):
+            try:
+                with open(os.path.join(_dir, _key), "r", encoding="utf-8") as _fh:
+                    _val = _fh.read().strip().strip('"').strip("'")
+            except OSError:
+                continue
+            os.environ[_key] = _val
+            break
+
+
+_apply_env()
 
 _cache = {"token": None, "expires": 0.0, "playing": None, "playing_at": 0.0, "stats": None, "stats_at": 0.0}
 
