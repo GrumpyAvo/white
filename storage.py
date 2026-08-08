@@ -80,15 +80,19 @@ def _ensure_bucket():
     global _bucket_checked
     if _bucket_checked:
         return
-    _bucket_checked = True
     if not USING_SERVICE_ROLE:
+        _bucket_checked = True
         return
     status, _ = _request(SUPABASE_URL + "/storage/v1/bucket/" + BUCKET, "GET")
     if status == 200:
+        _bucket_checked = True
         return
     if status == 404:
         payload = json.dumps({"id": BUCKET, "name": BUCKET, "public": True}).encode("utf-8")
-        _request(SUPABASE_URL + "/storage/v1/bucket", "POST", payload, _headers(json_body=True))
+        status, _ = _request(SUPABASE_URL + "/storage/v1/bucket", "POST", payload, _headers(json_body=True))
+        # 200/201 = created, 400 = already exists (race) — either way we're good
+        if status in (200, 201, 400):
+            _bucket_checked = True
 
 
 # ── snapshot ──────────────────────────────────────────────────────────────────
