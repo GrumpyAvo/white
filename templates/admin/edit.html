@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'edit' if record else 'new' }} {{ entity.rstrip('s') }} · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="editor-top">
+    <a class="back-btn" href="{{ url_for('admin.list_entity', entity=entity) }}">← {{ entity }}</a>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;">{{ 'Edit' if record else 'New' }} {{ entity.rstrip('s') }}</span>
+    <div class="spacer"></div>
+  </div>
+  {% if error %}<div class="editor-error">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('admin.edit_entity', entity=entity, item_id=(record.id if record else None)) }}" style="max-width:900px;padding-bottom:80px">
+    {% for field in fields %}
+      {% set fname, label, ftype, options = field[0], field[1], field[2], (field[3] if field|length > 3 else None) %}
+      <div class="editor-field">
+        <label>{{ label }}</label>
+        {% if ftype == 'textarea' %}
+          <textarea name="{{ fname }}" rows="8" placeholder="{{ label }}" class="md-textarea">{{ record[fname] or '' if record else '' }}</textarea>
+        {% elif ftype == 'checkbox' %}
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
+            <input type="checkbox" name="{{ fname }}" {% if record and record[fname] %}checked{% endif %} /> Yes
+          </label>
+        {% elif ftype == 'select' %}
+          <select name="{{ fname }}">
+            {% for opt in (options or []) %}<option value="{{ opt }}" {% if record and record[fname] == opt %}selected{% endif %}>{{ opt }}</option>{% endfor %}
+          </select>
+        {% elif fname == 'tab_id' %}
+          <select name="tab_id">
+            <option value="">— none —</option>
+            {% for t in tabs %}<option value="{{ t.id }}" {% if record and record['tab_id'] == t.id %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+          </select>
+        {% else %}
+          <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="{{ label }}" />
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="spacer"></div>
+    <button type="submit" class="save-btn">💾 Save</button>
+  </form>
+</div>
+{% endblock %}

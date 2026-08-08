@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block title %}users · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Pending Users</div>
+    <div class="page-sub">{{ users|length }} awaiting review</div>
+  </div>
+  <div class="data-table">
+    <div class="table-head posts-head"><span>Email</span><span>Name</span><span>Requested</span><span>Actions</span></div>
+    {% for u in users %}
+    <div class="table-row">
+      <span>{{ u.email }}</span><span>{{ u.name or '—' }}</span><span>{{ u.created_at[:10] }}</span>
+      <span>
+        <form method="post" style="display:inline">
+          <input type="hidden" name="id" value="{{ u.id }}" />
+          <button class="qa-btn" name="action" value="approve" type="submit" style="display:inline-block;margin:0 4px">✓ approve</button>
+        </form>
+        <form method="post" style="display:inline" onsubmit="return confirm('Reject this request?')">
+          <input type="hidden" name="id" value="{{ u.id }}" />
+          <button class="qa-btn" name="action" value="reject" type="submit" style="display:inline-block;margin:0">✕ reject</button>
+        </form>
+      </span>
+    </div>
+    {% else %}
+    <div class="table-row"><span>No pending signups.</span></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

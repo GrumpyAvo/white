@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">white</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Fonts are loaded from your existing pages — copy the @font-face blocks from index.html here -->
+
+  <style>
+    :root{--cream:#f0edf8;--dark:#1a1228;--accent1:#8b3fc8;--accent2:#5b8dd9;--accent3:#c97fd4;--muted:#8a7a9e;--border:#c9bfe0;--panel:#e8e2f5;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{background-color:var(--cream);color:var(--dark);font-family:'Inconsolata',monospace;font-size:15px;line-height:1.6;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(80,0,120,0.03) 28px,rgba(80,0,120,0.03) 29px);}
+    body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%238b3fc8'/%3E%3C/svg%3E") 10 10,auto;}
+    a{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='6' fill='%235b8dd9' stroke='%231a1228' stroke-width='1.5'/%3E%3C/svg%3E") 10 10,pointer;}
+
+    /* ── MARQUEE ── */
+    .marquee-bar{background:var(--dark);color:var(--accent3);font-family:'Inconsolata',monospace;font-size:12px;letter-spacing:0.1em;padding:6px 0;overflow:hidden;white-space:nowrap;border-bottom:2px solid var(--accent1);}
+    .marquee-inner{display:inline-block;animation:marquee 28s linear infinite;}
+    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+    /* ── HEADER ── */
+    header{display:grid;grid-template-columns:1fr auto;align-items:end;padding:36px 40px 20px;border-bottom:2px solid var(--dark);gap:20px;position:relative;}
+    header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(-45deg,transparent,transparent 8px,rgba(80,0,120,0.02) 8px,rgba(80,0,120,0.02) 9px);pointer-events:none;}
+    .site-title{font-family:'FluxDemo','Syne',serif;font-weight:800;font-size:clamp(2.4rem,6vw,4.2rem);line-height:0.95;letter-spacing:-0.03em;}
+    .site-title a{text-decoration:none;color:var(--accent1);}
+    .site-title .small{font-size:0.35em;font-weight:400;font-family:'Inconsolata',monospace;display:block;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+    .header-meta{text-align:right;font-size:11px;color:var(--muted);letter-spacing:0.05em;}
+    .visitor-label{font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);}
+    .hit-counter{display:inline-flex;gap:2px;margin-top:4px;}
+    .hit-counter span{background:var(--dark);color:var(--accent3);font-family:'Inconsolata',monospace;font-size:16px;padding:2px 5px;font-weight:700;}
+
+    /* ── NAV ── */
+    nav{display:flex;gap:0;padding:0 40px;border-bottom:2px solid var(--dark);background:var(--panel);flex-wrap:wrap;}
+    nav a{display:block;padding:10px 18px;font-family:'Blowpis','Syne',sans-serif;font-weight:700;font-size:13px;text-decoration:none;color:var(--dark);letter-spacing:0.08em;text-transform:uppercase;border-right:1px solid var(--border);transition:background 0.15s,color 0.15s;}
+    nav a:hover{background:var(--accent1);color:white;}
+    nav a.active{background:var(--accent1);color:white;}
+
+    /* ── LAYOUT ── */
+    .layout{display:grid;grid-template-columns:1fr 260px;gap:0;max-width:1200px;margin:0 auto;padding:0 40px;align-items:start;}
+    main{padding:32px 32px 32px 0;border-right:2px solid var(--dark);min-height:60vh;}
+    aside{padding:32px 0 32px 28px;display:flex;flex-direction:column;gap:24px;}
+
+    /* ── FEED HEADER ── */
+    .feed-header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+    .feed-header h2{font-family:'Blowpis','Syne',sans-serif;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:var(--muted);}
+    .feed-header::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* ── POST CARD ── */
+    .post{margin-bottom:36px;border:1.5px solid var(--dark);background:white;position:relative;transition:transform 0.2s,box-shadow 0.2s;box-shadow:3px 3px 0 var(--dark);}
+    .post:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--dark);}
+    .post-tag{position:absolute;top:-11px;left:16px;z-index:10;background:var(--accent1);color:white;font-family:'Blowpis','Syne',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;padding:3px 10px;}
+    .post-image{width:100%;height:240px;object-fit:cover;display:block;border-bottom:1.5px solid var(--dark);filter:sepia(15%) contrast(1.05);}
+    .post-body{padding:20px 22px 22px;}
+    .post-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);}
+    .post-title{font-family:'SupremeDonuts','Syne',serif;font-weight:800;font-size:1.25rem;line-height:1.2;margin-bottom:10px;letter-spacing:-0.02em;}
+    .post-title a{text-decoration:none;color:inherit;}
+    .post-title a:hover{color:var(--accent1);}
+    .post-excerpt{color:#4a3d60;font-size:14px;line-height:1.65;margin-bottom:16px;}
+    .read-more{display:inline-block;font-family:'Blowpis','Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--dark);text-decoration:none;border:1.5px solid var(--dark);padding:6px 14px;transition:background 0.15s,color 0.15s;}
+    .read-more:hover{background:var(--accent1);color:white;border-color:var(--accent1);}
+
+    /* ── BOOK CARDS ── */
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;padding-top:8px;}
+    .book-card{border:1.5px solid var(--dark);background:white;box-shadow:3px 3px 0 var(--dark);transition:transform 0.2s,box-shadow 0.2s;position:relative;}
+    .book-card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--dark);}
+    .book-cover{width:100%;height:200px;object-fit:cover;border-bottom:1.5px solid var(--dark);display:block;}
+    .book-cover-placeholder{width:100%;height:200px;background:var(--panel);border-bottom:1.5px solid var(--dark);display:flex;align-items:center;justify-content:center;font-size:40px;}
+    .book-info{padding:12px 14px;}
+    .book-title-text{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:13px;line-height:1.3;margin-bottom:4px;}
+    .book-author{font-size:11px;color:var(--muted);margin-bottom:6px;}
+    .book-stars{color:#f59e0b;font-size:13px;letter-spacing:1px;}
+
+    /* ── MUSIC ── */
+    .music-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;}
+    .music-card{border:1.5px solid var(--dark);background:white;box-shadow:3px 3px 0 var(--dark);transition:transform 0.2s,box-shadow 0.2s;}
+    .music-card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--dark);}
+    .music-cover{width:100%;height:180px;object-fit:cover;display:block;border-bottom:1.5px solid var(--dark);}
+    .music-cover-ph{width:100%;height:180px;background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:36px;border-bottom:1.5px solid var(--dark);}
+    .music-info{padding:12px 14px;}
+    .music-title-text{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+    .music-artist{font-size:11px;color:var(--muted);}
+    .music-type{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent1);margin-top:4px;}
+
+    /* ── PHOTOS ── */
+    .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+    .photo-item{border:1.5px solid var(--dark);overflow:hidden;aspect-ratio:4/3;position:relative;}
+    .photo-item img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(10%) contrast(1.05);transition:filter 0.3s,transform 0.3s;}
+    .photo-item:hover img{filter:sepia(0%) contrast(1);transform:scale(1.03);}
+    .photo-caption{position:absolute;bottom:0;left:0;right:0;background:rgba(26,18,40,0.8);color:var(--cream);font-size:11px;padding:6px 10px;transform:translateY(100%);transition:transform 0.2s;}
+    .photo-item:hover .photo-caption{transform:translateY(0);}
+
+    /* ── LINKS ── */
+    .links-list{display:flex;flex-direction:column;gap:12px;}
+    .link-item{border:1.5px solid var(--dark);background:white;box-shadow:2px 2px 0 var(--dark);padding:14px 18px;transition:transform 0.15s,box-shadow 0.15s;}
+    .link-item:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--dark);}
+    .link-item a{text-decoration:none;color:var(--accent1);font-weight:700;font-size:14px;}
+    .link-item a:hover{color:var(--accent2);}
+    .link-desc{font-size:12px;color:var(--muted);margin-top:4px;}
+    .link-category{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent3);margin-bottom:4px;}
+    .links-category-header{font-family:'Blowpis','Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:var(--muted);margin:24px 0 12px;display:flex;align-items:center;gap:12px;}
+    .links-category-header::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* ── TEXT BLOCK ── */
+    .text-block{font-size:15px;line-height:1.8;color:#3a2d55;max-width:680px;}
+    .text-block h1,.text-block h2,.text-block h3{font-family:'SupremeDonuts','Syne',serif;margin:1.4rem 0 0.6rem;line-height:1.2;}
+    .text-block p{margin-bottom:1rem;}
+    .text-block a{color:var(--accent1);}
+    .text-block blockquote{border-left:3px solid var(--accent1);padding-left:1rem;color:var(--muted);margin:1rem 0;}
+    .text-block code{background:var(--panel);padding:2px 6px;font-family:'Inconsolata',monospace;}
+    .text-block pre{background:var(--dark);color:var(--cream);padding:16px;overflow-x:auto;margin:1rem 0;}
+    .text-block ul,.text-block ol{padding-left:1.5rem;margin-bottom:1rem;}
+
+    /* ── GUESTBOOK ── */
+    .gb-form{background:white;border:1.5px solid var(--dark);box-shadow:3px 3px 0 var(--dark);padding:24px;margin-bottom:32px;}
+    .gb-form h3{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:1rem;margin-bottom:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent1);margin-bottom:6px;}
+    .form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);background:var(--cream);color:var(--dark);font-family:inherit;font-size:14px;outline:none;transition:border-color 0.15s;}
+    .form-group input:focus,.form-group textarea:focus{border-color:var(--accent1);}
+    .gb-submit{background:var(--accent1);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.15em;padding:10px 24px;cursor:pointer;}
+    .gb-submit:hover{opacity:0.85;}
+    .gb-submit:disabled{opacity:0.4;cursor:not-allowed;}
+    .gb-entries{display:flex;flex-direction:column;gap:16px;}
+    .gb-entry-card{border:1.5px solid var(--dark);background:white;box-shadow:2px 2px 0 var(--dark);padding:18px 20px;}
+    .gb-name{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:14px;margin-bottom:2px;}
+    .gb-date{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;}
+    .gb-message{font-size:14px;line-height:1.6;color:#4a3d60;}
+    .gb-msg-ok{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#065f46;padding:10px 14px;font-size:13px;margin-top:12px;}
+    .gb-msg-err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#991b1b;padding:10px 14px;font-size:13px;margin-top:12px;}
+    .gb-closed{padding:16px;background:var(--panel);border:1px solid var(--border);font-size:14px;color:var(--muted);margin-bottom:24px;font-style:italic;}
+
+    /* ── HERO ── */
+    .hero-section{padding:40px 0 32px;}
+    .hero-section h1{font-family:'SupremeDonuts','Syne',serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;letter-spacing:-0.03em;margin-bottom:12px;}
+    .hero-section .hero-sub{font-size:14px;color:var(--muted);max-width:520px;line-height:1.7;margin-bottom:20px;}
+
+    /* ── PAPER CARD (studies) ── */
+    .paper-card{border:1.5px solid var(--dark);background:white;box-shadow:3px 3px 0 var(--dark);padding:28px 32px;margin-bottom:24px;transition:transform 0.2s,box-shadow 0.2s;}
+    .paper-card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--dark);}
+    .paper-card h3{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:1rem;margin-bottom:6px;}
+    .paper-card .paper-meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;}
+    .paper-card p{font-size:13px;line-height:1.6;color:#4a3d60;}
+
+    /* ── WIDGET ── */
+    .widget{border:1.5px solid var(--dark);background:white;box-shadow:3px 3px 0 var(--dark);}
+    .widget-title{background:var(--dark);color:var(--cream);font-family:'Blowpis','Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;padding:8px 14px;display:flex;align-items:center;gap:8px;}
+    .widget-title span{color:var(--accent3);}
+    .widget-body{padding:14px;}
+    .recent-post{display:flex;align-items:flex-start;gap:10px;text-decoration:none;color:var(--dark);padding:6px 0;border-bottom:1px solid var(--border);}
+    .recent-post:last-child{border-bottom:none;}
+    .recent-post:hover .rp-title{color:var(--accent1);}
+    .rp-num{font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted);min-width:20px;margin-top:2px;}
+    .rp-title{font-size:12px;font-weight:600;line-height:1.3;}
+    .rp-date{font-size:10px;color:var(--muted);margin-top:2px;}
+
+    /* ── FOOTER ── */
+    footer{border-top:2px solid var(--dark);background:var(--dark);color:var(--cream);padding:24px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:11px;letter-spacing:0.08em;}
+    .footer-badges{display:flex;gap:6px;flex-wrap:wrap;}
+    .badge{padding:3px 10px;border:1px solid rgba(255,255,255,0.2);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;}
+    .badge.red{border-color:rgba(239,68,68,0.4);color:#fca5a5;}
+    .badge.green{border-color:rgba(52,211,153,0.4);color:#6ee7b7;}
+    footer a{color:var(--accent3);text-decoration:none;}
+    .copy{color:var(--muted);}
+    .dark-toggle{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);padding:5px 12px;font-family:'Inconsolata',monospace;font-size:11px;cursor:pointer;letter-spacing:0.08em;}
+    .dark-toggle:hover{border-color:var(--accent3);color:var(--accent3);}
+
+    /* ── DARK MODE ── */
+    [data-theme="dark"] body{background-color:#1c1530;color:#ede8f7;}
+    [data-theme="dark"] header,[data-theme="dark"] .layout{background:#1c1530;}
+    [data-theme="dark"] nav{background:#261d3d;}
+    [data-theme="dark"] footer{background:#16112a !important;}
+    [data-theme="dark"] .post,[data-theme="dark"] .widget,[data-theme="dark"] .gb-form,
+    [data-theme="dark"] .gb-entry-card,[data-theme="dark"] .book-card,[data-theme="dark"] .music-card,
+    [data-theme="dark"] .link-item,[data-theme="dark"] .paper-card{background:#261d3d !important;}
+    [data-theme="dark"] .form-group input,[data-theme="dark"] .form-group textarea{background:#1c1530;color:#ede8f7;border-color:#3d2f5e;}
+    [data-theme="dark"] .text-block,[data-theme="dark"] .post-excerpt,[data-theme="dark"] .gb-message{color:#c9bfe0;}
+
+    /* ── LOADING ── */
+    .section-loading{padding:40px;text-align:center;color:var(--muted);font-size:13px;font-style:italic;}
+    .empty-notice{padding:32px 0;color:var(--muted);font-size:14px;font-style:italic;}
+
+    /* ── MOBILE ── */
+    @media(max-width:768px){
+      .layout{grid-template-columns:1fr;padding:0 20px;}
+      main{border-right:none;padding:24px 0;}
+      aside{padding:0 0 24px;}
+      header{padding:24px 20px 16px;}
+      nav{padding:0 20px;}
+      footer{padding:20px;}
+      .books-grid{grid-template-columns:repeat(2,1fr);}
+      .music-grid{grid-template-columns:repeat(2,1fr);}
+      .photos-grid{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
+
+  <!-- Dark mode: apply saved preference before paint -->
+  <script>
+    (function(){
+      var t=localStorage.getItem('theme')||'light';
+      document.documentElement.setAttribute('data-theme',t);
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Marquee (content loaded from site_settings) -->
+<div class="marquee-bar">
+  <div class="marquee-inner" id="marquee-text">
+    ★ welcome to white ★ &nbsp;&nbsp;&nbsp; ★ welcome to white ★ &nbsp;&nbsp;&nbsp;
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="site-title">
+    <a href="index.html" id="site-title-link">white</a>
+  </div>
+  <div class="header-meta">
+    <span class="visitor-label">visitors</span>
+    <div class="hit-counter" id="hit-counter-display"></div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted)">you are visitor <strong style="color:var(--dark)" id="visitor-num">—</strong></div>
+  </div>
+</header>
+
+<!-- Nav (built dynamically from tabs table) -->
+<nav id="site-nav">
+  <a href="index.html">home</a>
+</nav>
+
+<!-- Main layout -->
+<div class="layout">
+  <main id="main-content">
+    <div class="section-loading">loading…</div>
+  </main>
+
+  <aside id="site-aside">
+    <!-- About widget -->
+    <div class="widget" id="about-widget">
+      <div class="widget-title"><span>★</span> about me</div>
+      <div class="widget-body">
+        <p style="font-size:12px;line-height:1.6;color:#4a3d60" id="about-widget-text">loading…</p>
+      </div>
+    </div>
+
+    <!-- Now playing widget -->
+    <div class="widget">
+      <div class="widget-title"><span>♫</span> <a href="music.html" style="color:inherit;text-decoration:none;">now playing ↗</a></div>
+      <div class="widget-body">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div id="np-art" style="width:44px;height:44px;background:var(--panel);border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">♪</div>
+          <div>
+            <div style="font-size:13px;font-weight:600" id="np-title">loading…</div>
+            <div style="font-size:11px;color:var(--muted)" id="np-artist">spotify</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px" id="np-status">◈ fetching</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent posts -->
+    <div class="widget">
+      <div class="widget-title"><span>↓</span> recent posts</div>
+      <div class="widget-body" id="recent-posts-sidebar">
+        <div style="font-size:12px;color:var(--muted);font-style:italic">loading…</div>
+      </div>
+    </div>
+
+    <!-- Guestbook preview -->
+    <div class="widget">
+      <div class="widget-title"><span>✉</span> guestbook</div>
+      <div class="widget-body">
+        <div id="gb-sidebar-preview" style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px"></div>
+        <a href="guestbook.html" class="read-more" style="font-size:10px;">sign guestbook →</a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <div>
+    <div style="font-family:'Blowpis','Syne',sans-serif;font-weight:800;font-size:16px;margin-bottom:4px">white</div>
+    <div class="copy">© 2025 · made with curiosity and too much free time</div>
+    <div style="margin-top:4px"><a href="guestbook.html">guestbook</a> · <a href="links.html">links</a> · <a href="about.html">about</a></div>
+  </div>
+  <div class="footer-badges">
+    <span class="badge red">made by hand</span>
+    <span class="badge green">no ads ever</span>
+    <span class="badge">best viewed with curiosity</span>
+  </div>
+  <button class="dark-toggle" id="theme-toggle">☾ dark</button>
+</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://wzvmdpkiwwfhnisjudeo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_jxJuEEzH3qwVFLFaw22r3w_0034g6op';
+const SPOTIFY_API  = 'https://spotify-backend-lyart.vercel.app';
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── ROUTING ───────────────────────────────────────────────────────────────────
+// Determines which page slug we're on.
+// Works whether the file is named page.html?slug=life OR life.html
+function currentSlug(){
+  const params = new URLSearchParams(location.search);
+  if(params.get('slug')) return params.get('slug');
+  // fallback: derive from filename
+  const file = location.pathname.split('/').pop().replace('.html','');
+  if(!file || file==='page') return 'index';
+  return file;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(s){return s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
+function stars(n){return n?'★'.repeat(n)+'☆'.repeat(5-n):'—';}
+
+// Tiny Markdown → HTML (headings, bold, italic, links, paragraphs)
+function md(text){
+  if(!text) return '';
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2">$1</a>')
+    .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/^/,'<p>').replace(/$/,'</p>')
+    .replace(/<p>(<h[123]>)/g,'$1').replace(/(<\/h[123]>)<\/p>/g,'$1')
+    .replace(/<p>(<blockquote>)/g,'$1').replace(/(<\/blockquote>)<\/p>/g,'$1');
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+async function boot(){
+  const slug = currentSlug();
+
+  // Run nav, settings, sidebar in parallel — don't block page render
+  buildNav(slug);
+  loadSidebarData();
+  loadNowPlaying();
+  loadHitCounter();
+
+  // Load the page's sections
+  const {data: tab} = await db.from('tabs').select('*').eq('slug', slug).single();
+  if(!tab){
+    document.getElementById('main-content').innerHTML = '<div class="empty-notice">Page not found.</div>';
+    return;
+  }
+
+  document.title = tab.name + ' · white';
+  document.getElementById('page-title').textContent = tab.name + ' · white';
+
+  const {data: sections} = await db
+    .from('sections')
+    .select('*')
+    .eq('tab_id', tab.id)
+    .eq('visible', true)
+    .order('order');
+
+  if(!sections || !sections.length){
+    document.getElementById('main-content').innerHTML = '<div class="empty-notice">Nothing here yet — check back soon.</div>';
+    return;
+  }
+
+  document.getElementById('main-content').innerHTML = '';
+  for(const section of sections){
+    await renderSection(section, slug);
+  }
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+async function buildNav(activeSlug){
+  const {data} = await db.from('tabs').select('name,slug,visible').eq('visible',true).order('order');
+  if(!data) return;
+  const nav = document.getElementById('site-nav');
+  nav.innerHTML = data.map(t => {
+    const href = t.slug === 'index' ? 'index.html' : t.slug + '.html';
+    const active = t.slug === activeSlug ? ' class="active"' : '';
+    return `<a href="${href}"${active}>${esc(t.name)}</a>`;
+  }).join('');
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+async function loadSettings(){
+  const {data} = await db.from('site_settings').select('*');
+  if(!data) return {};
+  return Object.fromEntries(data.map(r=>[r.key,r.value]));
+}
+
+// ── SIDEBAR DATA ──────────────────────────────────────────────────────────────
+async function loadSidebarData(){
+  const cfg = await loadSettings();
+
+  // Marquee
+  if(cfg.marquee_text){
+    const t = esc(cfg.marquee_text)+' &nbsp;&nbsp;&nbsp; ';
+    document.getElementById('marquee-text').innerHTML = t+t;
+  }
+
+  // Site tagline in about widget
+  if(cfg.site_tagline){
+    document.getElementById('about-widget-text').textContent = cfg.site_tagline;
+  }
+
+  // Recent posts sidebar
+  const {data:posts} = await db.from('posts').select('*,tab:tabs(name,slug)')
+    .eq('published',true).neq('status','hidden')
+    .order('created_at',{ascending:false}).limit(3);
+  const rp = document.getElementById('recent-posts-sidebar');
+  if(posts && posts.length){
+    rp.innerHTML = posts.map((p,i)=>`
+      <a href="${p.tab?p.tab.slug+'.html':'index.html'}#post-${p.id}" class="recent-post">
+        <span class="rp-num">0${i+1}</span>
+        <div><div class="rp-title">${esc(p.title)}</div><div class="rp-date">${fmtDate(p.created_at)}</div></div>
+      </a>`).join('');
+  } else {
+    rp.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic">no posts yet</div>';
+  }
+
+  // Guestbook preview
+  const {data:gb} = await db.from('guestbook_entries').select('*')
+    .eq('status','approved').order('created_at',{ascending:false}).limit(1);
+  const gbPrev = document.getElementById('gb-sidebar-preview');
+  if(gb && gb.length){
+    const g = gb[0];
+    gbPrev.innerHTML = `<strong style="font-size:12px">${esc(g.name)}</strong><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px">"${esc(g.message.substring(0,70))}${g.message.length>70?'…':''}"</div>`;
+  }
+}
+
+// ── HIT COUNTER ───────────────────────────────────────────────────────────────
+async function loadHitCounter(){
+  try{
+    const res = await fetch(SPOTIFY_API+'/api/visitors?page='+currentSlug(),{cache:'no-store'});
+    if(!res.ok) return;
+    const data = await res.json();
+    const count = data.count??data.visitors??data.total??0;
+    const display = document.getElementById('hit-counter-display');
+    if(display) display.innerHTML = String(count).padStart(6,'0').split('').map(d=>`<span>${d}</span>`).join('');
+    const vnum = document.getElementById('visitor-num');
+    if(vnum) vnum.textContent = '#'+count;
+  } catch(e){}
+}
+
+// ── NOW PLAYING ───────────────────────────────────────────────────────────────
+async function loadNowPlaying(){
+  try{
+    const res = await fetch(SPOTIFY_API+'/api/now-playing');
+    const data = await res.json();
+    const title  = document.getElementById('np-title');
+    const artist = document.getElementById('np-artist');
+    const status = document.getElementById('np-status');
+    const art    = document.getElementById('np-art');
+    if(!title) return;
+    if(data.isPlaying){
+      title.textContent  = data.title;
+      artist.textContent = data.artist;
+      status.innerHTML   = '<span style="color:var(--accent1)">▶</span> playing now';
+      if(data.albumArt) art.innerHTML = `<img src="${data.albumArt}" style="width:44px;height:44px;object-fit:cover;display:block;" />`;
+    } else {
+      title.textContent  = 'not playing';
+      artist.textContent = '—';
+      status.textContent = '◈ offline';
+    }
+  } catch(e){
+    const t = document.getElementById('np-title');
+    if(t) t.textContent = 'unavailable';
+  }
+}
+// Poll every 10s
+setTimeout(loadNowPlaying, 800);
+setInterval(loadNowPlaying, 10000);
+
+// ── SECTION RENDERER ─────────────────────────────────────────────────────────
+async function renderSection(section, pageSlug){
+  const main = document.getElementById('main-content');
+  const cfg  = section.config || {};
+
+  // Optional section heading
+  let headerHtml = '';
+  if(section.title){
+    headerHtml = `<div class="feed-header"><h2>${esc(section.title)}</h2></div>`;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.id = 'section-'+section.id;
+  wrap.innerHTML = headerHtml + '<div class="section-loading">loading…</div>';
+  main.appendChild(wrap);
+
+  let html = '';
+
+  switch(section.type){
+
+    // ── HERO ────────────────────────────────────────────────────────────────
+    case 'hero': {
+      html = `<div class="hero-section">
+        <h1>${esc(cfg.subtitle||'welcome.')}</h1>
+        ${cfg.body?`<div class="text-block hero-sub">${md(cfg.body)}</div>`:''}
+      </div>`;
+      break;
+    }
+
+    // ── POSTS ───────────────────────────────────────────────────────────────
+    case 'posts': {
+      let query = db.from('posts').select('*,tab:tabs(name,slug)')
+        .eq('published',true).neq('status','hidden')
+        .order(cfg.pinned_first?'pinned':'created_at',{ascending:false});
+      if(cfg.tag)    query = query.contains('tags',[cfg.tag]);
+      if(!cfg.tag){
+        // Default: show posts for this page's tab
+        const {data:tab} = await db.from('tabs').select('id').eq('slug',pageSlug).single();
+        if(tab) query = query.eq('tab_id',tab.id);
+      }
+      query = query.limit(cfg.limit||10);
+      const {data:posts} = await query;
+      if(!posts||!posts.length){
+        html = '<div class="empty-notice">No posts yet — check back soon!</div>';
+      } else {
+        html = posts.map(p => renderPostCard(p)).join('');
+      }
+      break;
+    }
+
+    // ── BOOKS ───────────────────────────────────────────────────────────────
+    case 'books': {
+      let query = db.from('books').select('*').eq('status','published');
+      if(cfg.sort==='rating_desc') query = query.order('rating',{ascending:false});
+      else query = query.order('created_at',{ascending:false});
+      query = query.limit(cfg.limit||24);
+      const {data:books} = await query;
+      if(!books||!books.length){
+        html = '<div class="empty-notice">No books here yet.</div>';
+      } else {
+        html = `<div class="books-grid">`+books.map(b=>`
+          <div class="book-card">
+            ${b.cover_url
+              ? `<img class="book-cover" src="${esc(b.cover_url)}" alt="${esc(b.title)}" />`
+              : `<div class="book-cover-placeholder">📚</div>`}
+            <div class="book-info">
+              <div class="book-title-text">${esc(b.title)}</div>
+              <div class="book-author">${esc(b.author)}</div>
+              ${b.rating?`<div class="book-stars">${stars(b.rating)}</div>`:''}
+              ${b.year_read?`<div style="font-size:10px;color:var(--muted);margin-top:4px">${b.year_read}</div>`:''}
+            </div>
+          </div>`).join('')+`</div>`;
+      }
+      break;
+    }
+
+    // ── PHOTOS ──────────────────────────────────────────────────────────────
+    case 'photos': {
+      let query = db.from('photos').select('*').eq('visible',true);
+      if(cfg.album) query = query.eq('album',cfg.album);
+      query = query.order('order').limit(cfg.limit||48);
+      const {data:photos} = await query;
+      if(!photos||!photos.length){
+        html = '<div class="empty-notice">No photos yet.</div>';
+      } else {
+        html = `<div class="photos-grid">`+photos.map(p=>`
+          <div class="photo-item">
+            <img src="${esc(p.url)}" alt="${esc(p.alt_text||p.caption||'')}" loading="lazy" />
+            ${p.caption?`<div class="photo-caption">${esc(p.caption)}</div>`:''}
+          </div>`).join('')+`</div>`;
+      }
+      break;
+    }
+
+    // ── MUSIC ───────────────────────────────────────────────────────────────
+    case 'music': {
+      let query = db.from('music').select('*').eq('status','published');
+      if(cfg.type) query = query.eq('type',cfg.type);
+      query = query.order('created_at',{ascending:false}).limit(cfg.limit||24);
+      const {data:tracks} = await query;
+      if(!tracks||!tracks.length){
+        html = '<div class="empty-notice">Nothing here yet.</div>';
+      } else {
+        html = `<div class="music-grid">`+tracks.map(t=>`
+          <div class="music-card">
+            ${t.cover_url
+              ? `<img class="music-cover" src="${esc(t.cover_url)}" alt="${esc(t.title)}" />`
+              : `<div class="music-cover-ph">♪</div>`}
+            <div class="music-info">
+              <div class="music-title-text">${esc(t.title)}</div>
+              <div class="music-artist">${esc(t.artist)}</div>
+              <div class="music-type">${esc(t.type)}</div>
+              ${t.rating?`<div style="color:#f59e0b;font-size:12px;margin-top:4px">${'★'.repeat(t.rating)}</div>`:''}
+            </div>
+          </div>`).join('')+`</div>`;
+      }
+      break;
+    }
+
+    // ── LINKS ───────────────────────────────────────────────────────────────
+    case 'links': {
+      let query = db.from('links').select('*').eq('visible',true);
+      if(cfg.category) query = query.eq('category',cfg.category);
+      query = query.order('order').limit(cfg.limit||100);
+      const {data:links} = await query;
+      if(!links||!links.length){
+        html = '<div class="empty-notice">No links yet.</div>';
+      } else {
+        // Group by category
+        const cats = {};
+        links.forEach(l=>{
+          const c = l.category||'misc';
+          if(!cats[c]) cats[c]=[];
+          cats[c].push(l);
+        });
+        html = Object.entries(cats).map(([cat,ls])=>`
+          <div class="links-category-header">${esc(cat)}</div>
+          <div class="links-list">${ls.map(l=>`
+            <div class="link-item">
+              <div><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a></div>
+              ${l.description?`<div class="link-desc">${esc(l.description)}</div>`:''}
+            </div>`).join('')}
+          </div>`).join('');
+      }
+      break;
+    }
+
+    // ── TEXT ─────────────────────────────────────────────────────────────────
+    case 'text': {
+      html = `<div class="text-block">${md(cfg.content||'')}</div>`;
+      break;
+    }
+
+    // ── GUESTBOOK ────────────────────────────────────────────────────────────
+    case 'guestbook': {
+      html = await renderGuestbook(cfg);
+      break;
+    }
+
+    default:
+      html = `<div class="empty-notice">Unknown section type: ${esc(section.type)}</div>`;
+  }
+
+  wrap.querySelector('.section-loading')?.remove();
+  wrap.insertAdjacentHTML('beforeend', html);
+}
+
+// ── POST CARD ─────────────────────────────────────────────────────────────────
+function renderPostCard(p){
+  const img    = p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" class="post-image" style="margin-top:12px" />` : '';
+  const excerpt= (p.excerpt||(p.content||'')).substring(0,220)+'…';
+  const tags   = (p.tags||[]).slice(0,3).map(t=>`<span style="background:var(--panel);border:1px solid var(--border);font-size:10px;padding:2px 7px;margin-right:4px">${esc(t)}</span>`).join('');
+  const href   = p.tab ? p.tab.slug+'.html#post-'+p.id : '#post-'+p.id;
+  return `<article class="post" id="post-${esc(p.id)}">
+    <div class="post-tag">${esc(p.tab?.name||'post')}</div>
+    ${img}
+    <div class="post-body">
+      <div class="post-meta"><span>${fmtDate(p.created_at)}</span></div>
+      <h2 class="post-title"><a href="${href}">${esc(p.title)}</a></h2>
+      ${p.subtitle?`<div style="font-size:13px;color:var(--muted);margin-bottom:8px">${esc(p.subtitle)}</div>`:''}
+      <p class="post-excerpt">${esc(excerpt)}</p>
+      ${tags?`<div style="margin-bottom:14px">${tags}</div>`:''}
+      <a href="${href}" class="read-more">keep reading →</a>
+    </div>
+  </article>`;
+}
+
+// ── GUESTBOOK SECTION ────────────────────────────────────────────────────────
+async function renderGuestbook(cfg){
+  const cfg2   = await loadSettings();
+  const open   = cfg.form_open !== 'false' && cfg2.guestbook_open !== 'false';
+  const limit  = cfg.limit || 20;
+
+  const {data:entries} = await db.from('guestbook_entries')
+    .select('*').eq('status','approved')
+    .order('created_at',{ascending:false}).limit(limit);
+
+  const formHtml = open ? `
+    <div class="gb-form" id="gb-form-wrap">
+      <h3>leave a message</h3>
+      <div class="form-group"><label>Name *</label><input type="text" id="gb-name" maxlength="80" /></div>
+      <div class="form-group"><label>Message *</label><textarea id="gb-msg" rows="4" maxlength="500"></textarea></div>
+      <div class="form-group"><label>Website <span style="opacity:0.5;font-size:9px">(optional)</span></label><input type="text" id="gb-website" maxlength="200" placeholder="https://…" /></div>
+      <button class="gb-submit" id="gb-submit-btn" onclick="submitGuestbook()">Send Message</button>
+      <div id="gb-form-feedback"></div>
+    </div>` : `<div class="gb-closed">The guestbook is currently closed. Check back later.</div>`;
+
+  const entriesHtml = entries&&entries.length
+    ? `<div class="feed-header" style="margin-top:8px"><h2>★ messages</h2></div>
+       <div class="gb-entries">`+entries.map(g=>`
+        <div class="gb-entry-card">
+          <div class="gb-name">${esc(g.name)}${g.website?` <a href="${esc(g.website)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);font-weight:400;margin-left:6px">↗</a>`:''}</div>
+          <div class="gb-date">${fmtDate(g.created_at)}</div>
+          <div class="gb-message">${esc(g.message)}</div>
+        </div>`).join('')+`</div>`
+    : '<div class="empty-notice">No messages yet. Be the first!</div>';
+
+  return formHtml + entriesHtml;
+}
+
+async function submitGuestbook(){
+  const name    = document.getElementById('gb-name')?.value.trim();
+  const message = document.getElementById('gb-msg')?.value.trim();
+  const website = document.getElementById('gb-website')?.value.trim();
+  const fb      = document.getElementById('gb-form-feedback');
+  const btn     = document.getElementById('gb-submit-btn');
+  if(!name||!message){fb.innerHTML='<div class="gb-msg-err">Name and message are required.</div>';return;}
+  btn.disabled=true; btn.textContent='Sending…';
+  const {error} = await db.from('guestbook_entries').insert({name,message,website:website||null,status:'pending'});
+  btn.disabled=false; btn.textContent='Send Message';
+  if(error){fb.innerHTML=`<div class="gb-msg-err">Error: ${esc(error.message)}</div>`;return;}
+  document.getElementById('gb-name').value='';
+  document.getElementById('gb-msg').value='';
+  document.getElementById('gb-website').value='';
+  fb.innerHTML='<div class="gb-msg-ok">Message sent! It\'ll appear once approved. Thanks ✦</div>';
+}
+
+// ── DARK MODE ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  const btn = document.getElementById('theme-toggle');
+  if(btn){
+    const update = ()=>{
+      const cur = document.documentElement.getAttribute('data-theme');
+      btn.textContent = cur==='dark' ? '☀ light' : '☾ dark';
+    };
+    update();
+    btn.addEventListener('click',()=>{
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur==='dark'?'light':'dark';
+      document.documentElement.setAttribute('data-theme',next);
+      localStorage.setItem('theme',next);
+      update();
+    });
+  }
+});
+
+// ── SECRET FONT (type "nese") ─────────────────────────────────────────────────
+(function(){
+  var seq='',target='nese',active=sessionStorage.getItem('rf2active')==='1';
+  function applyFont(on){
+    document.documentElement.setAttribute('data-font2',on?'1':'0');
+    sessionStorage.setItem('rf2active',on?'1':'0');
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    seq+=e.key.toLowerCase();
+    if(seq.length>target.length)seq=seq.slice(-target.length);
+    if(seq===target){seq='';active=!active;applyFont(active);}
+  });
+  if(active)applyFont(true);
+})();
+
+// ── START ─────────────────────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>

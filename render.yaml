@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: white
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    healthCheckPath: /
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: change-me
+      - key: SECRET_KEY
+        generateValue: true

@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ entity }} · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">{{ entity_title }}</div>
+    <div class="page-sub">{{ rows|length }} {{ entity }}</div>
+  </div>
+  <div class="filter-row">
+    <a class="add-btn" href="{{ url_for('admin.edit_entity', entity=entity) }}">＋ New {{ entity.rstrip('s') }}</a>
+  </div>
+  <div class="data-table">
+    <div class="table-head posts-head">
+      {% for key, label in columns %}<span>{{ label }}</span>{% endfor %}<span>Actions</span>
+    </div>
+    {% for row in rows %}
+    <div class="table-row">
+      {% for key, label in columns %}
+        {% if key == 'status' or key == 'visible' %}
+          <span><span class="status-pill {{ row[key] or 'draft' }}">{{ row[key] or 'draft' }}</span></span>
+        {% elif key == 'rating' %}
+          <span>{{ row[key] }}{% if row[key] is not none and row[key]|float > 5 %}/10{% endif %}</span>
+        {% else %}
+          <span>{{ row[key] }}</span>
+        {% endif %}
+      {% endfor %}
+      <span>
+        <a class="qa-btn" style="display:inline-block;margin:0 4px" href="{{ url_for('admin.edit_entity', entity=entity, item_id=row.id) }}">edit</a>
+        <form method="post" action="{{ url_for('admin.delete_entity', entity=entity, item_id=row.id) }}" style="display:inline" onsubmit="return confirm('Delete this {{ entity.rstrip('s') }}?')">
+          <button class="qa-btn" style="display:inline-block;margin:0" type="submit">✕</button>
+        </form>
+      </span>
+    </div>
+    {% else %}
+    <div class="table-row"><span>Nothing here yet.</span></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ site_title }}{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@400;600&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block extra_head %}{% endblock %}
+  <script>(function(){var s=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',s);})();</script>
+</head>
+<body>
+
+<div class="marquee-bar">
+  <div class="marquee-inner">{{ marquee }} &nbsp;&nbsp;&nbsp; {{ marquee }}</div>
+</div>
+
+<header>
+  <div class="site-title">
+    <a href="{{ url_for('home') }}" style="text-decoration:none;color:var(--accent1);">white</a>
+  </div>
+  <div class="header-meta">
+    <span class="visitor-label">visitors</span>
+    <div class="hit-counter">{% set digits = ('000000' + visitor_count|string)[-6:] %}{% for d in digits %}<span>{{ d }}</span>{% endfor %}</div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted)">you are visitor <strong style="color:var(--dark)" id="visitor-num">#{{ visitor_count }}</strong></div>
+  </div>
+  <form class="global-search-wrap" action="{{ url_for('search') }}" method="get">
+    <input class="global-search-input" name="q" placeholder="search site…" autocomplete="off" value="{{ q or '' }}" />
+    <button class="global-search-btn" type="submit">🔍</button>
+  </form>
+</header>
+
+<nav id="site-nav">
+  {% for tab in nav %}
+    <a href="{{ url_for('home') if tab.slug == 'index' else url_for('page_view', slug=tab.slug) }}"{% if tab.slug == page_slug %} class="active"{% endif %}>{{ tab.name }}</a>
+  {% endfor %}
+</nav>
+
+{% block layout %}
+<div class="page-wrap">
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
+
+<footer>
+  <div>
+    <div style="font-family:'Blowpis','Syne',sans-serif;font-weight:800;font-size:16px;margin-bottom:4px">white</div>
+    <div class="copy">© {{ now_year }} · made with curiosity and too much free time</div>
+    <div style="margin-top:4px"><a href="{{ url_for('guestbook') }}">guestbook</a> · <a href="{{ url_for('page_view', slug='links') }}">links</a> · <a href="{{ url_for('page_view', slug='about') }}">about</a></div>
+  </div>
+  <div class="footer-badges">
+    <span class="badge red">made by hand</span>
+    <span class="badge green">no ads ever</span>
+    <span class="badge">best viewed with curiosity</span>
+  </div>
+  <button class="dark-toggle" id="theme-toggle">☾ dark</button>
+</footer>
+
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1)" style="position:fixed;left:20px;top:50%;transform:translateY(-50%);font-size:32px;color:white;background:none;border:none;cursor:pointer;opacity:0.7;z-index:10001;">‹</button>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <img id="lightbox-img" src="" alt="" />
+    <div id="lb-caption-row" style="display:flex;align-items:center;gap:20px;">
+      <span id="lb-counter" style="color:rgba(255,255,255,0.4);font-size:12px;font-family:'Inconsolata',monospace;"></span>
+      <span id="lightbox-caption" style="color:rgba(255,255,255,0.7);font-size:13px;font-family:'Inconsolata',monospace;"></span>
+    </div>
+  </div>
+  <button id="lb-next" onclick="lbNav(1)" style="position:fixed;right:20px;top:50%;transform:translateY(-50%);font-size:32px;color:white;background:none;border:none;cursor:pointer;opacity:0.7;z-index:10001;">›</button>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_post_card.html" import post_card %}
+{% block title %}{{ page_name }} · {{ site_title }}{% endblock %}
+{% block content %}
+{% if sections %}
+  {% for section in sections %}
+    {% include "_section.html" %}
+  {% endfor %}
+{% elif fallback %}
+  {% with section = fallback %}
+    {% include "_section.html" %}
+  {% endwith %}
+{% else %}
+  <div class="empty-notice">Nothing here yet — check back soon.</div>
+{% endif %}
+{% endblock %}

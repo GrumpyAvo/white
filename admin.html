@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>admin · white</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;600;700&family=Syne:wght@700;800&display=swap');
+    :root{--bg:#0a0a14;--surface:#12121f;--surface2:#1a1a2e;--accent:#8b3fc8;--accent2:#5b8dd9;--green:#34d399;--red:#ef4444;--cream:#ede8f7;--muted:#6b5f8a;--border:rgba(139,63,200,0.2);}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg);color:var(--cream);font-family:'Inconsolata',monospace;min-height:100vh;}
+
+    /* ── AUTH ── */
+    .auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;}
+    .auth-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:3rem;color:var(--accent);margin-bottom:6px;}
+    .auth-sub{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+    .auth-card{border:1px solid var(--border);padding:32px;width:390px;background:var(--surface);}
+    .auth-tabs{display:flex;margin-bottom:24px;border-bottom:1px solid var(--border);}
+    .auth-tab{flex:1;padding:10px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:12px;text-transform:uppercase;letter-spacing:0.12em;cursor:pointer;transition:color 0.15s;border-bottom:2px solid transparent;margin-bottom:-1px;}
+    .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .field{margin-bottom:18px;}
+    .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent);margin-bottom:7px;}
+    .field .input-wrap{position:relative;}
+    .field input{width:100%;padding:10px 40px 10px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--cream);font-family:inherit;font-size:14px;outline:none;transition:border-color 0.15s;}
+    .field input:focus{border-color:var(--accent);}
+    .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 4px;line-height:1;user-select:none;}
+    .pw-eye:hover{color:var(--accent);}
+    .btn{width:100%;padding:12px;background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.15em;cursor:pointer;transition:opacity 0.15s;}
+    .btn:hover{opacity:0.85;}
+    .btn:disabled{opacity:0.4;cursor:not-allowed;}
+    .err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 12px;font-size:12px;margin-bottom:16px;}
+    .ok-msg{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:var(--green);padding:10px 12px;font-size:12px;margin-bottom:16px;}
+
+    /* ── SHELL ── */
+    #app{display:none;height:100vh;overflow:hidden;}
+    .shell{display:flex;height:100vh;}
+    .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border);}
+    .sidebar-logo .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent);}
+    .sidebar-logo .logo-sub{font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;}
+    .sidebar-nav{flex:1;padding:12px 0;overflow-y:auto;}
+    .nav-section{font-size:9px;text-transform:uppercase;letter-spacing:0.18em;color:var(--muted);padding:12px 20px 4px;opacity:0.6;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.45);border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .nav-item:hover{color:var(--accent);background:rgba(139,63,200,0.05);}
+    .nav-item.active{color:var(--accent);background:rgba(139,63,200,0.1);border-left-color:var(--accent);font-weight:600;}
+    .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:11px;}
+    .user-email{color:rgba(255,255,255,0.2);margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .signout-btn{background:none;border:none;cursor:pointer;color:rgba(239,68,68,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;padding:0;font-family:inherit;transition:color 0.15s;}
+    .signout-btn:hover{color:var(--red);}
+    .view-site{display:block;font-size:11px;color:rgba(255,255,255,0.25);text-decoration:none;margin-bottom:10px;}
+    .view-site:hover{color:var(--accent);}
+    .main{flex:1;overflow-y:auto;padding:36px 40px;}
+    .page{display:none;}
+    .page.active{display:block;}
+    .page-header{margin-bottom:28px;}
+    .page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:white;margin-bottom:6px;}
+    .page-sub{color:var(--muted);font-size:13px;}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);padding:18px 20px;}
+    .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);margin-bottom:10px;}
+    .stat-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;}
+
+    /* ── TABLES ── */
+    .data-table{border:1px solid var(--border);}
+    .table-head{display:grid;padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);}
+    .table-row{display:grid;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center;transition:background 0.1s;}
+    .table-row:last-child{border-bottom:none;}
+    .table-row:hover{background:rgba(255,255,255,0.02);}
+    .posts-head,.posts-row{grid-template-columns:1fr 100px 85px 75px 110px;gap:12px;}
+    .pages-head,.pages-row{grid-template-columns:40px 1fr 120px 80px 90px;gap:12px;}
+    .books-head,.books-row{grid-template-columns:1fr 140px 60px 70px 110px;gap:12px;}
+    .music-head,.music-row{grid-template-columns:1fr 130px 70px 80px 110px;gap:12px;}
+    .photos-head,.photos-row{grid-template-columns:60px 1fr 120px 80px 100px;gap:12px;}
+    .links-head,.links-row{grid-template-columns:1fr 120px 80px 100px;gap:12px;}
+    .sections-head,.sections-row{grid-template-columns:40px 1fr 100px 80px 80px;gap:12px;}
+    .users-head,.users-row{grid-template-columns:1fr 130px 90px 110px;gap:12px;}
+    .gbook-head,.gbook-row{grid-template-columns:120px 1fr 120px 90px 120px;gap:12px;}
+    .row-title{font-size:13px;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .row-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+    .row-muted{font-size:11px;color:var(--muted);}
+    .row-date{font-size:11px;color:rgba(255,255,255,0.3);}
+    .pill{display:inline-block;font-size:10px;padding:2px 8px;text-transform:uppercase;letter-spacing:0.08em;border:1px solid;cursor:pointer;transition:all 0.15s;}
+    .pill.live,.pill.published,.pill.approved{color:var(--green);border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.08);}
+    .pill.draft,.pill.pending{color:rgba(255,255,255,0.3);border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);}
+    .pill.hidden,.pill.rejected{color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08);}
+    .pill:hover{opacity:0.8;}
+    .row-actions{display:flex;align-items:center;gap:8px;}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:3px;font-size:13px;transition:opacity 0.15s;opacity:0.5;}
+    .icon-btn:hover{opacity:1;}
+    .approve-btn{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:var(--green);font-family:inherit;font-size:11px;padding:4px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;}
+    .reject-btn{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;font-family:inherit;font-size:11px;padding:4px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;}
+    .empty-state{padding:40px;text-align:center;color:var(--muted);font-size:13px;}
+    .loading{color:var(--muted);font-size:13px;padding:24px;}
+    .filter-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+    .filter-input,.filter-select{padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--cream);font-family:inherit;font-size:12px;outline:none;}
+    .filter-input{flex:1;min-width:150px;}
+    .filter-input:focus,.filter-select:focus{border-color:var(--accent);}
+    .filter-select option{background:#1a1a2e;}
+
+    /* ── EDITOR SHARED ── */
+    .editor-top{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:inherit;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;padding:7px 12px;cursor:pointer;}
+    .spacer{flex:1;}
+    .save-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.1em;padding:8px 20px;cursor:pointer;}
+    .save-btn:disabled{opacity:0.4;cursor:not-allowed;}
+    .add-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;margin-bottom:18px;}
+    .section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:var(--muted);margin-bottom:12px;font-weight:700;}
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+    .meta-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+    .editor-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.4);margin-bottom:7px;}
+    .editor-field input,.editor-field select,.editor-field textarea{width:100%;padding:10px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--cream);font-family:inherit;font-size:13px;outline:none;transition:border-color 0.15s;resize:vertical;}
+    .editor-field input:focus,.editor-field select:focus,.editor-field textarea:focus{border-color:var(--accent);}
+    .editor-field select option{background:#1a1a2e;}
+    .editor-field input[type="checkbox"]{width:auto;margin-right:8px;}
+    .tags-wrap{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);min-height:44px;display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;align-items:center;cursor:text;transition:border-color 0.15s;}
+    .tags-wrap:focus-within{border-color:var(--accent);}
+    .tag-chip{background:rgba(139,63,200,0.25);border:1px solid rgba(139,63,200,0.4);color:var(--accent);font-size:12px;padding:2px 8px;display:inline-flex;align-items:center;gap:5px;}
+    .tag-chip button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;padding:0;}
+    .tag-chip button:hover{color:var(--red);}
+    .tag-input-hidden{background:none;border:none;outline:none;color:var(--cream);font-family:inherit;font-size:13px;min-width:120px;flex:1;}
+    .image-upload-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);font-family:inherit;font-size:13px;cursor:pointer;transition:all 0.15s;}
+    .image-upload-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .image-preview-wrap{position:relative;display:inline-block;}
+    .image-preview-wrap img{max-width:280px;height:160px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);display:block;}
+    .image-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;color:white;cursor:pointer;padding:4px 6px;font-size:12px;}
+    .md-textarea{width:100%;min-height:280px;padding:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--cream);font-family:'Inconsolata',monospace;font-size:14px;line-height:1.7;resize:vertical;outline:none;}
+    .md-textarea:focus{border-color:var(--accent);}
+    .editor-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 12px;font-size:12px;margin-bottom:14px;display:none;}
+
+    /* ── PAGES MANAGER ── */
+    .pages-form{padding:16px;background:rgba(139,63,200,0.08);border:1px solid rgba(139,63,200,0.25);margin-bottom:16px;}
+    .pages-form-title{font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent);margin-bottom:14px;font-weight:700;}
+    .pages-form-fields{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+    .form-actions{display:flex;gap:8px;}
+    .form-save{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;}
+    .form-cancel{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:'Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;}
+    .drag-handle{font-size:14px;cursor:grab;color:rgba(255,255,255,0.2);user-select:none;padding:4px;}
+    .drag-handle:hover{color:var(--accent);}
+
+    /* ── SECTIONS MANAGER ── */
+    .sections-page-sel{display:flex;gap:12px;align-items:center;margin-bottom:20px;}
+    .sections-page-sel select{padding:9px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--cream);font-family:inherit;font-size:13px;outline:none;flex:1;}
+    .section-type-badge{display:inline-block;padding:2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;border:1px solid rgba(139,63,200,0.4);color:var(--accent);background:rgba(139,63,200,0.1);}
+    .section-form{padding:16px;background:rgba(139,63,200,0.06);border:1px solid rgba(139,63,200,0.2);margin-bottom:14px;}
+
+    /* ── STAR RATING ── */
+    .star-row{display:flex;gap:4px;margin-top:4px;}
+    .star-btn{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;color:rgba(255,255,255,0.2);padding:0;}
+    .star-btn.on{color:#fbbf24;}
+
+    /* ── PAGINATION ── */
+    .pagination-ctrl{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(139,63,200,0.05);border:1px solid var(--border);margin-bottom:20px;}
+    .pagination-ctrl label{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);}
+    .pagination-ctrl input{width:70px;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--cream);font-family:inherit;font-size:13px;outline:none;}
+
+    /* ── SETTINGS ── */
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:700px;}
+    .settings-save{margin-top:20px;display:inline-flex;align-items:center;gap:6px;padding:10px 22px;background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;}
+
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;background:var(--surface);border:1px solid var(--border);font-size:13px;color:var(--cream);opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;}
+    #toast.show{opacity:1;}
+    #toast.success{border-color:rgba(52,211,153,0.4);color:var(--green);}
+    #toast.error{border-color:rgba(239,68,68,0.4);color:#fca5a5;}
+
+    /* ── PHOTO THUMB ── */
+    .photo-thumb{width:48px;height:48px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);}
+
+    /* ── QUICK ACTIONS ── */
+    .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;}
+    .qa-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:rgba(139,63,200,0.15);border:1px solid rgba(139,63,200,0.3);color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;}
+    .qa-btn:hover{background:rgba(139,63,200,0.3);}
+  </style>
+</head>
+<body>
+
+<!-- ── AUTH ── -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-logo">white</div>
+  <div class="auth-sub">admin panel</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Request Access</button>
+    </div>
+    <div id="form-signin">
+      <div id="signin-err" class="err" style="display:none"></div>
+      <div class="field"><label>Email</label><input type="email" id="si-email" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('si-password').focus()" /></div>
+      <div class="field"><label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="si-password" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleSignIn()" />
+          <button type="button" class="pw-eye" onclick="togglePw('si-password',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn" id="signin-btn" onclick="handleSignIn()">Sign In</button>
+    </div>
+    <div id="form-signup" style="display:none">
+      <div id="signup-msg" class="ok-msg" style="display:none"></div>
+      <div id="signup-err" class="err" style="display:none"></div>
+      <div class="field"><label>Email</label><input type="email" id="su-email" /></div>
+      <button class="btn" id="signup-btn" onclick="handleSignUp()">Request Access</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <div class="shell">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo">white</div>
+        <div class="logo-sub">admin panel</div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">⊞ Dashboard</div>
+
+        <div class="nav-section">Content</div>
+        <div class="nav-item" onclick="showPage('posts')">✎ Posts</div>
+        <div class="nav-item" onclick="showPage('books')">📚 Books</div>
+        <div class="nav-item" onclick="showPage('music')">🎵 Music</div>
+        <div class="nav-item" onclick="showPage('photos')">🖼 Photos</div>
+        <div class="nav-item" onclick="showPage('links')">🔗 Links</div>
+        <div class="nav-item" onclick="showPage('guestbook')">💬 Guestbook</div>
+
+        <div class="nav-section">Structure</div>
+        <div class="nav-item" onclick="showPage('pages')">⊟ Pages</div>
+        <div class="nav-item" onclick="showPage('sections')">⚙ Sections</div>
+
+        <div class="nav-section">System</div>
+        <div class="nav-item" id="nav-users" onclick="showPage('users')" style="display:none">👥 Users</div>
+        <div class="nav-item" onclick="showPage('settings')">⚙ Settings</div>
+        <div class="nav-item" id="nav-seeder" onclick="showPage('seeder')">⬆ Import Data</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-email" id="user-email-display"></div>
+        <a class="view-site" href="index.html" target="_blank">↗ view site</a>
+        <button class="signout-btn" onclick="handleSignOut()">sign out</button>
+        <button class="signout-btn" style="color:rgba(52,211,153,0.6);margin-top:8px;" onclick="showPage('seeder')">⬆ seed data</button>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Welcome back.</div>
+        </div>
+        <div class="stats-grid" id="dash-stats">
+          <div class="stat-card"><div class="stat-label">Posts</div><div class="stat-value" id="stat-posts">—</div></div>
+          <div class="stat-card"><div class="stat-label">Books</div><div class="stat-value" id="stat-books">—</div></div>
+          <div class="stat-card"><div class="stat-label">Photos</div><div class="stat-value" id="stat-photos">—</div></div>
+          <div class="stat-card"><div class="stat-label">Guestbook</div><div class="stat-value" id="stat-gbook">—</div></div>
+        </div>
+        <div class="quick-actions">
+          <button class="qa-btn" onclick="showPage('post-editor')">＋ New Post</button>
+          <button class="qa-btn" onclick="showPage('book-editor')">＋ New Book</button>
+          <button class="qa-btn" onclick="showPage('music-editor')">＋ New Music</button>
+          <button class="qa-btn" onclick="showPage('photo-editor')">＋ New Photo</button>
+        </div>
+        <div class="section-label">Recent Posts</div>
+        <div class="data-table" id="dash-recent"></div>
+      </div>
+
+      <!-- ── POSTS LIST ── -->
+      <div class="page" id="page-posts">
+        <div class="page-header"><div class="page-title">Posts</div></div>
+        <button class="add-btn" onclick="openPostEditor()">＋ New Post</button>
+        <div class="filter-row">
+          <input class="filter-input" id="posts-search" placeholder="Search posts…" oninput="renderPostsTable()">
+          <select class="filter-select" id="posts-filter-page" onchange="renderPostsTable()"><option value="">All pages</option></select>
+          <select class="filter-select" id="posts-filter-status" onchange="renderPostsTable()">
+            <option value="">All statuses</option>
+            <option value="live">Live</option>
+            <option value="draft">Draft</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </div>
+        <div class="data-table">
+          <div class="table-head posts-head"><span>Title</span><span>Page</span><span>Date</span><span>Status</span><span>Actions</span></div>
+          <div id="posts-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── POST EDITOR ── -->
+      <div class="page" id="page-post-editor">
+        <div class="editor-top">
+          <button class="back-btn" onclick="showPage('posts')">← Posts</button>
+          <span id="post-editor-title" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;">New Post</span>
+          <div class="spacer"></div>
+          <button class="save-btn" id="post-save-btn" onclick="savePost()">💾 Save</button>
+        </div>
+        <div id="post-editor-error" class="editor-error"></div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Title *</label><input type="text" id="ed-title" placeholder="Post title" /></div>
+          <div class="editor-field"><label>Subtitle</label><input type="text" id="ed-subtitle" placeholder="Optional subtitle" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Page *</label><select id="ed-tab"></select></div>
+          <div class="editor-field"><label>Status</label>
+            <select id="ed-status">
+              <option value="draft">Draft</option>
+              <option value="live">Live</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Tags <span style="opacity:0.4;font-size:9px">(press Enter)</span></label>
+            <div class="tags-wrap" id="post-tags-wrap" onclick="document.getElementById('post-tag-input').focus()">
+              <input class="tag-input-hidden" id="post-tag-input" placeholder="add tag…" onkeydown="handleTagKey(event,'post')" />
+            </div>
+          </div>
+          <div class="editor-field"><label>Pinned</label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
+              <input type="checkbox" id="ed-pinned"> Show pinned at top
+            </label>
+          </div>
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Excerpt <span style="opacity:0.4;font-size:9px">(shown in feeds)</span></label>
+          <textarea id="ed-excerpt" rows="2" placeholder="Short summary…" style="resize:vertical;"></textarea>
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Cover Image</label>
+          <div id="post-image-area">
+            <button class="image-upload-btn" onclick="document.getElementById('post-image-file').click()">⬆ Upload image</button>
+          </div>
+          <input type="file" id="post-image-file" accept="image/*" style="display:none" onchange="handleImageUpload('post')">
+        </div>
+        <div class="editor-field">
+          <label>Content <span style="opacity:0.4;font-size:9px">(Markdown)</span></label>
+          <textarea class="md-textarea" id="ed-content" placeholder="Write in Markdown…"></textarea>
+        </div>
+      </div>
+
+      <!-- ── BOOKS LIST ── -->
+      <div class="page" id="page-books">
+        <div class="page-header"><div class="page-title">Books</div></div>
+        <button class="add-btn" onclick="openBookEditor()">＋ New Book</button>
+        <div class="filter-row">
+          <input class="filter-input" id="books-search" placeholder="Search books…" oninput="renderBooksTable()">
+          <select class="filter-select" id="books-filter-status" onchange="renderBooksTable()">
+            <option value="">All</option><option value="published">Published</option><option value="draft">Draft</option>
+          </select>
+        </div>
+        <div class="data-table">
+          <div class="table-head books-head"><span>Title / Author</span><span>Year Read</span><span>Rating</span><span>Status</span><span>Actions</span></div>
+          <div id="books-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── BOOK EDITOR ── -->
+      <div class="page" id="page-book-editor">
+        <div class="editor-top">
+          <button class="back-btn" onclick="showPage('books')">← Books</button>
+          <span id="book-editor-title" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;">New Book</span>
+          <div class="spacer"></div>
+          <button class="save-btn" id="book-save-btn" onclick="saveBook()">💾 Save</button>
+        </div>
+        <div id="book-editor-error" class="editor-error"></div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Title *</label><input type="text" id="bk-title" /></div>
+          <div class="editor-field"><label>Author *</label><input type="text" id="bk-author" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Year Read</label><input type="number" id="bk-year" placeholder="2024" /></div>
+          <div class="editor-field"><label>Status</label>
+            <select id="bk-status"><option value="published">Published</option><option value="draft">Draft</option></select>
+          </div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Rating</label>
+            <div class="star-row" id="bk-stars">
+              <button class="star-btn" data-val="1" onclick="setRating('bk',1)">★</button>
+              <button class="star-btn" data-val="2" onclick="setRating('bk',2)">★</button>
+              <button class="star-btn" data-val="3" onclick="setRating('bk',3)">★</button>
+              <button class="star-btn" data-val="4" onclick="setRating('bk',4)">★</button>
+              <button class="star-btn" data-val="5" onclick="setRating('bk',5)">★</button>
+            </div>
+          </div>
+          <div class="editor-field"><label>Buy Link</label><input type="text" id="bk-buy-link" placeholder="https://…" /></div>
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Tags <span style="opacity:0.4;font-size:9px">(press Enter)</span></label>
+          <div class="tags-wrap" id="book-tags-wrap" onclick="document.getElementById('book-tag-input').focus()">
+            <input class="tag-input-hidden" id="book-tag-input" placeholder="add tag…" onkeydown="handleTagKey(event,'book')" />
+          </div>
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Cover Image</label>
+          <div id="book-image-area"><button class="image-upload-btn" onclick="document.getElementById('book-image-file').click()">⬆ Upload image</button></div>
+          <input type="file" id="book-image-file" accept="image/*" style="display:none" onchange="handleImageUpload('book')">
+        </div>
+        <div class="editor-field">
+          <label>Review <span style="opacity:0.4;font-size:9px">(Markdown)</span></label>
+          <textarea class="md-textarea" id="bk-review" placeholder="Your review…" style="min-height:200px;"></textarea>
+        </div>
+      </div>
+
+      <!-- ── MUSIC LIST ── -->
+      <div class="page" id="page-music">
+        <div class="page-header"><div class="page-title">Music</div></div>
+        <button class="add-btn" onclick="openMusicEditor()">＋ New Entry</button>
+        <div class="filter-row">
+          <input class="filter-input" id="music-search" placeholder="Search music…" oninput="renderMusicTable()">
+        </div>
+        <div class="data-table">
+          <div class="table-head music-head"><span>Title / Artist</span><span>Type</span><span>Rating</span><span>Status</span><span>Actions</span></div>
+          <div id="music-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── MUSIC EDITOR ── -->
+      <div class="page" id="page-music-editor">
+        <div class="editor-top">
+          <button class="back-btn" onclick="showPage('music')">← Music</button>
+          <span id="music-editor-title" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;">New Music Entry</span>
+          <div class="spacer"></div>
+          <button class="save-btn" id="music-save-btn" onclick="saveMusic()">💾 Save</button>
+        </div>
+        <div id="music-editor-error" class="editor-error"></div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Title *</label><input type="text" id="mu-title" /></div>
+          <div class="editor-field"><label>Artist *</label><input type="text" id="mu-artist" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Type</label>
+            <select id="mu-type">
+              <option value="album">Album</option><option value="ep">EP</option>
+              <option value="single">Single</option><option value="playlist">Playlist</option><option value="mix">Mix</option>
+            </select>
+          </div>
+          <div class="editor-field"><label>Year</label><input type="number" id="mu-year" placeholder="2024" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Rating</label>
+            <div class="star-row" id="mu-stars">
+              <button class="star-btn" data-val="1" onclick="setRating('mu',1)">★</button>
+              <button class="star-btn" data-val="2" onclick="setRating('mu',2)">★</button>
+              <button class="star-btn" data-val="3" onclick="setRating('mu',3)">★</button>
+              <button class="star-btn" data-val="4" onclick="setRating('mu',4)">★</button>
+              <button class="star-btn" data-val="5" onclick="setRating('mu',5)">★</button>
+            </div>
+          </div>
+          <div class="editor-field"><label>Status</label>
+            <select id="mu-status"><option value="published">Published</option><option value="draft">Draft</option></select>
+          </div>
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Embed URL <span style="opacity:0.4;font-size:9px">(Spotify / YouTube / SoundCloud)</span></label>
+          <input type="text" id="mu-embed" placeholder="https://open.spotify.com/…" />
+        </div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Cover Image</label>
+          <div id="music-image-area"><button class="image-upload-btn" onclick="document.getElementById('music-image-file').click()">⬆ Upload image</button></div>
+          <input type="file" id="music-image-file" accept="image/*" style="display:none" onchange="handleImageUpload('music')">
+        </div>
+        <div class="editor-field">
+          <label>Notes <span style="opacity:0.4;font-size:9px">(Markdown)</span></label>
+          <textarea class="md-textarea" id="mu-notes" placeholder="What do you think of it…" style="min-height:160px;"></textarea>
+        </div>
+      </div>
+
+      <!-- ── PHOTOS LIST ── -->
+      <div class="page" id="page-photos">
+        <div class="page-header"><div class="page-title">Photos</div></div>
+        <button class="add-btn" onclick="openPhotoEditor()">＋ New Photo</button>
+        <div class="filter-row">
+          <input class="filter-input" id="photos-search" placeholder="Search photos…" oninput="renderPhotosTable()">
+          <input class="filter-input" id="photos-album" placeholder="Filter by album…" oninput="renderPhotosTable()" style="flex:0.5;">
+        </div>
+        <div class="data-table">
+          <div class="table-head photos-head"><span>Thumb</span><span>Caption</span><span>Album</span><span>Visible</span><span>Actions</span></div>
+          <div id="photos-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── PHOTO EDITOR ── -->
+      <div class="page" id="page-photo-editor">
+        <div class="editor-top">
+          <button class="back-btn" onclick="showPage('photos')">← Photos</button>
+          <span id="photo-editor-title" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;">New Photo</span>
+          <div class="spacer"></div>
+          <button class="save-btn" id="photo-save-btn" onclick="savePhoto()">💾 Save</button>
+        </div>
+        <div id="photo-editor-error" class="editor-error"></div>
+        <div class="editor-field" style="margin-bottom:14px;">
+          <label>Photo *</label>
+          <div id="photo-image-area"><button class="image-upload-btn" onclick="document.getElementById('photo-image-file').click()">⬆ Upload photo</button></div>
+          <input type="file" id="photo-image-file" accept="image/*" style="display:none" onchange="handleImageUpload('photo')">
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Caption</label><input type="text" id="ph-caption" /></div>
+          <div class="editor-field"><label>Alt Text</label><input type="text" id="ph-alt" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Album</label><input type="text" id="ph-album" placeholder="e.g. london-2024" /></div>
+          <div class="editor-field"><label>Date Taken</label><input type="date" id="ph-date" /></div>
+        </div>
+        <div class="meta-grid">
+          <div class="editor-field"><label>Tags</label>
+            <div class="tags-wrap" id="photo-tags-wrap" onclick="document.getElementById('photo-tag-input').focus()">
+              <input class="tag-input-hidden" id="photo-tag-input" placeholder="add tag…" onkeydown="handleTagKey(event,'photo')" />
+            </div>
+          </div>
+          <div class="editor-field"><label>Visible</label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
+              <input type="checkbox" id="ph-visible" checked> Show on site
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LINKS ── -->
+      <div class="page" id="page-links">
+        <div class="page-header"><div class="page-title">Links</div></div>
+        <button class="add-btn" onclick="openLinkEditor()">＋ New Link</button>
+        <div id="link-form-wrap" style="display:none;margin-bottom:16px;"></div>
+        <div class="data-table">
+          <div class="table-head links-head"><span>Label / URL</span><span>Category</span><span>Visible</span><span>Actions</span></div>
+          <div id="links-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── GUESTBOOK ── -->
+      <div class="page" id="page-guestbook">
+        <div class="page-header"><div class="page-title">Guestbook</div></div>
+        <div class="filter-row">
+          <select class="filter-select" id="gbook-filter" onchange="renderGuestbookTable()">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="data-table">
+          <div class="table-head gbook-head"><span>Name</span><span>Message</span><span>Date</span><span>Status</span><span>Actions</span></div>
+          <div id="gbook-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── PAGES ── -->
+      <div class="page" id="page-pages">
+        <div class="page-header">
+          <div class="page-title">Pages</div>
+          <div class="page-sub">Manage your nav and page structure.</div>
+        </div>
+        <button class="add-btn" id="add-page-btn" onclick="openPageForm(null)">＋ New Page</button>
+        <div id="page-form-wrap" style="display:none;margin-bottom:16px;"></div>
+        <div class="data-table">
+          <div class="table-head pages-head"><span>⠿</span><span>Name / Slug</span><span>Type</span><span>Visible</span><span>Actions</span></div>
+          <div id="pages-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── SECTIONS ── -->
+      <div class="page" id="page-sections">
+        <div class="page-header">
+          <div class="page-title">Sections</div>
+          <div class="page-sub">Build each page from stackable content blocks.</div>
+        </div>
+        <div class="sections-page-sel">
+          <select id="sections-page-select" onchange="loadSectionsForPage()">
+            <option value="">— Select a page —</option>
+          </select>
+          <button class="add-btn" style="margin:0;" id="add-section-btn" onclick="openSectionForm(null)" disabled>＋ Add Section</button>
+        </div>
+        <div id="section-form-wrap" style="display:none;margin-bottom:16px;"></div>
+        <div class="data-table">
+          <div class="table-head sections-head"><span>⠿</span><span>Title / Type</span><span>Type</span><span>Visible</span><span>Actions</span></div>
+          <div id="sections-table-body"><div class="empty-state">Select a page above to see its sections.</div></div>
+        </div>
+      </div>
+
+      <!-- ── USERS ── -->
+      <div class="page" id="page-users">
+        <div class="page-header"><div class="page-title">Users</div></div>
+        <div class="data-table">
+          <div class="table-head users-head"><span>Email</span><span>Requested</span><span>Status</span><span>Actions</span></div>
+          <div id="users-table-body"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><div class="page-title">Settings</div></div>
+        <div class="settings-grid">
+          <div class="editor-field"><label>Site Title</label><input type="text" id="set-site-title" /></div>
+          <div class="editor-field"><label>Site Tagline</label><input type="text" id="set-tagline" /></div>
+          <div class="editor-field" style="grid-column:1/-1;"><label>Marquee Text</label><input type="text" id="set-marquee" /></div>
+          <div class="editor-field"><label>Posts Per Page</label><input type="number" id="set-posts-per-page" min="1" max="50" /></div>
+          <div class="editor-field"><label>Guestbook Open</label>
+            <select id="set-gbook-open"><option value="true">Open</option><option value="false">Closed</option></select>
+          </div>
+        </div>
+        <button class="settings-save" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+
+
+      <!-- ── SEEDER ── -->
+      <div class="page" id="page-seeder">
+        <div class="page-header">
+          <div class="page-title">Import Data</div>
+          <div class="page-sub">One-time import of static content into Supabase. Safe to run multiple times — checks for existing data first.</div>
+        </div>
+        <div id="seeder-status" style="margin-bottom:20px;font-size:13px;color:var(--muted)"></div>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:600px;">
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Default Pages (tabs)</div>
+              <div style="font-size:12px;color:var(--muted)">home, about, life, pics, books, studies, music, guestbook, links, ballas</div>
+            </div>
+            <button class="save-btn" onclick="seedPages()">Import Pages</button>
+          </div>
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Books (33 titles)</div>
+              <div style="font-size:12px;color:var(--muted)">The Bible, Dune, 1984, and 30 others with ratings</div>
+            </div>
+            <button class="save-btn" onclick="seedBooks()">Import Books</button>
+          </div>
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Studies / Papers (6 papers)</div>
+              <div style="font-size:12px;color:var(--muted)">Existing research papers as posts on the studies page</div>
+            </div>
+            <button class="save-btn" onclick="seedStudies()">Import Studies</button>
+          </div>
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Photos (51 filenames)</div>
+              <div style="font-size:12px;color:var(--muted)">Local photos/ folder references — will show when hosted</div>
+            </div>
+            <button class="save-btn" onclick="seedPhotos()">Import Photos</button>
+          </div>
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Default Sections</div>
+              <div style="font-size:12px;color:var(--muted)">Wire each page to the right content type (posts, books, etc.)</div>
+            </div>
+            <button class="save-btn" onclick="seedSections()">Setup Sections</button>
+          </div>
+          <div class="stat-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="stat-label">Import Everything</div>
+              <div style="font-size:12px;color:var(--muted)">Run all imports in sequence</div>
+            </div>
+            <button class="save-btn" style="background:var(--green);" onclick="seedAll()">⬆ Import All</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+<input type="file" id="global-image-file" accept="image/*" style="display:none">
+
+<script>
+const SUPABASE_URL  = 'https://wzvmdpkiwwfhnisjudeo.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_jxJuEEzH3qwVFLFaw22r3w_0034g6op';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let allPages=[], allPosts=[], allBooks=[], allMusic=[], allPhotos=[], allLinks=[], allUsers=[], allGbook=[], allSections=[];
+let editingPostId=null, editingBookId=null, editingMusicId=null, editingPhotoId=null, editingLinkId=null, editingPageId=null, editingSectionId=null;
+let currentPostTags=[], currentBookTags=[], currentPhotoTags=[];
+let currentPostImage='', currentBookImage='', currentMusicImage='', currentPhotoUrl='';
+let bkRating=0, muRating=0;
+let dragSrcIdx=null;
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
+function switchAuthTab(t){
+  document.getElementById('form-signin').style.display=t==='signin'?'block':'none';
+  document.getElementById('form-signup').style.display=t==='signup'?'block':'none';
+  document.getElementById('tab-signin').classList.toggle('active',t==='signin');
+  document.getElementById('tab-signup').classList.toggle('active',t==='signup');
+}
+async function handleSignIn(){
+  const email=document.getElementById('si-email').value.trim();
+  const pass=document.getElementById('si-password').value;
+  const err=document.getElementById('signin-err');
+  err.style.display='none';
+  if(!email||!pass){err.textContent='Email and password required.';err.style.display='block';return;}
+  const btn=document.getElementById('signin-btn');
+  btn.disabled=true; btn.textContent='Signing in…';
+  const {error}=await db.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false; btn.textContent='Sign In';
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  bootApp();
+}
+
+async function handleSignUp(){
+  const email=document.getElementById('su-email').value.trim();
+  const err=document.getElementById('signup-err');
+  const msg=document.getElementById('signup-msg');
+  err.style.display='none'; msg.style.display='none';
+  if(!email){err.textContent='Email required';err.style.display='block';return;}
+  const existing=await db.from('pending_users').select('status').eq('email',email).maybeSingle();
+  if(existing.data){err.textContent='Already requested.';err.style.display='block';return;}
+  await db.from('pending_users').insert({email,status:'pending'});
+  msg.textContent='Request submitted! Check back soon.';
+  msg.style.display='block';
+}
+
+function bootApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('nav-users').style.display='flex';
+  db.auth.getUser().then(({data})=>{
+    if(data?.user)document.getElementById('user-email-display').textContent=data.user.email;
+  });
+  loadAll();
+}
+
+async function handleSignOut(){await db.auth.signOut();location.reload();}
+
+// Resume session on page reload
+db.auth.getSession().then(({data:{session}})=>{
+  if(session?.user) bootApp();
+});
+
+// ── LOAD ALL ─────────────────────────────────────────────────────────────────
+async function loadAll(){
+  await Promise.all([loadPages(),loadPosts(),loadBooks(),loadMusic(),loadPhotos(),loadLinks(),loadUsers(),loadGuestbook()]);
+  renderDashboard(); renderPostsTable(); renderBooksTable(); renderMusicTable();
+  renderPhotosTable(); renderLinksTable(); renderGuestbookTable(); renderUsersTable();
+  populatePageDropdowns(); populateSectionsPageSelect();
+}
+async function loadPages(){const{data}=await db.from('tabs').select('*').order('order');allPages=data||[];}
+async function loadPosts(){const{data}=await db.from('posts').select('*,tab:tabs(name,slug)').order('created_at',{ascending:false});allPosts=data||[];}
+async function loadBooks(){const{data}=await db.from('books').select('*').order('created_at',{ascending:false});allBooks=data||[];}
+async function loadMusic(){const{data}=await db.from('music').select('*').order('created_at',{ascending:false});allMusic=data||[];}
+async function loadPhotos(){const{data}=await db.from('photos').select('*').order('created_at',{ascending:false});allPhotos=data||[];}
+async function loadLinks(){const{data}=await db.from('links').select('*').order('order');allLinks=data||[];}
+async function loadUsers(){const{data}=await db.from('pending_users').select('*').order('created_at',{ascending:false});allUsers=data||[];}
+async function loadGuestbook(){const{data}=await db.from('guestbook_entries').select('*').order('created_at',{ascending:false});allGbook=data||[];}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);
+  if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(name.split('-')[0]))n.classList.add('active');});
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  document.getElementById('stat-posts').textContent=allPosts.filter(p=>p.status==='live').length;
+  document.getElementById('stat-books').textContent=allBooks.filter(b=>b.status==='published').length;
+  document.getElementById('stat-photos').textContent=allPhotos.filter(p=>p.visible).length;
+  document.getElementById('stat-gbook').textContent=allGbook.filter(g=>g.status==='pending').length+' pending';
+  const recent=allPosts.slice(0,5);
+  document.getElementById('dash-recent').innerHTML=recent.length?recent.map(p=>`
+    <div class="table-row" style="grid-template-columns:1fr 100px 70px 80px;gap:12px;">
+      <div><div class="row-title">${esc(p.title)}</div><div class="row-sub">${esc(p.tab?.name||'')}</div></div>
+      <div class="row-date">${fmtDate(p.created_at)}</div>
+      <div><span class="pill ${statusPill(p)}">${statusPill(p)}</span></div>
+      <div class="row-actions"><button class="icon-btn" onclick="openPostEditor('${p.id}')">✏️</button></div>
+    </div>`).join(''):'<div class="empty-state">No posts yet.</div>';
+}
+
+// ── POSTS ─────────────────────────────────────────────────────────────────────
+function statusPill(p){if(!p.published&&p.status!=='live')return'draft';if(p.status==='hidden')return'hidden';return'live';}
+function renderPostsTable(){
+  const q=(document.getElementById('posts-search')?.value||'').toLowerCase();
+  const pg=document.getElementById('posts-filter-page')?.value||'';
+  const st=document.getElementById('posts-filter-status')?.value||'';
+  const rows=allPosts.filter(p=>{
+    if(q&&!p.title?.toLowerCase().includes(q))return false;
+    if(pg&&p.tab_id!==pg)return false;
+    if(st&&statusPill(p)!==st)return false;
+    return true;
+  });
+  const body=document.getElementById('posts-table-body');
+  body.innerHTML=rows.length?rows.map(p=>`
+    <div class="table-row posts-row">
+      <div><div class="row-title">${esc(p.title)}</div><div class="row-sub">${esc(p.tab?.name||'—')}</div></div>
+      <div class="row-muted">${esc(p.tab?.name||'—')}</div>
+      <div class="row-date">${fmtDate(p.created_at)}</div>
+      <div><span class="pill ${statusPill(p)}" onclick="quickPostStatus('${p.id}',event)">${statusPill(p)}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openPostEditor('${p.id}')">✏️</button>
+        <button class="icon-btn" onclick="deletePost('${p.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No posts found.</div>';
+}
+
+async function quickPostStatus(id,e){
+  const p=allPosts.find(x=>x.id===id); if(!p)return;
+  const next=statusPill(p)==='live'?'draft':statusPill(p)==='draft'?'live':'draft';
+  await db.from('posts').update({status:next,published:next==='live'}).eq('id',id);
+  await loadPosts(); renderPostsTable(); renderDashboard();
+  toast('Status → '+next,'success');
+}
+async function deletePost(id){
+  if(!confirm('Delete this post?'))return;
+  await db.from('posts').delete().eq('id',id);
+  await loadPosts(); renderPostsTable(); renderDashboard(); toast('Post deleted');
+}
+
+function openPostEditor(id){
+  editingPostId=id||null;
+  currentPostTags=[]; currentPostImage='';
+  const p=id?allPosts.find(x=>x.id===id):null;
+  document.getElementById('post-editor-title').textContent=p?'Edit Post':'New Post';
+  document.getElementById('ed-title').value=p?.title||'';
+  document.getElementById('ed-subtitle').value=p?.subtitle||'';
+  document.getElementById('ed-excerpt').value=p?.excerpt||'';
+  document.getElementById('ed-content').value=p?.content||'';
+  document.getElementById('ed-status').value=p?.status||'draft';
+  document.getElementById('ed-pinned').checked=p?.pinned||false;
+  if(p?.tab_id)document.getElementById('ed-tab').value=p.tab_id;
+  currentPostTags=p?.tags||[];
+  renderTagChips('post');
+  showImagePreview('post',p?.image_url||'');
+  document.getElementById('post-editor-error').style.display='none';
+  showPage('post-editor');
+}
+async function savePost(){
+  const title=document.getElementById('ed-title').value.trim();
+  const tabId=document.getElementById('ed-tab').value;
+  const statusVal=document.getElementById('ed-status').value;
+  const err=document.getElementById('post-editor-error');
+  if(!title){err.textContent='Title is required';err.style.display='block';return;}
+  if(!tabId){err.textContent='Please select a page';err.style.display='block';return;}
+  err.style.display='none';
+  const btn=document.getElementById('post-save-btn');
+  btn.disabled=true;
+  const payload={
+    title,
+    subtitle:document.getElementById('ed-subtitle').value||null,
+    excerpt:document.getElementById('ed-excerpt').value||null,
+    content:document.getElementById('ed-content').value||null,
+    tab_id:tabId,
+    published:statusVal==='live',
+    status:statusVal,
+    image_url:currentPostImage||null,
+    tags:currentPostTags,
+    pinned:document.getElementById('ed-pinned').checked
+  };
+  let error;
+  if(editingPostId){({error}=await db.from('posts').update(payload).eq('id',editingPostId));}
+  else{({error}=await db.from('posts').insert(payload));}
+  btn.disabled=false;
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  await loadPosts(); renderPostsTable(); renderDashboard();
+  toast(editingPostId?'Post updated!':'Post created!','success');
+  showPage('posts');
+}
+
+// ── BOOKS ─────────────────────────────────────────────────────────────────────
+function renderBooksTable(){
+  const q=(document.getElementById('books-search')?.value||'').toLowerCase();
+  const st=document.getElementById('books-filter-status')?.value||'';
+  const rows=allBooks.filter(b=>{
+    if(q&&!b.title?.toLowerCase().includes(q)&&!b.author?.toLowerCase().includes(q))return false;
+    if(st&&b.status!==st)return false; return true;
+  });
+  document.getElementById('books-table-body').innerHTML=rows.length?rows.map(b=>`
+    <div class="table-row books-row">
+      <div><div class="row-title">${esc(b.title)}</div><div class="row-sub">${esc(b.author)}</div></div>
+      <div class="row-muted">${b.year_read||'—'}</div>
+      <div class="row-muted">${'★'.repeat(b.rating||0)}</div>
+      <div><span class="pill ${b.status}">${b.status}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openBookEditor('${b.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteBook('${b.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No books yet.</div>';
+}
+function openBookEditor(id){
+  editingBookId=id||null; currentBookTags=[]; currentBookImage=''; bkRating=0;
+  const b=id?allBooks.find(x=>x.id===id):null;
+  document.getElementById('book-editor-title').textContent=b?'Edit Book':'New Book';
+  document.getElementById('bk-title').value=b?.title||'';
+  document.getElementById('bk-author').value=b?.author||'';
+  document.getElementById('bk-year').value=b?.year_read||'';
+  document.getElementById('bk-status').value=b?.status||'published';
+  document.getElementById('bk-review').value=b?.review||'';
+  document.getElementById('bk-buy-link').value=b?.buy_link||'';
+  currentBookTags=b?.tags||[]; renderTagChips('book');
+  bkRating=b?.rating||0; renderStars('bk',bkRating);
+  showImagePreview('book',b?.cover_url||'');
+  document.getElementById('book-editor-error').style.display='none';
+  showPage('book-editor');
+}
+async function saveBook(){
+  const title=document.getElementById('bk-title').value.trim();
+  const author=document.getElementById('bk-author').value.trim();
+  const err=document.getElementById('book-editor-error');
+  if(!title||!author){err.textContent='Title and author required';err.style.display='block';return;}
+  err.style.display='none';
+  const btn=document.getElementById('book-save-btn'); btn.disabled=true;
+  const payload={title,author,
+    year_read:parseInt(document.getElementById('bk-year').value)||null,
+    status:document.getElementById('bk-status').value,
+    review:document.getElementById('bk-review').value||null,
+    buy_link:document.getElementById('bk-buy-link').value||null,
+    cover_url:currentBookImage||null,
+    tags:currentBookTags,rating:bkRating||null};
+  let error;
+  if(editingBookId){({error}=await db.from('books').update(payload).eq('id',editingBookId));}
+  else{({error}=await db.from('books').insert(payload));}
+  btn.disabled=false;
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  await loadBooks(); renderBooksTable(); renderDashboard();
+  toast(editingBookId?'Book updated!':'Book added!','success'); showPage('books');
+}
+async function deleteBook(id){if(!confirm('Delete this book?'))return;await db.from('books').delete().eq('id',id);await loadBooks();renderBooksTable();toast('Book deleted');}
+
+// ── MUSIC ─────────────────────────────────────────────────────────────────────
+function renderMusicTable(){
+  const q=(document.getElementById('music-search')?.value||'').toLowerCase();
+  const rows=allMusic.filter(m=>!q||m.title?.toLowerCase().includes(q)||m.artist?.toLowerCase().includes(q));
+  document.getElementById('music-table-body').innerHTML=rows.length?rows.map(m=>`
+    <div class="table-row music-row">
+      <div><div class="row-title">${esc(m.title)}</div><div class="row-sub">${esc(m.artist)}</div></div>
+      <div class="row-muted">${esc(m.type)}</div>
+      <div class="row-muted">${'★'.repeat(m.rating||0)}</div>
+      <div><span class="pill ${m.status}">${m.status}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openMusicEditor('${m.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteMusic('${m.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No music yet.</div>';
+}
+function openMusicEditor(id){
+  editingMusicId=id||null; currentMusicImage=''; muRating=0;
+  const m=id?allMusic.find(x=>x.id===id):null;
+  document.getElementById('music-editor-title').textContent=m?'Edit Entry':'New Music Entry';
+  document.getElementById('mu-title').value=m?.title||'';
+  document.getElementById('mu-artist').value=m?.artist||'';
+  document.getElementById('mu-type').value=m?.type||'album';
+  document.getElementById('mu-year').value=m?.year||'';
+  document.getElementById('mu-status').value=m?.status||'published';
+  document.getElementById('mu-embed').value=m?.embed_url||'';
+  document.getElementById('mu-notes').value=m?.notes||'';
+  muRating=m?.rating||0; renderStars('mu',muRating);
+  showImagePreview('music',m?.cover_url||'');
+  document.getElementById('music-editor-error').style.display='none';
+  showPage('music-editor');
+}
+async function saveMusic(){
+  const title=document.getElementById('mu-title').value.trim();
+  const artist=document.getElementById('mu-artist').value.trim();
+  const err=document.getElementById('music-editor-error');
+  if(!title||!artist){err.textContent='Title and artist required';err.style.display='block';return;}
+  err.style.display='none';
+  const btn=document.getElementById('music-save-btn'); btn.disabled=true;
+  const payload={title,artist,type:document.getElementById('mu-type').value,
+    year:parseInt(document.getElementById('mu-year').value)||null,
+    status:document.getElementById('mu-status').value,
+    embed_url:document.getElementById('mu-embed').value||null,
+    notes:document.getElementById('mu-notes').value||null,
+    cover_url:currentMusicImage||null,rating:muRating||null};
+  let error;
+  if(editingMusicId){({error}=await db.from('music').update(payload).eq('id',editingMusicId));}
+  else{({error}=await db.from('music').insert(payload));}
+  btn.disabled=false;
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  await loadMusic(); renderMusicTable(); renderDashboard();
+  toast(editingMusicId?'Updated!':'Added!','success'); showPage('music');
+}
+async function deleteMusic(id){if(!confirm('Delete?'))return;await db.from('music').delete().eq('id',id);await loadMusic();renderMusicTable();toast('Deleted');}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────────────
+function renderPhotosTable(){
+  const q=(document.getElementById('photos-search')?.value||'').toLowerCase();
+  const alb=(document.getElementById('photos-album')?.value||'').toLowerCase();
+  const rows=allPhotos.filter(p=>{
+    if(q&&!p.caption?.toLowerCase().includes(q))return false;
+    if(alb&&!p.album?.toLowerCase().includes(alb))return false; return true;
+  });
+  document.getElementById('photos-table-body').innerHTML=rows.length?rows.map(p=>`
+    <div class="table-row photos-row">
+      <div>${p.url?`<img class="photo-thumb" src="${esc(p.url)}" alt="">`:'—'}</div>
+      <div><div class="row-title">${esc(p.caption||'(no caption)')}</div><div class="row-sub">${esc(p.alt_text||'')}</div></div>
+      <div class="row-muted">${esc(p.album||'—')}</div>
+      <div><span class="pill ${p.visible?'published':'hidden'}">${p.visible?'visible':'hidden'}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openPhotoEditor('${p.id}')">✏️</button>
+        <button class="icon-btn" onclick="deletePhoto('${p.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No photos yet.</div>';
+}
+function openPhotoEditor(id){
+  editingPhotoId=id||null; currentPhotoUrl=''; currentPhotoTags=[];
+  const p=id?allPhotos.find(x=>x.id===id):null;
+  document.getElementById('photo-editor-title').textContent=p?'Edit Photo':'New Photo';
+  document.getElementById('ph-caption').value=p?.caption||'';
+  document.getElementById('ph-alt').value=p?.alt_text||'';
+  document.getElementById('ph-album').value=p?.album||'';
+  document.getElementById('ph-date').value=p?.taken_at||'';
+  document.getElementById('ph-visible').checked=p?.visible!==false;
+  currentPhotoTags=p?.tags||[]; renderTagChips('photo');
+  currentPhotoUrl=p?.url||'';
+  showImagePreview('photo',p?.url||'');
+  document.getElementById('photo-editor-error').style.display='none';
+  showPage('photo-editor');
+}
+async function savePhoto(){
+  const err=document.getElementById('photo-editor-error');
+  if(!currentPhotoUrl){err.textContent='Please upload a photo';err.style.display='block';return;}
+  err.style.display='none';
+  const btn=document.getElementById('photo-save-btn'); btn.disabled=true;
+  const payload={url:currentPhotoUrl,
+    caption:document.getElementById('ph-caption').value||null,
+    alt_text:document.getElementById('ph-alt').value||null,
+    album:document.getElementById('ph-album').value||null,
+    taken_at:document.getElementById('ph-date').value||null,
+    visible:document.getElementById('ph-visible').checked,
+    tags:currentPhotoTags};
+  let error;
+  if(editingPhotoId){({error}=await db.from('photos').update(payload).eq('id',editingPhotoId));}
+  else{({error}=await db.from('photos').insert(payload));}
+  btn.disabled=false;
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  await loadPhotos(); renderPhotosTable(); renderDashboard();
+  toast(editingPhotoId?'Photo updated!':'Photo added!','success'); showPage('photos');
+}
+async function deletePhoto(id){if(!confirm('Delete?'))return;await db.from('photos').delete().eq('id',id);await loadPhotos();renderPhotosTable();toast('Deleted');}
+
+// ── LINKS ─────────────────────────────────────────────────────────────────────
+function renderLinksTable(){
+  document.getElementById('links-table-body').innerHTML=allLinks.length?allLinks.map(l=>`
+    <div class="table-row links-row">
+      <div><div class="row-title">${esc(l.label)}</div><div class="row-sub">${esc(l.url)}</div></div>
+      <div class="row-muted">${esc(l.category||'—')}</div>
+      <div><span class="pill ${l.visible?'published':'hidden'}">${l.visible?'visible':'hidden'}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openLinkEditor('${l.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteLink('${l.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No links yet.</div>';
+}
+function openLinkEditor(id){
+  editingLinkId=id||null;
+  const l=id?allLinks.find(x=>x.id===id):null;
+  document.getElementById('add-page-btn') && null;
+  const wrap=document.getElementById('link-form-wrap');
+  wrap.style.display='block';
+  wrap.innerHTML=`
+    <div class="pages-form">
+      <div class="pages-form-title">${l?'Edit Link':'New Link'}</div>
+      <div class="pages-form-fields" style="grid-template-columns:1fr 1fr 1fr 100px;">
+        <div class="editor-field"><label>Label *</label><input type="text" id="lk-label" value="${esc(l?.label||'')}" placeholder="My Blog" /></div>
+        <div class="editor-field"><label>URL *</label><input type="text" id="lk-url" value="${esc(l?.url||'')}" placeholder="https://…" /></div>
+        <div class="editor-field"><label>Category</label><input type="text" id="lk-cat" value="${esc(l?.category||'')}" placeholder="blogs" /></div>
+        <div class="editor-field"><label>Visible</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:10px 0;"><input type="checkbox" id="lk-visible" ${l?.visible!==false?'checked':''}> Yes</label></div>
+      </div>
+      <div class="editor-field" style="margin-bottom:12px;"><label>Description</label><input type="text" id="lk-desc" value="${esc(l?.description||'')}" /></div>
+      <div class="form-actions">
+        <button class="form-save" onclick="saveLink()">✓ Save</button>
+        <button class="form-cancel" onclick="closeLinkForm()">✕ Cancel</button>
+      </div>
+    </div>`;
+}
+function closeLinkForm(){editingLinkId=null;document.getElementById('link-form-wrap').style.display='none';}
+async function saveLink(){
+  const label=document.getElementById('lk-label').value.trim();
+  const url=document.getElementById('lk-url').value.trim();
+  if(!label||!url){toast('Label and URL required','error');return;}
+  const payload={label,url,category:document.getElementById('lk-cat').value||null,
+    description:document.getElementById('lk-desc').value||null,
+    visible:document.getElementById('lk-visible').checked};
+  let error;
+  if(editingLinkId){({error}=await db.from('links').update(payload).eq('id',editingLinkId));}
+  else{({error}=await db.from('links').insert({...payload,order:allLinks.length}));}
+  if(error){toast('Error: '+error.message,'error');return;}
+  await loadLinks(); renderLinksTable(); closeLinkForm();
+  toast(editingLinkId?'Link updated!':'Link added!','success');
+}
+async function deleteLink(id){if(!confirm('Delete?'))return;await db.from('links').delete().eq('id',id);await loadLinks();renderLinksTable();toast('Deleted');}
+
+// ── GUESTBOOK ─────────────────────────────────────────────────────────────────
+function renderGuestbookTable(){
+  const st=document.getElementById('gbook-filter')?.value||'';
+  const rows=allGbook.filter(g=>!st||g.status===st);
+  document.getElementById('gbook-table-body').innerHTML=rows.length?rows.map(g=>`
+    <div class="table-row gbook-row">
+      <div class="row-title">${esc(g.name)}</div>
+      <div class="row-muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(g.message)}</div>
+      <div class="row-date">${fmtDate(g.created_at)}</div>
+      <div><span class="pill ${g.status}">${g.status}</span></div>
+      <div class="row-actions">
+        ${g.status!=='approved'?`<button class="approve-btn" onclick="setGbookStatus('${g.id}','approved')">✓</button>`:''}
+        ${g.status!=='rejected'?`<button class="reject-btn" onclick="setGbookStatus('${g.id}','rejected')">✕</button>`:''}
+        <button class="icon-btn" onclick="deleteGbook('${g.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No entries.</div>';
+}
+async function setGbookStatus(id,status){
+  await db.from('guestbook_entries').update({status}).eq('id',id);
+  await loadGuestbook(); renderGuestbookTable(); renderDashboard();
+  toast(status==='approved'?'Approved!':'Rejected','success');
+}
+async function deleteGbook(id){if(!confirm('Delete?'))return;await db.from('guestbook_entries').delete().eq('id',id);await loadGuestbook();renderGuestbookTable();toast('Deleted');}
+
+// ── PAGES ─────────────────────────────────────────────────────────────────────
+function renderPagesTable(){
+  const body=document.getElementById('pages-table-body');
+  body.innerHTML=allPages.length?allPages.map((t,i)=>`
+    <div class="table-row pages-row" draggable="true" data-idx="${i}"
+      ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})" ondrop="dragDrop(event,${i})" ondragend="dragEnd()">
+      <div class="drag-handle">⠿</div>
+      <div><div class="row-title">${esc(t.name)}</div><div class="row-sub">/${esc(t.slug)}</div></div>
+      <div class="row-muted">${esc(t.page_type||'standard')}</div>
+      <div>
+        <span class="pill ${t.visible?'published':'hidden'}" style="cursor:pointer" onclick="togglePageVisible('${t.id}',${!t.visible})">${t.visible?'✓ visible':'✗ hidden'}</span>
+      </div>
+      <div class="row-actions">
+        <button class="icon-btn" title="Edit" onclick="editPageForm('${t.id}')">✏️</button>
+        <button class="icon-btn" title="${t.visible?'Hide from nav':'Show in nav'}" onclick="togglePageVisible('${t.id}',${!t.visible})">${'${t.visible?"👁 hide":"👁 show"}'}</button>
+        <button class="icon-btn" title="Delete" onclick="deletePage('${t.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No pages yet.</div>';
+}
+function dragStart(i){dragSrcIdx=i;}
+function dragOver(e,i){e.preventDefault();document.querySelectorAll('.pages-row').forEach((r,ri)=>r.classList.toggle('row-drag-over',ri===i&&i!==dragSrcIdx));}
+function dragEnd(){document.querySelectorAll('.pages-row').forEach(r=>r.classList.remove('row-drag-over'));}
+async function dragDrop(e,targetIdx){
+  e.preventDefault(); if(dragSrcIdx===null||dragSrcIdx===targetIdx)return;
+  const moved=allPages.splice(dragSrcIdx,1)[0]; allPages.splice(targetIdx,0,moved);
+  for(let i=0;i<allPages.length;i++)await db.from('tabs').update({order:i}).eq('id',allPages[i].id);
+  renderPagesTable(); populatePageDropdowns(); toast('Order saved','success');
+}
+function populatePageDropdowns(){
+  const sel=document.getElementById('ed-tab');
+  if(sel)sel.innerHTML=allPages.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  const fsel=document.getElementById('posts-filter-page');
+  if(fsel)fsel.innerHTML='<option value="">All pages</option>'+allPages.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+}
+function slugify(s){return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function openPageForm(page){
+  editingPageId=page?page.id:null;
+  document.getElementById('add-page-btn').style.display='none';
+  const wrap=document.getElementById('page-form-wrap');
+  wrap.style.display='block';
+  wrap.innerHTML=`
+    <div class="pages-form">
+      <div class="pages-form-title">${page?'Edit Page':'New Page'}</div>
+      <div class="pages-form-fields">
+        <div class="editor-field"><label>Name</label><input type="text" id="page-name-input" value="${esc(page?.name||'')}" oninput="if(!${!!page})document.getElementById('page-slug-input').value=slugify(this.value)" /></div>
+        <div class="editor-field"><label>Slug</label><input type="text" id="page-slug-input" value="${esc(page?.slug||'')}" /></div>
+        <div class="editor-field"><label>Type</label>
+          <select id="page-type-input">
+            <option value="standard" ${page?.page_type==='standard'?'selected':''}>Standard</option>
+            <option value="home" ${page?.page_type==='home'?'selected':''}>Home</option>
+            <option value="guestbook" ${page?.page_type==='guestbook'?'selected':''}>Guestbook</option>
+            <option value="links" ${page?.page_type==='links'?'selected':''}>Links</option>
+          </select>
+        </div>
+        <div class="editor-field"><label>Visible in Nav</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:10px 0;"><input type="checkbox" id="page-visible-input" ${page?.visible!==false?'checked':''}> Show</label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="form-save" onclick="savePage()">✓ Save</button>
+        <button class="form-cancel" onclick="closePageForm()">✕ Cancel</button>
+      </div>
+    </div>`;
+}
+function editPageForm(id){openPageForm(allPages.find(t=>t.id===id));}
+function closePageForm(){
+  editingPageId=null;
+  document.getElementById('page-form-wrap').style.display='none';
+  document.getElementById('page-form-wrap').innerHTML='';
+  document.getElementById('add-page-btn').style.display='inline-flex';
+}
+async function savePage(){
+  const name=document.getElementById('page-name-input').value.trim();
+  const slug=slugify(document.getElementById('page-slug-input').value);
+  const page_type=document.getElementById('page-type-input').value;
+  const visible=document.getElementById('page-visible-input').checked;
+  if(!name||!slug){toast('Name and slug required','error');return;}
+  let error;
+  if(editingPageId){({error}=await db.from('tabs').update({name,slug,page_type,visible}).eq('id',editingPageId));}
+  else{({error}=await db.from('tabs').insert({name,slug,page_type,visible,order:allPages.length}));}
+  if(error){toast('Error: '+error.message,'error');return;}
+  await loadPages(); renderPagesTable(); populatePageDropdowns(); closePageForm(); populateSectionsPageSelect();
+  toast(editingPageId?'Page updated!':'Page created!','success');
+}
+async function deletePage(id){
+  if(!confirm('Delete this page and all its sections?'))return;
+  await db.from('tabs').delete().eq('id',id);
+  await loadAll(); toast('Page deleted');
+}
+
+// ── SECTIONS ──────────────────────────────────────────────────────────────────
+function populateSectionsPageSelect(){
+  const sel=document.getElementById('sections-page-select');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Select a page —</option>'+allPages.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+async function loadSectionsForPage(){
+  const tabId=document.getElementById('sections-page-select').value;
+  document.getElementById('add-section-btn').disabled=!tabId;
+  if(!tabId){document.getElementById('sections-table-body').innerHTML='<div class="empty-state">Select a page above.</div>';return;}
+  const{data}=await db.from('sections').select('*').eq('tab_id',tabId).order('order');
+  allSections=data||[];
+  renderSectionsTable();
+}
+function renderSectionsTable(){
+  const body=document.getElementById('sections-table-body');
+  body.innerHTML=allSections.length?allSections.map((s,i)=>`
+    <div class="table-row sections-row" draggable="true" data-idx="${i}"
+      ondragstart="dragSectionStart(${i})" ondragover="dragSectionOver(event,${i})" ondrop="dragSectionDrop(event,${i})" ondragend="dragSectionEnd()">
+      <div class="drag-handle">⠿</div>
+      <div><div class="row-title">${esc(s.title||'(untitled)')}</div><div class="row-sub">${esc(JSON.stringify(s.config).slice(0,60))}…</div></div>
+      <div><span class="section-type-badge">${esc(s.type)}</span></div>
+      <div><span class="pill ${s.visible?'published':'hidden'}">${s.visible?'yes':'no'}</span></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="openSectionForm('${s.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteSection('${s.id}')">🗑️</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No sections yet. Add one above.</div>';
+}
+let dragSecSrcIdx=null;
+function dragSectionStart(i){dragSecSrcIdx=i;}
+function dragSectionOver(e,i){e.preventDefault();}
+function dragSectionEnd(){}
+async function dragSectionDrop(e,targetIdx){
+  e.preventDefault(); if(dragSecSrcIdx===null||dragSecSrcIdx===targetIdx)return;
+  const moved=allSections.splice(dragSecSrcIdx,1)[0]; allSections.splice(targetIdx,0,moved);
+  for(let i=0;i<allSections.length;i++)await db.from('sections').update({order:i}).eq('id',allSections[i].id);
+  renderSectionsTable(); toast('Section order saved','success');
+}
+function openSectionForm(id){
+  editingSectionId=id||null;
+  const s=id?allSections.find(x=>x.id===id):null;
+  const tabId=document.getElementById('sections-page-select').value;
+  const wrap=document.getElementById('section-form-wrap');
+  wrap.style.display='block';
+  wrap.innerHTML=`
+    <div class="section-form">
+      <div class="pages-form-title">${s?'Edit Section':'New Section'}</div>
+      <div class="meta-grid">
+        <div class="editor-field"><label>Section Title <span style="opacity:0.4;font-size:9px">(optional heading)</span></label><input type="text" id="sec-title" value="${esc(s?.title||'')}" /></div>
+        <div class="editor-field"><label>Type *</label>
+          <select id="sec-type" onchange="renderSectionConfigFields()">
+            <option value="hero" ${s?.type==='hero'?'selected':''}>Hero</option>
+            <option value="posts" ${s?.type==='posts'?'selected':''}>Posts Feed</option>
+            <option value="books" ${s?.type==='books'?'selected':''}>Books Grid</option>
+            <option value="photos" ${s?.type==='photos'?'selected':''}>Photo Grid</option>
+            <option value="music" ${s?.type==='music'?'selected':''}>Music</option>
+            <option value="links" ${s?.type==='links'?'selected':''}>Links</option>
+            <option value="text" ${s?.type==='text'?'selected':''}>Text Block</option>
+            <option value="guestbook" ${s?.type==='guestbook'?'selected':''}>Guestbook</option>
+          </select>
+        </div>
+      </div>
+      <div id="sec-config-fields" style="margin-bottom:12px;"></div>
+      <div class="editor-field" style="margin-bottom:12px;"><label>Visible</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0;"><input type="checkbox" id="sec-visible" ${s?.visible!==false?'checked':''}> Show on page</label>
+      </div>
+      <div class="form-actions">
+        <button class="form-save" onclick="saveSection('${tabId}')">✓ Save</button>
+        <button class="form-cancel" onclick="closeSectionForm()">✕ Cancel</button>
+      </div>
+    </div>`;
+  // Store existing config for population
+  window._editingSecConfig = s?.config||{};
+  renderSectionConfigFields();
+}
+function renderSectionConfigFields(){
+  const type=document.getElementById('sec-type')?.value;
+  const cfg=window._editingSecConfig||{};
+  const el=document.getElementById('sec-config-fields');
+  if(!el)return;
+  const fi=(id,label,val,placeholder='')=>`<div class="editor-field"><label>${label}</label><input type="text" id="scf-${id}" value="${esc(String(val||''))}" placeholder="${placeholder}" /></div>`;
+  const templates={
+    hero:`<div class="meta-grid">${fi('subtitle','Subtitle',cfg.subtitle,'A place on the internet…')}${fi('show_counter','Show Hit Counter (true/false)',cfg.show_hit_counter,'true')}</div>`,
+    posts:`<div class="meta-grid">${fi('tag','Filter by Tag',cfg.tag,'leave blank for all')}${fi('limit','How Many to Show',cfg.limit||10,'10')}</div>`,
+    books:`<div class="meta-grid">${fi('limit','How Many to Show',cfg.limit||12,'12')}${fi('sort','Sort',cfg.sort||'date_desc','date_desc')}</div>`,
+    photos:`<div class="meta-grid">${fi('album','Filter by Album',cfg.album,'leave blank for all')}${fi('limit','How Many to Show',cfg.limit||24,'24')}</div>`,
+    music:`<div class="meta-grid">${fi('limit','How Many to Show',cfg.limit||12,'12')}${fi('type','Filter by Type',cfg.type,'album, ep, etc.')}</div>`,
+    links:`<div class="meta-grid">${fi('category','Filter by Category',cfg.category,'leave blank for all')}${fi('limit','How Many to Show',cfg.limit||50,'50')}</div>`,
+    text:`<div class="editor-field"><label>Content (Markdown)</label><textarea class="md-textarea" id="scf-content" style="min-height:120px;">${esc(cfg.content||'')}</textarea></div>`,
+    guestbook:`<div class="meta-grid">${fi('limit','Entries to Show',cfg.limit||20,'20')}${fi('form_open','Form Open (true/false)',cfg.form_open!==false?'true':'false','true')}</div>`,
+  };
+  el.innerHTML=templates[type]||'';
+}
+function getSectionConfig(){
+  const type=document.getElementById('sec-type')?.value;
+  if(type==='text')return{content:document.getElementById('scf-content')?.value||''};
+  const cfg={};
+  document.querySelectorAll('[id^="scf-"]').forEach(el=>{
+    const key=el.id.replace('scf-','');
+    const val=el.value.trim();
+    if(val)cfg[key]=isNaN(val)?val:Number(val);
+  });
+  return cfg;
+}
+function closeSectionForm(){editingSectionId=null;document.getElementById('section-form-wrap').style.display='none';}
+async function saveSection(tabId){
+  const type=document.getElementById('sec-type').value;
+  if(!tabId){toast('No page selected','error');return;}
+  const payload={tab_id:tabId,type,title:document.getElementById('sec-title').value||null,
+    visible:document.getElementById('sec-visible').checked,config:getSectionConfig()};
+  let error;
+  if(editingSectionId){({error}=await db.from('sections').update(payload).eq('id',editingSectionId));}
+  else{({error}=await db.from('sections').insert({...payload,order:allSections.length}));}
+  if(error){toast('Error: '+error.message,'error');return;}
+  closeSectionForm(); await loadSectionsForPage();
+  toast(editingSectionId?'Section updated!':'Section added!','success');
+}
+async function deleteSection(id){
+  if(!confirm('Delete this section?'))return;
+  await db.from('sections').delete().eq('id',id);
+  await loadSectionsForPage(); toast('Section deleted');
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+async function loadSettings(){
+  const{data}=await db.from('site_settings').select('*');
+  if(!data)return;
+  const map=Object.fromEntries(data.map(r=>[r.key,r.value]));
+  document.getElementById('set-site-title').value=map.site_title||'';
+  document.getElementById('set-tagline').value=map.site_tagline||'';
+  document.getElementById('set-marquee').value=map.marquee_text||'';
+  document.getElementById('set-posts-per-page').value=map.posts_per_page||10;
+  document.getElementById('set-gbook-open').value=map.guestbook_open||'true';
+}
+async function saveSettings(){
+  const pairs=[
+    ['site_title',document.getElementById('set-site-title').value],
+    ['site_tagline',document.getElementById('set-tagline').value],
+    ['marquee_text',document.getElementById('set-marquee').value],
+    ['posts_per_page',document.getElementById('set-posts-per-page').value],
+    ['guestbook_open',document.getElementById('set-gbook-open').value],
+  ];
+  for(const[key,value]of pairs){
+    await db.from('site_settings').upsert({key,value},{onConflict:'key'});
+  }
+  toast('Settings saved!','success');
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────────────
+function renderUsersTable(){
+  const body=document.getElementById('users-table-body'); if(!body)return;
+  body.innerHTML=allUsers.length?allUsers.map(u=>`
+    <div class="table-row users-row">
+      <div class="row-title">${esc(u.email)}</div>
+      <div class="row-date">${fmtDate(u.created_at)}</div>
+      <div><span class="pill ${u.status}">${u.status}</span></div>
+      <div class="row-actions">
+        ${u.status!=='approved'?`<button class="approve-btn" onclick="setUserStatus('${u.id}','approved')">✓ Approve</button>`:''}
+        ${u.status!=='rejected'?`<button class="reject-btn" onclick="setUserStatus('${u.id}','rejected')">✕ Reject</button>`:''}
+      </div>
+    </div>`).join(''):'<div class="empty-state">No access requests.</div>';
+}
+async function setUserStatus(id,status){
+  await db.from('pending_users').update({status}).eq('id',id);
+  await loadUsers(); renderUsersTable(); toast(status==='approved'?'Approved!':'Rejected');
+}
+
+// ── IMAGE UPLOAD ──────────────────────────────────────────────────────────────
+async function handleImageUpload(context){
+  const fileInput=document.getElementById(context+'-image-file');
+  const file=fileInput.files[0]; if(!file)return;
+  const ext=file.name.split('.').pop();
+  const path=`${context}s/${Date.now()}.${ext}`;
+  const{data,error}=await db.storage.from('post-images').upload(path,file);
+  if(error){toast('Upload failed: '+error.message,'error');return;}
+  const{data:{publicUrl}}=db.storage.from('post-images').getPublicUrl(data.path);
+  if(context==='post')currentPostImage=publicUrl;
+  else if(context==='book')currentBookImage=publicUrl;
+  else if(context==='music')currentMusicImage=publicUrl;
+  else if(context==='photo')currentPhotoUrl=publicUrl;
+  showImagePreview(context,publicUrl);
+  toast('Image uploaded!','success');
+}
+function showImagePreview(context,url){
+  const area=document.getElementById(context+'-image-area'); if(!area)return;
+  if(!url){area.innerHTML=`<button class="image-upload-btn" onclick="document.getElementById('${context}-image-file').click()">⬆ Upload image</button>`;return;}
+  area.innerHTML=`<div class="image-preview-wrap"><img src="${esc(url)}" alt="preview"><button class="image-remove" onclick="clearImage('${context}')">✕</button></div>`;
+}
+function clearImage(context){
+  if(context==='post')currentPostImage='';
+  else if(context==='book')currentBookImage='';
+  else if(context==='music')currentMusicImage='';
+  else if(context==='photo')currentPhotoUrl='';
+  showImagePreview(context,'');
+}
+
+// ── TAGS ──────────────────────────────────────────────────────────────────────
+function handleTagKey(e,context){
+  if(e.key!=='Enter'&&e.key!==',')return;
+  e.preventDefault();
+  const val=e.target.value.trim(); if(!val)return;
+  if(context==='post')currentPostTags.push(val);
+  else if(context==='book')currentBookTags.push(val);
+  else if(context==='photo')currentPhotoTags.push(val);
+  e.target.value=''; renderTagChips(context);
+}
+function renderTagChips(context){
+  const tags=context==='post'?currentPostTags:context==='book'?currentBookTags:currentPhotoTags;
+  const wrap=document.getElementById(context+'-tags-wrap'); if(!wrap)return;
+  const input=document.getElementById(context+'-tag-input');
+  wrap.innerHTML='';
+  tags.forEach((t,i)=>{
+    const chip=document.createElement('span'); chip.className='tag-chip';
+    chip.innerHTML=`${esc(t)}<button onclick="removeTag('${context}',${i})">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+function removeTag(context,i){
+  if(context==='post')currentPostTags.splice(i,1);
+  else if(context==='book')currentBookTags.splice(i,1);
+  else if(context==='photo')currentPhotoTags.splice(i,1);
+  renderTagChips(context);
+}
+
+// ── STAR RATING ───────────────────────────────────────────────────────────────
+function setRating(prefix,val){
+  if(prefix==='bk')bkRating=val;
+  else if(prefix==='mu')muRating=val;
+  renderStars(prefix,val);
+}
+function renderStars(prefix,val){
+  document.querySelectorAll(`#${prefix}-stars .star-btn`).forEach(btn=>{
+    btn.classList.toggle('on',parseInt(btn.dataset.val)<=val);
+  });
+}
+
+// ── SETTINGS PAGE LOAD ────────────────────────────────────────────────────────
+// Hook into showPage to load settings when navigating there
+const _origShowPage=showPage;
+window.showPage=function(name){
+  _origShowPage(name);
+  if(name==='settings')loadSettings();
+  if(name==='sections')populateSectionsPageSelect();
+};
+
+
+// ── PAGES TOGGLE VISIBILITY ───────────────────────────────────────────────────
+async function togglePageVisible(id, visible) {
+  await db.from('tabs').update({visible}).eq('id', id);
+  await loadPages(); renderPagesTable(); populatePageDropdowns();
+  toast(visible ? 'Page shown in nav' : 'Page hidden from nav', 'success');
+}
+
+// ── SEEDER ────────────────────────────────────────────────────────────────────
+function seederLog(msg, type) {
+  const el = document.getElementById('seeder-status');
+  const line = document.createElement('div');
+  line.style.cssText = 'padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);';
+  line.style.color = type === 'error' ? '#fca5a5' : type === 'ok' ? 'var(--green)' : 'var(--cream)';
+  line.textContent = (type === 'ok' ? '✓ ' : type === 'error' ? '✗ ' : '  ') + msg;
+  el.prepend(line);
+}
+
+const DEFAULT_PAGES = [
+  {name:'Home',        slug:'index',     page_type:'home',       visible:true,  order:0},
+  {name:'About',       slug:'about',     page_type:'standard',   visible:true,  order:1},
+  {name:'Life',        slug:'life',      page_type:'standard',   visible:true,  order:2},
+  {name:'Pics',        slug:'pics',      page_type:'photos',     visible:true,  order:3},
+  {name:'Book Reviews',slug:'books',     page_type:'books',      visible:true,  order:4},
+  {name:'Studies',     slug:'studies',   page_type:'standard',   visible:true,  order:5},
+  {name:'Music',       slug:'music',     page_type:'music',      visible:true,  order:6},
+  {name:'Guestbook',   slug:'guestbook', page_type:'guestbook',  visible:true,  order:7},
+  {name:'Links',       slug:'links',     page_type:'links',      visible:true,  order:8},
+  {name:'Ballas',      slug:'ballas',    page_type:'standard',   visible:false, order:9},
+];
+
+async function seedPages() {
+  seederLog('Seeding pages…');
+  const {data: existing} = await db.from('tabs').select('slug');
+  const existingSlugs = new Set((existing||[]).map(t => t.slug));
+  let added = 0;
+  for (const p of DEFAULT_PAGES) {
+    if (!existingSlugs.has(p.slug)) {
+      const {error} = await db.from('tabs').insert(p);
+      if (error) seederLog('Error adding ' + p.slug + ': ' + error.message, 'error');
+      else added++;
+    }
+  }
+  await loadPages(); renderPagesTable(); populatePageDropdowns(); populateSectionsPageSelect();
+  seederLog(`Pages done — ${added} added, ${existingSlugs.size} already existed`, 'ok');
+}
+
+const BOOKS_DATA = [{"title": "The Bible", "author": null, "rating": 10, "status": "published"}, {"title": "The Catcher in the Rye", "author": "J.D. Salinger", "rating": 6, "status": "published"}, {"title": "Dune", "author": "Frank Herbert", "rating": 10, "status": "published"}, {"title": "The Picture of Dorian Gray", "author": "Oscar Wilde", "rating": 8, "status": "published"}, {"title": "White Nights", "author": "Fyodor Dostoyevsky", "rating": 7, "status": "published"}, {"title": "The Selfish Gene", "author": "Richard Dawkins", "rating": 8, "status": "published"}, {"title": "Crime and Punishment", "author": "Fyodor Dostoyevsky", "rating": 7, "status": "published"}, {"title": "Meditations", "author": "Marcus Aurelius", "rating": 7, "status": "published"}, {"title": "The Odyssey", "author": "Homer", "rating": 9, "status": "published"}, {"title": "Beyond Good and Evil", "author": "Nietzsche", "rating": 10, "status": "published"}, {"title": "The Book of Mormon", "author": null, "rating": 2, "status": "published"}, {"title": "The Complete Works of William Shakespeare", "author": "William Shakespeare", "rating": 10, "status": "published"}, {"title": "Great Expectations", "author": "Charles Dickens", "rating": 4, "status": "published"}, {"title": "The Way of All Flesh", "author": "Samuel Butler", "rating": 3, "status": "published"}, {"title": "The Iliad", "author": "Homer", "rating": 9, "status": "published"}, {"title": "Pride and Prejudice", "author": "Jane Austen", "rating": 5, "status": "published"}, {"title": "Paradise Lost", "author": "John Milton", "rating": 10, "status": "published"}, {"title": "1984", "author": "George Orwell", "rating": 10, "status": "published"}, {"title": "Animal Farm", "author": "George Orwell", "rating": 10, "status": "published"}, {"title": "Aesop's Fables", "author": "Aesop", "rating": 9, "status": "published"}, {"title": "The Strange Case of Dr Jekyll and Mr Hyde", "author": null, "rating": 7, "status": "published"}, {"title": "Frankenstein", "author": "Mary Shelley", "rating": 6, "status": "published"}, {"title": "Gray's Anatomy", "author": null, "rating": 10, "status": "published"}, {"title": "Principia Mathematica", "author": "Isaac Newton", "rating": 9, "status": "published"}, {"title": "The Divine Comedy", "author": "Dante Alighieri", "rating": 10, "status": "published"}, {"title": "The Call of Cthulhu", "author": "H.P. Lovecraft", "rating": 7, "status": "published"}, {"title": "A Study in Scarlet", "author": "Arthur Conan Doyle", "rating": 7, "status": "published"}, {"title": "The Hound of the Baskervilles", "author": "Arthur Conan Doyle", "rating": 6, "status": "published"}, {"title": "The Diary of a Young Girl", "author": "Anne Frank", "rating": 0, "status": "published"}, {"title": "The Metamorphosis", "author": "Franz Kafka", "rating": 10, "status": "published"}, {"title": "The Hunger Games", "author": "Suzanne Collins", "rating": 8, "status": "published"}, {"title": "Catching Fire", "author": "Suzanne Collins", "rating": 7, "status": "published"}, {"title": "Mockingjay", "author": "Suzanne Collins", "rating": 6, "status": "published"}];
+async function seedBooks() {
+  seederLog('Seeding books…');
+  const {data: existing} = await db.from('books').select('title');
+  const existingTitles = new Set((existing||[]).map(b => b.title));
+  const toInsert = BOOKS_DATA.filter(b => !existingTitles.has(b.title));
+  if (!toInsert.length) { seederLog('Books: all already exist', 'ok'); return; }
+  const {error} = await db.from('books').insert(toInsert);
+  if (error) seederLog('Books error: ' + error.message, 'error');
+  else { seederLog(`Books done — ${toInsert.length} added`, 'ok'); await loadBooks(); renderBooksTable(); }
+}
+
+const PAPERS_DATA = [{"tag": "economics \u00b7 gender", "title": "The Paradox of Declining Female Happiness", "authors": "Betsey Stevenson & Justin Wolfers \u00b7 2008", "summary": "Using the US General Social Survey (1972\u20132006) and multiple other datasets across industrialized countries, the paper measures self-reported happiness by gender over 35 years. In the 1970s, women reported higher subjective well-being than men. By the 2000s, that gap had reversed \u2014 men now report higher well-being. The decline in female happiness is found both in absolute terms and relative to men. It is consistent across age groups, demographic categories, datasets, and countries. Female labor force participation rose from 43% in 1970 to 59% in 2005. Female college attendance exceeded male rates for cohorts born from 1960 onward. The authors do not offer a causal explanation. They state the relative decline in US women's well-being over 35 years is roughly equivalent in magnitude to the effect of an 8.5 percentage point rise in the unemployment rate.", "href": ""}, {"tag": "education \u00b7 race", "title": "Why Family Income Differences Don't Explain the Racial Gap in SAT Scores", "authors": "Anonymous \u00b7 Journal of Blacks in Higher Education \u00b7 2008/2009", "summary": "The intuitive explanation for the black-white SAT gap is income \u2014 black families earn less, so their kids score lower. But the data shows that black students from families earning over $200,000 still score lower on average than white students from families earning between $20,000 and $40,000. The gap persists at every income level. The article points to structural reasons: wealth inequality beyond income, generational differences in educational background, school quality, stereotype threat, and systemic underestimation by teachers. Income is a predictor of SAT scores, but it is not the explanation for the racial gap.", "href": "papers/why-ses-does-not-explain.pdf"}, {"tag": "intelligence \u00b7 denmark \u00b7 immigration", "title": "First Names, Cognitive Ability and Social Status in Denmark", "authors": "Emil O. W. Kirkegaard \u00b7 Mankind Quarterly \u00b7 2019", "summary": "IQ test scores from the Danish military draft (B\u00f8rge Prien Pr\u00f8ven) were linked to social status data for 265 common names in Denmark (85% male). Of the 265 names, 10 were non-western Muslim names and 255 were western, mostly Danish names. Average IQ across all names correlated with social status at r = .64. Western names averaged an IQ of 98 (range: up to 107). Non-western Muslim names averaged an IQ of 81 (range: 76\u201387) \u2014 the lowest-scoring group in the dataset. Non-western names scored 2.66 standard deviations below western names on the composite social status measure. Mediation analysis found that 30% of the social status gap between western and non-western names was explained by the measured IQ gap.", "href": "papers/FirstNamesCognitiveAbilityandSocialStatusinDenmark.pdf"}, {"tag": "crime \u00b7 policy", "title": "Recidivism of Prisoners Released in 1994", "authors": "Patrick A. Langan & David J. Levin \u00b7 Bureau of Justice Statistics \u00b7 2002", "summary": "272,111 prisoners released from 15 US states in 1994 were tracked for 3 years. The sample was 91% male, 50% white, 48% black, and 24% Hispanic. Within 3 years: 67.5% were rearrested, 46.9% were reconvicted, 25.4% were resentenced to prison, and 51.8% returned to prison with or without a new sentence. By race: black former prisoners were rearrested at a rate of 73%, white former prisoners at 63%. Non-Hispanics were rearrested at 71%, Hispanics at 65%. Men were rearrested at 68%, women at 58%. By offense type, the highest rearrest rates were for motor vehicle theft (78.8%), stolen property (77.4%), larceny (74.6%), and burglary (74.0%). The lowest rearrest rates were for homicide (40.7%), sexual assault (41%), rape (46%), and DUI (51.5%).", "href": "papers/rpr94%20(2).pdf"}, {"tag": "education \u00b7 policy \u00b7 race", "title": "Money and School Performance: Lessons from the Kansas City Desegregation Experiment", "authors": "Paul Ciotti \u00b7 Cato Institute \u00b7 1998", "summary": "In 1985, a federal judge took partial control of the Kansas City, Missouri School District (KCMSD) and ordered state and local taxpayers to fund a cost-is-no-object desegregation plan. Over 12 years, approximately $2 billion was spent. At its peak, the district spent $11,700 per pupil \u2014 more than any other of the 280 largest US school districts on a cost-of-living adjusted basis. The money funded 15 new schools, higher teacher salaries, an Olympic-sized swimming pool, television and animation studios, a robotics lab, a 25-acre wildlife sanctuary, a zoo, a model United Nations, and field trips abroad. The student-to-teacher ratio fell to 12\u201313 to 1, the lowest of any major US district. At the end of the program: achievement test scores did not rise, the black-white achievement gap did not narrow, and integration decreased \u2014 the percentage of black students in the district continued to increase. At peak, the plan attracted 1,500 white suburban students; by 1997 that number had fallen to 387.", "href": "papers/0817928723_308.pdf"}, {"tag": "intelligence \u00b7 education \u00b7 heredity", "title": "How Much Can We Boost IQ and Scholastic Achievement?", "authors": "Arthur R. Jensen \u00b7 Harvard Educational Review \u00b7 1969", "summary": "Published in the Harvard Educational Review (Vol. 39, 1969), this 123-page article reviews the evidence on IQ heritability and the effectiveness of compensatory education programs. Jensen reports that a nationwide evaluation by the US Commission on Civil Rights (1967) found that compensatory education programs had failed to narrow the achievement gap between minority and majority pupils. Jensen cites twin and adoption studies to estimate IQ heritability at approximately 80%. He distinguishes two levels of cognitive ability: Level I (associative learning, rote memory) and Level II (abstract reasoning, conceptual learning), arguing that these are distributed differently across socioeconomic and racial groups. He reviews the black-white IQ gap, measured at approximately 15 points (1 standard deviation) on standardized tests at the time, and argues the evidence does not support the conclusion that this gap is entirely explained by environmental factors. The paper triggered widespread academic and public controversy and is credited with initiating the modern debate over race and intelligence research.", "href": "papers/How-Much-Can-We-Boost-IQ-and-Scholastic-Achievement-OCR.pdf"}];
+async function seedStudies() {
+  seederLog('Seeding studies…');
+  // Find the studies tab
+  const {data: tab} = await db.from('tabs').select('id').eq('slug','studies').single();
+  if (!tab) { seederLog('Studies tab not found — import pages first', 'error'); return; }
+  const {data: existing} = await db.from('posts').select('title').eq('tab_id', tab.id);
+  const existingTitles = new Set((existing||[]).map(p => p.title));
+  let added = 0;
+  for (const p of PAPERS_DATA) {
+    if (existingTitles.has(p.title)) continue;
+    const content = (p.href ? `[PDF ↗](${p.href})\n\n` : '') + p.summary;
+    const {error} = await db.from('posts').insert({
+      tab_id: tab.id, title: p.title,
+      subtitle: p.authors, excerpt: p.summary.substring(0, 200),
+      content, tags: p.tag ? p.tag.split(' · ') : [],
+      status: 'live', published: true
+    });
+    if (error) seederLog('Paper error: ' + error.message, 'error');
+    else added++;
+  }
+  await loadPosts(); renderPostsTable();
+  seederLog(`Studies done — ${added} papers added`, 'ok');
+}
+
+const PHOTOS_DATA = ["photos/waar is my dop.jpeg", "photos/chicken chicken.jpeg", "photos/cuhz.jpeg", "photos/ed me.jpeg", "photos/I love you.jpeg", "photos/kachow.jpeg", "photos/lar boom.jpeg", "photos/lar han.jpeg", "photos/lar hard.jpeg", "photos/lar me 2.jpeg", "photos/lar me.jpeg", "photos/lar smile.jpeg", "photos/lar stare 2.jpeg", "photos/lar stare.jpeg", "photos/Lario lag.jpeg", "photos/mario cam.jpeg", "photos/mario close 2.jpeg", "photos/mario close.jpeg", "photos/mario stare.jpeg", "photos/me hard asf.jpeg", "photos/rick baby.jpeg", "photos/rick cath me.jpeg", "photos/rick den franz 2.jpeg", "photos/rick den franz.jpeg", "photos/rick ed ocean.jpeg", "photos/rick eland mea psp.jpeg", "photos/rick forehead.jpeg", "photos/rick grave angel.jpeg", "photos/rick grave.jpeg", "photos/rick happy.jpeg", "photos/rick lar bed.jpeg", "photos/rick lar bike.jpeg", "photos/rick lar rock 2.jpeg", "photos/rick lar rock.jpeg", "photos/rick lar swim.jpeg", "photos/rick me.jpeg", "photos/rick mog 2.jpeg", "photos/rick mog.jpeg", "photos/rick pimp 2.jpeg", "photos/rick pimp.jpeg", "photos/rick rek.jpeg", "photos/rick sand.jpeg", "photos/rick ski.jpeg", "photos/rick sky eli.jpeg", "photos/rick smoke.jpeg", "photos/rick snowball.jpeg", "photos/rick vis.jpeg", "photos/rick wtf.jpeg", "photos/spedo rick.jpeg", "photos/the gang.jpeg", "photos/ricardo,lario mog.jpeg"];
+async function seedPhotos() {
+  seederLog('Seeding photos…');
+  const {data: existing} = await db.from('photos').select('url');
+  const existingUrls = new Set((existing||[]).map(p => p.url));
+  const toInsert = PHOTOS_DATA
+    .filter(url => !existingUrls.has(url))
+    .map((url, i) => ({url, visible: true, order: (existing?.length||0) + i}));
+  if (!toInsert.length) { seederLog('Photos: all already exist', 'ok'); return; }
+  const {error} = await db.from('photos').insert(toInsert);
+  if (error) seederLog('Photos error: ' + error.message, 'error');
+  else { seederLog(`Photos done — ${toInsert.length} added`, 'ok'); await loadPhotos(); renderPhotosTable(); }
+}
+
+async function seedSections() {
+  seederLog('Setting up default sections…');
+  const {data: tabs} = await db.from('tabs').select('*');
+  if (!tabs) { seederLog('No tabs found — import pages first', 'error'); return; }
+  const tabMap = Object.fromEntries(tabs.map(t => [t.slug, t]));
+
+  const sectionDefs = [
+    {slug:'index',    type:'posts',     title:'Latest Posts',   config:{limit:6}},
+    {slug:'life',     type:'posts',     title:'',               config:{limit:20}},
+    {slug:'studies',  type:'posts',     title:'Research & Papers', config:{limit:20}},
+    {slug:'books',    type:'books',     title:'Book Reviews',   config:{limit:48}},
+    {slug:'pics',     type:'photos',    title:'',               config:{limit:200}},
+    {slug:'music',    type:'music',     title:'Music',          config:{limit:48}},
+    {slug:'guestbook',type:'guestbook', title:'',               config:{limit:50}},
+    {slug:'links',    type:'links',     title:'',               config:{limit:200}},
+    {slug:'about',    type:'text',      title:'',               config:{content:''}},
+  ];
+  let added = 0;
+  for (const def of sectionDefs) {
+    const tab = tabMap[def.slug];
+    if (!tab) continue;
+    const {data: existing} = await db.from('sections').select('id').eq('tab_id', tab.id).limit(1);
+    if (existing && existing.length) continue; // already has sections
+    const {error} = await db.from('sections').insert({
+      tab_id: tab.id, type: def.type,
+      title: def.title || null,
+      config: def.config, visible: true, order: 0
+    });
+    if (error) seederLog('Section error (' + def.slug + '): ' + error.message, 'error');
+    else added++;
+  }
+  seederLog(`Sections done — ${added} sections created`, 'ok');
+}
+
+async function seedAll() {
+  document.getElementById('seeder-status').innerHTML = '';
+  seederLog('Starting full import…');
+  await seedPages();
+  await seedBooks();
+  await seedStudies();
+  await seedPhotos();
+  await seedSections();
+  seederLog('✦ Full import complete!', 'ok');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(s){return s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show '+(type||'');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.className='',2800);
+}
+</script>
+</body>
+</html>

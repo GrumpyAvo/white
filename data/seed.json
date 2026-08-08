@@ -1,0 +1,446 @@
+{
+ "pages": [
+  {
+   "name": "Home",
+   "slug": "index",
+   "page_type": "home",
+   "visible": true,
+   "order": 0
+  },
+  {
+   "name": "About",
+   "slug": "about",
+   "page_type": "standard",
+   "visible": true,
+   "order": 1
+  },
+  {
+   "name": "Life",
+   "slug": "life",
+   "page_type": "standard",
+   "visible": true,
+   "order": 2
+  },
+  {
+   "name": "Pics",
+   "slug": "pics",
+   "page_type": "photos",
+   "visible": true,
+   "order": 3
+  },
+  {
+   "name": "Book Reviews",
+   "slug": "books",
+   "page_type": "books",
+   "visible": true,
+   "order": 4
+  },
+  {
+   "name": "Studies",
+   "slug": "studies",
+   "page_type": "standard",
+   "visible": true,
+   "order": 5
+  },
+  {
+   "name": "Music",
+   "slug": "music",
+   "page_type": "music",
+   "visible": true,
+   "order": 6
+  },
+  {
+   "name": "Guestbook",
+   "slug": "guestbook",
+   "page_type": "guestbook",
+   "visible": true,
+   "order": 7
+  },
+  {
+   "name": "Links",
+   "slug": "links",
+   "page_type": "links",
+   "visible": true,
+   "order": 8
+  },
+  {
+   "name": "Ballas",
+   "slug": "ballas",
+   "page_type": "standard",
+   "visible": false,
+   "order": 9
+  }
+ ],
+ "books": [
+  {
+   "title": "The Bible",
+   "author": null,
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "The Catcher in the Rye",
+   "author": "J.D. Salinger",
+   "rating": 6,
+   "status": "published"
+  },
+  {
+   "title": "Dune",
+   "author": "Frank Herbert",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "The Picture of Dorian Gray",
+   "author": "Oscar Wilde",
+   "rating": 8,
+   "status": "published"
+  },
+  {
+   "title": "White Nights",
+   "author": "Fyodor Dostoyevsky",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "The Selfish Gene",
+   "author": "Richard Dawkins",
+   "rating": 8,
+   "status": "published"
+  },
+  {
+   "title": "Crime and Punishment",
+   "author": "Fyodor Dostoyevsky",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "Meditations",
+   "author": "Marcus Aurelius",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "The Odyssey",
+   "author": "Homer",
+   "rating": 9,
+   "status": "published"
+  },
+  {
+   "title": "Beyond Good and Evil",
+   "author": "Nietzsche",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "The Book of Mormon",
+   "author": null,
+   "rating": 2,
+   "status": "published"
+  },
+  {
+   "title": "The Complete Works of William Shakespeare",
+   "author": "William Shakespeare",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "Great Expectations",
+   "author": "Charles Dickens",
+   "rating": 4,
+   "status": "published"
+  },
+  {
+   "title": "The Way of All Flesh",
+   "author": "Samuel Butler",
+   "rating": 3,
+   "status": "published"
+  },
+  {
+   "title": "The Iliad",
+   "author": "Homer",
+   "rating": 9,
+   "status": "published"
+  },
+  {
+   "title": "Pride and Prejudice",
+   "author": "Jane Austen",
+   "rating": 5,
+   "status": "published"
+  },
+  {
+   "title": "Paradise Lost",
+   "author": "John Milton",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "1984",
+   "author": "George Orwell",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "Animal Farm",
+   "author": "George Orwell",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "Aesop's Fables",
+   "author": "Aesop",
+   "rating": 9,
+   "status": "published"
+  },
+  {
+   "title": "The Strange Case of Dr Jekyll and Mr Hyde",
+   "author": null,
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "Frankenstein",
+   "author": "Mary Shelley",
+   "rating": 6,
+   "status": "published"
+  },
+  {
+   "title": "Gray's Anatomy",
+   "author": null,
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "Principia Mathematica",
+   "author": "Isaac Newton",
+   "rating": 9,
+   "status": "published"
+  },
+  {
+   "title": "The Divine Comedy",
+   "author": "Dante Alighieri",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "The Call of Cthulhu",
+   "author": "H.P. Lovecraft",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "A Study in Scarlet",
+   "author": "Arthur Conan Doyle",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "The Hound of the Baskervilles",
+   "author": "Arthur Conan Doyle",
+   "rating": 6,
+   "status": "published"
+  },
+  {
+   "title": "The Diary of a Young Girl",
+   "author": "Anne Frank",
+   "rating": 0,
+   "status": "published"
+  },
+  {
+   "title": "The Metamorphosis",
+   "author": "Franz Kafka",
+   "rating": 10,
+   "status": "published"
+  },
+  {
+   "title": "The Hunger Games",
+   "author": "Suzanne Collins",
+   "rating": 8,
+   "status": "published"
+  },
+  {
+   "title": "Catching Fire",
+   "author": "Suzanne Collins",
+   "rating": 7,
+   "status": "published"
+  },
+  {
+   "title": "Mockingjay",
+   "author": "Suzanne Collins",
+   "rating": 6,
+   "status": "published"
+  }
+ ],
+ "papers": [
+  {
+   "tag": "economics · gender",
+   "title": "The Paradox of Declining Female Happiness",
+   "authors": "Betsey Stevenson & Justin Wolfers · 2008",
+   "summary": "Using the US General Social Survey (1972–2006) and multiple other datasets across industrialized countries, the paper measures self-reported happiness by gender over 35 years. In the 1970s, women reported higher subjective well-being than men. By the 2000s, that gap had reversed — men now report higher well-being. The decline in female happiness is found both in absolute terms and relative to men. It is consistent across age groups, demographic categories, datasets, and countries. Female labor force participation rose from 43% in 1970 to 59% in 2005. Female college attendance exceeded male rates for cohorts born from 1960 onward. The authors do not offer a causal explanation. They state the relative decline in US women's well-being over 35 years is roughly equivalent in magnitude to the effect of an 8.5 percentage point rise in the unemployment rate.",
+   "href": ""
+  },
+  {
+   "tag": "education · race",
+   "title": "Why Family Income Differences Don't Explain the Racial Gap in SAT Scores",
+   "authors": "Anonymous · Journal of Blacks in Higher Education · 2008/2009",
+   "summary": "The intuitive explanation for the black-white SAT gap is income — black families earn less, so their kids score lower. But the data shows that black students from families earning over $200,000 still score lower on average than white students from families earning between $20,000 and $40,000. The gap persists at every income level. The article points to structural reasons: wealth inequality beyond income, generational differences in educational background, school quality, stereotype threat, and systemic underestimation by teachers. Income is a predictor of SAT scores, but it is not the explanation for the racial gap.",
+   "href": "papers/why-ses-does-not-explain.pdf"
+  },
+  {
+   "tag": "intelligence · denmark · immigration",
+   "title": "First Names, Cognitive Ability and Social Status in Denmark",
+   "authors": "Emil O. W. Kirkegaard · Mankind Quarterly · 2019",
+   "summary": "IQ test scores from the Danish military draft (Børge Prien Prøven) were linked to social status data for 265 common names in Denmark (85% male). Of the 265 names, 10 were non-western Muslim names and 255 were western, mostly Danish names. Average IQ across all names correlated with social status at r = .64. Western names averaged an IQ of 98 (range: up to 107). Non-western Muslim names averaged an IQ of 81 (range: 76–87) — the lowest-scoring group in the dataset. Non-western names scored 2.66 standard deviations below western names on the composite social status measure. Mediation analysis found that 30% of the social status gap between western and non-western names was explained by the measured IQ gap.",
+   "href": "papers/FirstNamesCognitiveAbilityandSocialStatusinDenmark.pdf"
+  },
+  {
+   "tag": "crime · policy",
+   "title": "Recidivism of Prisoners Released in 1994",
+   "authors": "Patrick A. Langan & David J. Levin · Bureau of Justice Statistics · 2002",
+   "summary": "272,111 prisoners released from 15 US states in 1994 were tracked for 3 years. The sample was 91% male, 50% white, 48% black, and 24% Hispanic. Within 3 years: 67.5% were rearrested, 46.9% were reconvicted, 25.4% were resentenced to prison, and 51.8% returned to prison with or without a new sentence. By race: black former prisoners were rearrested at a rate of 73%, white former prisoners at 63%. Non-Hispanics were rearrested at 71%, Hispanics at 65%. Men were rearrested at 68%, women at 58%. By offense type, the highest rearrest rates were for motor vehicle theft (78.8%), stolen property (77.4%), larceny (74.6%), and burglary (74.0%). The lowest rearrest rates were for homicide (40.7%), sexual assault (41%), rape (46%), and DUI (51.5%).",
+   "href": "papers/rpr94%20(2).pdf"
+  },
+  {
+   "tag": "education · policy · race",
+   "title": "Money and School Performance: Lessons from the Kansas City Desegregation Experiment",
+   "authors": "Paul Ciotti · Cato Institute · 1998",
+   "summary": "In 1985, a federal judge took partial control of the Kansas City, Missouri School District (KCMSD) and ordered state and local taxpayers to fund a cost-is-no-object desegregation plan. Over 12 years, approximately $2 billion was spent. At its peak, the district spent $11,700 per pupil — more than any other of the 280 largest US school districts on a cost-of-living adjusted basis. The money funded 15 new schools, higher teacher salaries, an Olympic-sized swimming pool, television and animation studios, a robotics lab, a 25-acre wildlife sanctuary, a zoo, a model United Nations, and field trips abroad. The student-to-teacher ratio fell to 12–13 to 1, the lowest of any major US district. At the end of the program: achievement test scores did not rise, the black-white achievement gap did not narrow, and integration decreased — the percentage of black students in the district continued to increase. At peak, the plan attracted 1,500 white suburban students; by 1997 that number had fallen to 387.",
+   "href": "papers/0817928723_308.pdf"
+  },
+  {
+   "tag": "intelligence · education · heredity",
+   "title": "How Much Can We Boost IQ and Scholastic Achievement?",
+   "authors": "Arthur R. Jensen · Harvard Educational Review · 1969",
+   "summary": "Published in the Harvard Educational Review (Vol. 39, 1969), this 123-page article reviews the evidence on IQ heritability and the effectiveness of compensatory education programs. Jensen reports that a nationwide evaluation by the US Commission on Civil Rights (1967) found that compensatory education programs had failed to narrow the achievement gap between minority and majority pupils. Jensen cites twin and adoption studies to estimate IQ heritability at approximately 80%. He distinguishes two levels of cognitive ability: Level I (associative learning, rote memory) and Level II (abstract reasoning, conceptual learning), arguing that these are distributed differently across socioeconomic and racial groups. He reviews the black-white IQ gap, measured at approximately 15 points (1 standard deviation) on standardized tests at the time, and argues the evidence does not support the conclusion that this gap is entirely explained by environmental factors. The paper triggered widespread academic and public controversy and is credited with initiating the modern debate over race and intelligence research.",
+   "href": "papers/How-Much-Can-We-Boost-IQ-and-Scholastic-Achievement-OCR.pdf"
+  }
+ ],
+ "photos": [
+  "photos/waar is my dop.jpeg",
+  "photos/chicken chicken.jpeg",
+  "photos/cuhz.jpeg",
+  "photos/ed me.jpeg",
+  "photos/I love you.jpeg",
+  "photos/kachow.jpeg",
+  "photos/lar boom.jpeg",
+  "photos/lar han.jpeg",
+  "photos/lar hard.jpeg",
+  "photos/lar me 2.jpeg",
+  "photos/lar me.jpeg",
+  "photos/lar smile.jpeg",
+  "photos/lar stare 2.jpeg",
+  "photos/lar stare.jpeg",
+  "photos/Lario lag.jpeg",
+  "photos/mario cam.jpeg",
+  "photos/mario close 2.jpeg",
+  "photos/mario close.jpeg",
+  "photos/mario stare.jpeg",
+  "photos/me hard asf.jpeg",
+  "photos/rick baby.jpeg",
+  "photos/rick cath me.jpeg",
+  "photos/rick den franz 2.jpeg",
+  "photos/rick den franz.jpeg",
+  "photos/rick ed ocean.jpeg",
+  "photos/rick eland mea psp.jpeg",
+  "photos/rick forehead.jpeg",
+  "photos/rick grave angel.jpeg",
+  "photos/rick grave.jpeg",
+  "photos/rick happy.jpeg",
+  "photos/rick lar bed.jpeg",
+  "photos/rick lar bike.jpeg",
+  "photos/rick lar rock 2.jpeg",
+  "photos/rick lar rock.jpeg",
+  "photos/rick lar swim.jpeg",
+  "photos/rick me.jpeg",
+  "photos/rick mog 2.jpeg",
+  "photos/rick mog.jpeg",
+  "photos/rick pimp 2.jpeg",
+  "photos/rick pimp.jpeg",
+  "photos/rick rek.jpeg",
+  "photos/rick sand.jpeg",
+  "photos/rick ski.jpeg",
+  "photos/rick sky eli.jpeg",
+  "photos/rick smoke.jpeg",
+  "photos/rick snowball.jpeg",
+  "photos/rick vis.jpeg",
+  "photos/rick wtf.jpeg",
+  "photos/spedo rick.jpeg",
+  "photos/the gang.jpeg",
+  "photos/ricardo,lario mog.jpeg"
+ ],
+ "sections": [
+  {
+   "slug": "index",
+   "type": "posts",
+   "title": "Latest Posts",
+   "config": {
+    "limit": 6
+   }
+  },
+  {
+   "slug": "life",
+   "type": "posts",
+   "title": "",
+   "config": {
+    "limit": 20
+   }
+  },
+  {
+   "slug": "studies",
+   "type": "posts",
+   "title": "Research & Papers",
+   "config": {
+    "limit": 20
+   }
+  },
+  {
+   "slug": "books",
+   "type": "books",
+   "title": "Book Reviews",
+   "config": {
+    "limit": 48
+   }
+  },
+  {
+   "slug": "pics",
+   "type": "photos",
+   "title": "",
+   "config": {
+    "limit": 200
+   }
+  },
+  {
+   "slug": "music",
+   "type": "music",
+   "title": "Music",
+   "config": {
+    "limit": 48
+   }
+  },
+  {
+   "slug": "guestbook",
+   "type": "guestbook",
+   "title": "",
+   "config": {
+    "limit": 50
+   }
+  },
+  {
+   "slug": "links",
+   "type": "links",
+   "title": "",
+   "config": {
+    "limit": 200
+   }
+  },
+  {
+   "slug": "about",
+   "type": "text",
+   "title": "",
+   "config": {
+    "content": ""
+   }
+  }
+ ],
+ "settings": {}
+}

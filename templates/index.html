@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_post_card.html" import post_card %}
+{% block title %}{{ site_title }} — {{ tagline }}{% endblock %}
+{% block layout %}
+<div class="layout">
+  <main>
+    <div class="feed-header"><h2>★ latest posts</h2></div>
+    <div id="latest-posts-feed">
+      {% for p in posts %}
+        {{ post_card(p) }}
+        {% if not loop.last %}<div class="divider">✦ ✦ ✦</div>{% endif %}
+      {% else %}
+        <div class="empty-notice">No posts yet. Check back soon!</div>
+      {% endfor %}
+    </div>
+  </main>
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

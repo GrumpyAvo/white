@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% block title %}settings · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Site Settings</div>
+    <div class="page-sub">used by the header marquee, footer tagline, and guestbook status</div>
+  </div>
+  <form method="post" action="{{ url_for('admin.settings_admin') }}" style="max-width:600px">
+    {% for key in ['site_title', 'site_tagline', 'site_footer', 'marquee_text', 'guestbook_open'] %}
+    <div class="editor-field">
+      <label>{{ key.replace('_', ' ').title() }}</label>
+      {% if key == 'guestbook_open' %}
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
+          <input type="checkbox" name="{{ key }}" {% if settings.get(key) %}checked{% endif %} /> Guestbook open for new messages
+        </label>
+      {% else %}
+        <input type="text" name="{{ key }}" value="{{ settings.get(key) or '' }}" />
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="save-btn">💾 Save Settings</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}guestbook · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Guestbook</div>
+    <div class="page-sub">{{ entries|length }} entries</div>
+  </div>
+  <div class="data-table">
+    <div class="table-head posts-head"><span>Name</span><span>Message</span><span>Status</span><span>Date</span><span>Actions</span></div>
+    {% for g in entries %}
+    <div class="table-row">
+      <span>{{ g.name }}</span>
+      <span style="max-width:300px">{{ g.message[:80] }}{% if g.message|length > 80 %}…{% endif %}</span>
+      <span><span class="status-pill {{ g.status }}">{{ g.status }}</span></span>
+      <span>{{ g.created_at[:10] }}</span>
+      <span>
+        {% if g.status != 'approved' %}
+        <form method="post" style="display:inline">
+          <input type="hidden" name="id" value="{{ g.id }}" />
+          <button class="qa-btn" name="action" value="approve" type="submit" style="display:inline-block;margin:0 4px">✓ approve</button>
+        </form>
+        {% endif %}
+        <form method="post" style="display:inline" onsubmit="return confirm('Delete this entry?')">
+          <input type="hidden" name="id" value="{{ g.id }}" />
+          <button class="qa-btn" name="action" value="delete" type="submit" style="display:inline-block;margin:0">✕</button>
+        </form>
+      </span>
+    </div>
+    {% else %}
+    <div class="table-row"><span>No guestbook entries.</span></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

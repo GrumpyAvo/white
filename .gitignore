@@ -1,0 +1,10 @@
+# Flask / Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# SQLite database (regenerated on deploy)
+white.db
+*.sqlite3

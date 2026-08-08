@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_post_card.html" import post_card %}
+{% block title %}search · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="page-title">🔍 search</div>
+<div class="page-subtitle">find posts and books across the site.</div>
+
+<form action="{{ url_for('search') }}" method="get" class="search-wrap" style="max-width:460px">
+  <div class="search-icon">🔍</div>
+  <input class="search-input" type="text" name="q" value="{{ q or '' }}" placeholder="search posts, books…" autocomplete="off" />
+  <button class="submit-btn" type="submit" style="border:none">search</button>
+</form>
+
+{% if q and results.posts %}
+  <div class="feed-header"><h2>✶ posts</h2></div>
+  {% for p in results.posts %}
+    {{ post_card(p) }}
+    {% if not loop.last %}<div class="divider">✦ ✦ ✦</div>{% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if q and results.books %}
+  <div class="feed-header" style="margin-top:28px"><h2>📚 books</h2></div>
+  <div class="books-grid">
+    {% for b in results.books %}
+      <div class="book-card">
+        {% if b.cover_url %}<img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" />
+        {% else %}<div class="book-cover-placeholder">📚</div>{% endif %}
+        <div class="book-info">
+          <div class="book-title-text">{{ b.title }}</div>
+          <div class="book-author">{{ b.author or '' }}</div>
+          {% if b.rating %}<div class="book-stars">{{ b.rating | stars }}</div>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if q and not results.posts and not results.books %}
+  <div class="empty-notice" style="margin-top:24px">Nothing found for “{{ q }}”.</div>
+{% endif %}
+{% endblock %}

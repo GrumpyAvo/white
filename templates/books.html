@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Book Reviews · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="page-header-row">
+  <div class="page-title">📚 book reviews</div>
+  <div class="toggle-wrap">
+    <span class="toggle-label">rating as</span>
+    <button class="toggle-btn active" id="btn-num" onclick="setMode('num')">number</button>
+    <button class="toggle-btn" id="btn-phrase" onclick="setMode('phrase')">borat phrase</button>
+  </div>
+</div>
+<div class="page-subtitle">books i've read · cover art via open library · rated out of 10</div>
+
+{% if items %}
+  <div class="books-grid" style="margin-top:24px">
+    {% for b in items %}
+      <div class="book-card">
+        {% if b.cover_url %}<img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" />
+        {% else %}<div class="book-cover-placeholder">📚</div>{% endif %}
+        <div class="book-info">
+          <div class="book-title-text">{{ b.title }}</div>
+          <div class="book-author">{{ b.author or '' }}</div>
+          {% if b.rating %}
+            <div class="book-stars">
+              <span class="rating-num">{{ b.rating|int }}/10</span>
+              <span class="rating-phrase" style="display:none">{{ b.rating | phrase }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-notice" style="margin-top:40px">no books here yet — the shelf is empty.</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function setMode(m){
+  var num = m === 'num';
+  document.querySelectorAll('.rating-num').forEach(function(el){ el.style.display = num ? '' : 'none'; });
+  document.querySelectorAll('.rating-phrase').forEach(function(el){ el.style.display = num ? 'none' : ''; });
+  var bn = document.getElementById('btn-num'), bp = document.getElementById('btn-phrase');
+  if (bn) bn.classList.toggle('active', num);
+  if (bp) bp.classList.toggle('active', !num);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% from "_post_card.html" import post_card %}
+{% set cfg = section.get('cfg') or {} %}
+{% set items = section['items'] %}
+{% if section.get('title') %}<div class="feed-header"><h2>{{ section['title'] }}</h2></div>{% endif %}
+
+{% if section['type'] == 'hero' %}
+  <div class="hero-section">
+    <h1>{{ cfg.get('subtitle') or 'welcome.' }}</h1>
+    {% if cfg.get('body') %}<div class="text-block hero-sub">{{ cfg['body'] | md | safe }}</div>{% endif %}
+  </div>
+
+{% elif section['type'] == 'text' %}
+  <div class="text-block">{{ cfg.get('content','') | md | safe }}</div>
+
+{% elif section['type'] == 'posts' %}
+  {% if items %}
+    {% for p in items %}{{ post_card(p) }}{% if not loop.last %}<div class="divider">✦ ✦ ✦</div>{% endif %}{% endfor %}
+  {% else %}
+    <div class="empty-notice">No posts yet — check back soon!</div>
+  {% endif %}
+
+{% elif section['type'] == 'books' %}
+  {% if items %}
+    <div class="books-grid">
+      {% for b in items %}
+        <div class="book-card">
+          {% if b.cover_url %}<img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" />
+          {% else %}<div class="book-cover-placeholder">📚</div>{% endif %}
+          <div class="book-info">
+            <div class="book-title-text">{{ b.title }}</div>
+            <div class="book-author">{{ b.author or '' }}</div>
+            {% if b.rating %}<div class="book-stars">{{ b.rating | stars }}</div>{% endif %}
+            {% if b.year_read %}<div style="font-size:10px;color:var(--muted);margin-top:4px">{{ b.year_read }}</div>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-notice">No books here yet.</div>
+  {% endif %}
+
+{% elif section['type'] == 'photos' %}
+  {% if items %}
+    <div class="photos-grid">
+      {% for p in items %}
+        <div class="photo-item">
+          <img src="{{ p.url }}" alt="{{ p.alt_text or p.caption or '' }}" loading="lazy" />
+          {% if p.caption %}<div class="photo-caption">{{ p.caption }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-notice">No photos yet.</div>
+  {% endif %}
+
+{% elif section['type'] == 'music' %}
+  {% if items %}
+    <div class="music-grid">
+      {% for t in items %}
+        <div class="music-card">
+          {% if t.cover_url %}<img class="music-cover" src="{{ t.cover_url }}" alt="{{ t.title }}" />
+          {% else %}<div class="music-cover-ph">♪</div>{% endif %}
+          <div class="music-info">
+            <div class="music-title-text">{{ t.title }}</div>
+            <div class="music-artist">{{ t.artist }}</div>
+            <div class="music-type">{{ t.type or '' }}</div>
+            {% if t.rating %}<div style="color:#f59e0b;font-size:12px;margin-top:4px">{{ '★' * (t.rating|int) }}</div>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-notice">Nothing here yet.</div>
+  {% endif %}
+
+{% elif section['type'] == 'links' %}
+  {% if items %}
+    {% for cat, ls in items | groupby('category') %}
+      <div class="links-category-header">{{ cat }}</div>
+      <div class="links-list">
+        {% for l in ls %}
+          <div class="link-item">
+            <div><a href="{{ l.url }}" target="_blank" rel="noopener">{{ l.label }} ↗</a></div>
+            {% if l.description %}<div class="link-desc">{{ l.description }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-notice">No links yet.</div>
+  {% endif %}
+
+{% elif section['type'] == 'guestbook' %}
+  {% if items %}
+    <div class="feed-header" style="margin-top:8px"><h2>★ messages</h2></div>
+    {% for g in items %}
+      <div class="gb-entry-card">
+        <div class="gb-entry-header">
+          <span class="gb-entry-name">{{ g.name }}{% if g.website %} <a href="{{ g.website }}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);font-weight:400;margin-left:4px">↗</a>{% endif %}</span>
+          <span class="gb-entry-date">{{ g.created_at | fmtdate }}</span>
+        </div>
+        <div class="gb-entry-message">{{ g.message }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-notice">No messages yet. Be the first!</div>
+  {% endif %}
+
+{% endif %}

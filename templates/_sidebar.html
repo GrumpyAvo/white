@@ -1,0 +1,99 @@
+<aside>
+  <!-- About -->
+  <div class="widget about-widget">
+    <div class="widget-title"><span>★</span> about me</div>
+    <div class="widget-body">
+      <div class="clearfix">
+        <div class="avatar" style="overflow:hidden;padding:0;"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:34px;">🕶</span></div>
+        <div class="name">Hey, I'm Ricardo</div>
+      </div>
+      <p style="margin-top:8px">I like learning random things, reading, and playing games. Sometimes it's science, sometimes history, sometimes conspiracies, whatever weird topic I fell into at 2 a.m.</p>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:2">
+        📍 South Africa<br/>
+        📷 Kodak Ektar 35H · Voigtlander Bessa<br/>
+        ♟️ Chess · elo 1521<br/>
+        🎸 Guitar · musical genius<br/>
+        🎓 Aspiring doctor
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="widget">
+    <div class="widget-title"><span>◈</span> current status</div>
+    <div class="widget-body" style="overflow:visible">
+      <div style="font-size:12px;margin-bottom:12px;padding:8px;background:var(--panel);border:1px dashed var(--border);font-style:italic">
+        "{% if tagline %}{{ tagline }}{% endif %}"<span class="blink">|</span>
+      </div>
+      <div class="mood-bar"><span class="mood-label">energy</span><div class="mood-track"><div class="mood-fill gold" style="width:65%"></div></div></div>
+      <div class="mood-bar curiosity-row" style="overflow:visible">
+        <span class="mood-label">curiosity</span>
+        <div class="mood-track" style="overflow:visible"><div class="curiosity-fill"></div></div>
+      </div>
+      <div class="mood-bar"><span class="mood-label">social</span><div class="mood-track"><div class="mood-fill red" style="width:30%"></div></div></div>
+      <div class="mood-bar"><span class="mood-label">creative</span><div class="mood-track"><div class="mood-fill red" style="width:5%"></div></div></div>
+    </div>
+  </div>
+
+  <!-- Now Playing -->
+  <div class="widget">
+    <div class="widget-title"><span>♫</span> <a href="{{ url_for('page_view', slug='music') }}" style="color:inherit;text-decoration:none;">now playing ↗</a></div>
+    <div class="widget-body" id="np-widget-body">
+      <div class="now-playing">
+        <div class="album-art" id="np-art"><span class="vinyl">◎</span></div>
+        <div class="track-info">
+          <div class="track-name" id="np-title">{% if now_playing and now_playing.isPlaying %}{{ now_playing.title }}{% else %}not playing{% endif %}</div>
+          <div class="track-artist" id="np-artist">{% if now_playing and now_playing.isPlaying %}{{ now_playing.artist }}{% else %}—{% endif %}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px" id="np-status">{% if now_playing and now_playing.isPlaying %}<span style="color:var(--accent1)">▶</span> playing now{% else %}◈ offline{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Posts -->
+  <div class="widget">
+    <div class="widget-title"><span>↓</span> recent posts</div>
+    <div class="widget-body" id="recent-posts-sidebar">
+      {% if recent_posts %}
+        {% for p in recent_posts %}
+          <a href="{{ url_for('page_view', slug=p.tab_slug) }}#post-{{ p.id }}" class="recent-post">
+            <span class="rp-num">0{{ loop.index }}</span>
+            <div><div class="rp-title">{{ p.title }}</div><div class="rp-date">{{ p.created_at | fmtdate }}</div></div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div style="font-size:12px;color:var(--muted);font-style:italic">no posts yet</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div class="widget">
+    <div class="widget-title"><span>#</span> tags</div>
+    <div class="widget-body">
+      <div class="tag-cloud">
+        <a href="{{ url_for('page_view', slug='pics') }}" class="tag big">pics</a>
+        <a href="{{ url_for('page_view', slug='pics') }}" class="tag">film</a>
+        <a href="{{ url_for('page_view', slug='life') }}" class="tag big">life</a>
+        <a href="{{ url_for('page_view', slug='studies') }}" class="tag">studies</a>
+        <a href="{{ url_for('page_view', slug='books') }}" class="tag big">books</a>
+        <a href="{{ url_for('page_view', slug='pics') }}" class="tag">photography</a>
+        <a href="{{ url_for('page_view', slug='pics') }}" class="tag">kodak</a>
+        <a href="{{ url_for('page_view', slug='life') }}" class="tag">personal</a>
+        <a href="{{ url_for('page_view', slug='life') }}" class="tag">thoughts</a>
+        <a href="{{ url_for('page_view', slug='books') }}" class="tag">reading</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guestbook preview -->
+  <div class="widget">
+    <div class="widget-title"><span>✉</span> guestbook</div>
+    <div class="widget-body">
+      <div id="gb-sidebar-preview" style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px">
+        {% if gb_latest %}<strong style="font-size:12px">{{ gb_latest.name }}</strong><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px">"{{ gb_latest.message[:70] }}{% if gb_latest.message|length > 70 %}…{% endif %}"</div>{% endif %}
+      </div>
+      <a href="{{ url_for('guestbook') }}" class="read-more" style="margin-top:10px;display:inline-block;font-size:10px">sign guestbook →</a>
+    </div>
+  </div>
+</aside>

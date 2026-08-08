@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% block title %}import · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Import Data</div>
+    <div class="page-sub">Backfills pages, books, study papers, photos, sections & settings from the original seeder</div>
+  </div>
+  <div class="quick-actions">
+    {% for name in ['pages', 'books', 'music', 'photos', 'links', 'posts', 'sections', 'settings'] %}
+    <form method="post" action="{{ url_for('admin.import_admin') }}" style="display:inline">
+      <input type="hidden" name="dataset" value="{{ name }}" />
+      <button class="qa-btn" type="submit">⇪ {{ name }}</button>
+    </form>
+    {% endfor %}
+  </div>
+  <div style="margin-top:16px;font-size:12px;opacity:.7">Imports are idempotent — existing rows are skipped. <a href="{{ url_for('admin.dashboard') }}">← dashboard</a></div>
+</div>
+{% endblock %}

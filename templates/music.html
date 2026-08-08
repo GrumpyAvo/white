@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Music · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="page-title">♫ music</div>
+<div class="page-subtitle">live from my spotify. updates in real time.</div>
+
+<div class="now-playing-hero" id="now-playing-hero">
+  <div class="vinyl-large{% if not (now_playing and now_playing.isPlaying) %} vinyl-paused{% endif %}" id="vinyl"></div>
+  <div class="now-playing-info">
+    <div class="np-label" id="np-label">◈ {% if now_playing and now_playing.isPlaying %}now playing{% else %}not playing{% endif %}</div>
+    <div class="np-song" id="np-song">{% if now_playing and now_playing.isPlaying %}{{ now_playing.title }}{% else %}nothing on right now{% endif %}</div>
+    <div class="np-artist" id="np-artist">{% if now_playing and now_playing.isPlaying %}{{ now_playing.artist }}{% else %}open spotify and it'll appear here{% endif %}</div>
+  </div>
+</div>
+
+<div class="section-heading" id="shelf-heading" style="display:flex">★ my music shelf</div>
+{% if items %}
+  <div class="music-shelf-grid" id="music-shelf" style="display:block">
+    {% for t in items %}
+      <div class="shelf-card">
+        {% if t.cover_url %}<img src="{{ t.cover_url }}" alt="{{ t.title }}" />
+        {% else %}<div class="no-cov">♪</div>{% endif %}
+        <div class="sc-info">
+          <div class="sc-title">{{ t.title }}</div>
+          <div class="sc-artist">{{ t.artist }}</div>
+          {% if t.rating %}<div class="sc-stars">{{ '★' * (t.rating|int) }}</div>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="music-shelf-grid" id="music-shelf" style="display:block">
+    <div class="empty-notice" style="grid-column:1/-1">nothing on the shelf yet.</div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  var vinyl = document.getElementById('vinyl');
+  var label = document.getElementById('np-label');
+  var song = document.getElementById('np-song');
+  var artist = document.getElementById('np-artist');
+  function render(d){
+    var playing = !!(d && d.isPlaying);
+    if (vinyl) vinyl.classList.toggle('vinyl-paused', !playing);
+    if (label) label.textContent = '◈ ' + (playing ? 'now playing' : 'not playing');
+    if (song) song.textContent = playing ? d.title : 'nothing on right now';
+    if (artist) artist.textContent = playing ? d.artist : "open spotify and it'll appear here";
+  }
+  function refresh(){
+    fetch('/api/now-playing').then(function(r){ return r.json(); }).then(render).catch(function(){});
+  }
+  setInterval(refresh, 15000);
+})();
+</script>
+{% endblock %}

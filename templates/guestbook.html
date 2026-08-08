@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Guestbook · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="page-title">✉ guestbook</div>
+<div class="page-subtitle">you visited. leave a little something behind.</div>
+
+{% if guestbook_open %}
+  <form method="post" action="{{ url_for('guestbook') }}" class="gb-form">
+    <h3>★ sign the guestbook</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>your name *</label>
+        <input type="text" name="name" id="gb-name" placeholder="anonymous is fine too" maxlength="80" required />
+      </div>
+      <div class="form-group">
+        <label>your website (optional)</label>
+        <input type="text" name="website" id="gb-website" placeholder="https://..." maxlength="120" />
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>your message *</label>
+      <textarea name="message" id="gb-message" rows="4" placeholder="say hi, leave a thought, tell me what you think..." maxlength="500" required></textarea>
+    </div>
+    <button class="submit-btn" type="submit">sign guestbook →</button>
+    {% if flash_msg %}<div class="success-msg" id="success-msg" style="display:block">{{ flash_msg }}</div>{% endif %}
+    {% if flash_err %}<div class="gb-msg-err" id="gb-msg-err" style="display:block">{{ flash_err }}</div>{% endif %}
+  </form>
+{% else %}
+  <div class="empty-notice" style="margin:24px 0 40px">the guestbook is currently closed.</div>
+{% endif %}
+
+<div class="search-wrap">
+  <div class="search-icon">🔍</div>
+  <input class="search-input" id="gb-search" placeholder="search by name..." autocomplete="off" />
+</div>
+<div id="search-results-label" class="search-results-label" style="display:none"></div>
+<div class="entries-header">★ entries</div>
+<div id="entries-list">
+  {% if entries %}
+    {% for e in entries %}
+      <div class="gb-entry-card">
+        <div class="gb-entry-header">
+          <span class="gb-entry-name">{{ e.name }}{% if e.website %} <a href="{{ e.website }}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);font-weight:400;margin-left:4px">↗</a>{% endif %}</span>
+          <span class="gb-entry-date">{{ e.created_at | fmtdate }}</span>
+        </div>
+        <div class="gb-entry-message">{{ e.message }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-notice">no entries yet — be the first to sign! 🌟</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  var input = document.getElementById('gb-search');
+  var label = document.getElementById('search-results-label');
+  if (!input) return;
+  input.addEventListener('input', function(){
+    var q = this.value.trim().toLowerCase();
+    var visible = 0;
+    document.querySelectorAll('#entries-list .gb-entry-card').forEach(function(card){
+      var nameEl = card.querySelector('.gb-entry-name');
+      var name = nameEl ? nameEl.textContent.toLowerCase() : '';
+      var show = !q || name.indexOf(q) !== -1;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (label) {
+      label.style.display = q ? 'block' : 'none';
+      label.textContent = q ? visible + (visible === 1 ? ' result' : ' results') : '';
+    }
+  });
+})();
+</script>
+{% endblock %}

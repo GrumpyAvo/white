@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% block title %}login · white{% endblock %}
+{% block content %}
+<div class="page active">
+  <div class="page-header">
+    <div class="page-title">Admin Login</div>
+    <div class="page-sub">restricted area</div>
+  </div>
+  <div class="login-card">
+    <form method="post" action="{{ url_for('admin.login', next=request.args.get('next')) }}">
+      <div class="editor-field">
+        <label>Password</label>
+        <input type="password" name="password" required autofocus placeholder="••••••••" />
+      </div>
+      <button type="submit" class="save-btn" style="margin-top:14px;width:100%;justify-content:center">🔓 Enter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

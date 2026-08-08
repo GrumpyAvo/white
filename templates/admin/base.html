@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}admin · white{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">admin</div>
+    <nav class="side-nav">
+      <a class="nav-item {% if active == 'dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">dashboard</a>
+      <a class="nav-item {% if active == 'posts' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='posts') }}">posts</a>
+      <a class="nav-item {% if active == 'books' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='books') }}">books</a>
+      <a class="nav-item {% if active == 'music' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='music') }}">music</a>
+      <a class="nav-item {% if active == 'photos' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='photos') }}">photos</a>
+      <a class="nav-item {% if active == 'links' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='links') }}">links</a>
+      <a class="nav-item {% if active == 'guestbook' %}active{% endif %}" href="{{ url_for('admin.guestbook_admin') }}">guestbook</a>
+      <a class="nav-item {% if active == 'tabs' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='tabs') }}">pages</a>
+      <a class="nav-item {% if active == 'sections' %}active{% endif %}" href="{{ url_for('admin.list_entity', entity='sections') }}">sections</a>
+      <a class="nav-item {% if active == 'users' %}active{% endif %}" href="{{ url_for('admin.users_admin') }}">users</a>
+      <a class="nav-item {% if active == 'settings' %}active{% endif %}" href="{{ url_for('admin.settings_admin') }}">settings</a>
+      <a class="nav-item {% if active == 'import' %}active{% endif %}" href="{{ url_for('admin.import_admin') }}">import</a>
+    </nav>
+    <a class="logout-btn" href="{{ url_for('admin.logout') }}">↪ logout</a>
+  </aside>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
