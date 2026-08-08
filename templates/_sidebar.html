@@ -40,7 +40,7 @@
     <div class="widget-title"><span>♫</span> <a href="{{ url_for('page_view', slug='music') }}" style="color:inherit;text-decoration:none;">now playing ↗</a></div>
     <div class="widget-body" id="np-widget-body">
       <div class="now-playing">
-        <div class="album-art" id="np-art"><span class="vinyl">◎</span></div>
+        <div class="album-art" id="np-art" data-art="{% if now_playing and now_playing.isPlaying and now_playing.albumArt %}{{ now_playing.albumArt }}{% endif %}">{% if now_playing and now_playing.isPlaying and now_playing.albumArt %}<img src="{{ now_playing.albumArt }}" style="width:100%;height:100%;object-fit:cover;display:block;border:0;" alt="album art" />{% else %}<span class="vinyl">◎</span>{% endif %}</div>
         <div class="track-info">
           <div class="track-name" id="np-title">{% if now_playing and now_playing.isPlaying %}{{ now_playing.title }}{% else %}not playing{% endif %}</div>
           <div class="track-artist" id="np-artist">{% if now_playing and now_playing.isPlaying %}{{ now_playing.artist }}{% else %}—{% endif %}</div>

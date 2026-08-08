@@ -5,7 +5,7 @@
 <div class="page-subtitle">live from my spotify. updates in real time.</div>
 
 <div class="now-playing-hero" id="now-playing-hero">
-  <div class="vinyl-large{% if not (now_playing and now_playing.isPlaying) %} vinyl-paused{% endif %}" id="vinyl"></div>
+  <div id="vinyl" class="{% if now_playing and now_playing.isPlaying and now_playing.albumArt %}album-art-img{% else %}vinyl-large{% if not (now_playing and now_playing.isPlaying) %} vinyl-paused{% endif %}{% endif %}">{% if now_playing and now_playing.isPlaying and now_playing.albumArt %}<img src="{{ now_playing.albumArt }}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="album art" />{% endif %}</div>
   <div class="now-playing-info">
     <div class="np-label" id="np-label">◈ {% if now_playing and now_playing.isPlaying %}now playing{% else %}not playing{% endif %}</div>
     <div class="np-song" id="np-song">{% if now_playing and now_playing.isPlaying %}<a href="{{ now_playing.songUrl }}" target="_blank">{{ now_playing.title }}</a>{% else %}nothing on right now{% endif %}</div>
@@ -66,7 +66,15 @@
 
   function render(d){
     var playing = !!(d && d.isPlaying);
-    if (vinyl) vinyl.classList.toggle('vinyl-paused', !playing);
+    if (vinyl) {
+      if (playing && d.albumArt) {
+        vinyl.className = 'album-art-img';
+        vinyl.innerHTML = '<img src="' + d.albumArt + '" style="width:100%;height:100%;object-fit:cover;display:block;" alt="album art" />';
+      } else {
+        vinyl.className = 'vinyl-large' + (playing ? '' : ' vinyl-paused');
+        vinyl.innerHTML = '';
+      }
+    }
     if (label) label.textContent = '◈ ' + (playing ? 'now playing' : 'not playing');
     if (artist) artist.textContent = playing ? d.artist : "open spotify and it'll appear here";
     if (song) song.innerHTML = playing

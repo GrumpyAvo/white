@@ -43,7 +43,15 @@
   var titleEl = document.getElementById('np-title');
   var artistEl = document.getElementById('np-artist');
   var statusEl = document.getElementById('np-status');
+  var artEl = document.getElementById('np-art');
   if (!titleEl) return;
+
+  function setArt(d){
+    if (!artEl) return;
+    artEl.innerHTML = (d && d.isPlaying && d.albumArt)
+      ? '<img src="' + d.albumArt + '" style="width:100%;height:100%;object-fit:cover;display:block;border:0;" alt="album art" />'
+      : '<span class="vinyl">◎</span>';
+  }
 
   function render(d){
     if (d && d.isPlaying) {
@@ -55,6 +63,7 @@
       if (artistEl) artistEl.textContent = '—';
       if (statusEl) statusEl.innerHTML = '◈ offline';
     }
+    setArt(d);
   }
 
   function refresh(){
@@ -64,6 +73,10 @@
       .catch(function(){ /* keep last state */ });
   }
 
-  render({ isPlaying: (titleEl.textContent && titleEl.textContent !== 'not playing') });
+  render({
+    isPlaying: (titleEl.textContent && titleEl.textContent !== 'not playing'),
+    albumArt: artEl ? (artEl.getAttribute('data-art') || '') : ''
+  });
+  refresh();
   setInterval(refresh, 10000);
 })();
