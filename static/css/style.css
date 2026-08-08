@@ -296,7 +296,7 @@
 .empty-notice{padding:32px 0;color:var(--muted);font-size:14px;font-style:italic;}
 
 /* --- books.html components --- */
-.page-wrap{ flex:1 0 auto; max-width:1400px; margin:0 auto; padding:40px 48px; }
+.page-wrap{ flex:1 0 auto; width:100%; padding:40px 48px; }
 .page-header-row{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:12px; }
 .page-title{ font-family:'SupremeDonuts',serif; font-weight:800; font-size:2.2rem; letter-spacing:-0.02em; }
 /* ── TOGGLE BUTTON ── */
@@ -397,7 +397,7 @@
 .gallery-empty{ color:var(--muted); font-style:italic; font-size:13px; text-align:center; padding:60px 0; }
 
 .site-title a { text-decoration:none; color:var(--accent1); }
-.page-wrap { flex:1 0 auto; max-width:1400px; margin:0 auto; padding:40px 48px; }
+.page-wrap { flex:1 0 auto; width:100%; padding:40px 48px; }
 .page-subtitle { color:var(--muted); font-size:13px; margin-bottom:28px; }
 /* ── MAGAZINE GRID ── */
     .books-grid-wrap {

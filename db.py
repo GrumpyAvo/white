@@ -102,6 +102,10 @@ CREATE TABLE IF NOT EXISTS visitors (
   page TEXT PRIMARY KEY,
   count INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS visitors_seen (
+  vid TEXT PRIMARY KEY,
+  first_seen TEXT
+);
 """
 
 

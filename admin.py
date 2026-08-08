@@ -18,7 +18,7 @@ import db
 
 admin_bp = Blueprint("admin", __name__)
 
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 
 def require_admin(f):

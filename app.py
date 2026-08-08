@@ -8,6 +8,7 @@ Run with:
 import json
 import os
 import re
+import uuid
 from datetime import datetime
 
 from flask import (
@@ -143,13 +144,39 @@ def load_settings():
 
 
 def visitors_for(page):
-    page = (page or "home")[:40]
-    db.execute(
-        "INSERT INTO visitors(page, count) VALUES(?, 1) ON CONFLICT(page) DO UPDATE SET count = count + 1",
-        (page,),
-    )
-    row = db.query_one("SELECT count FROM visitors WHERE page=?", (page,))
-    return row["count"] if row else 1
+    """Read-only: every counter shows the same global tally."""
+    row = db.query_one("SELECT count FROM visitors WHERE page='site'")
+    return row["count"] if row else 0
+
+
+@app.before_request
+def count_visitor():
+    """Count each unique visitor once (tracked by a 10-year cookie), never per
+    refresh. Runs before rendering so the tally shown is already updated."""
+    path = request.path
+    if path.startswith("/static") or path.startswith("/api"):
+        return None
+    vid = request.cookies.get("white_vid")
+    already = False
+    if vid:
+        already = db.query_one("SELECT 1 FROM visitors_seen WHERE vid=?", (vid,))
+    if not already:
+        if not vid:
+            vid = uuid.uuid4().hex
+        db.execute("INSERT OR IGNORE INTO visitors_seen(vid, first_seen) VALUES(?, ?)", (vid, db.now_iso()))
+        db.execute(
+            "INSERT INTO visitors(page, count) VALUES('site', 1)"
+            " ON CONFLICT(page) DO UPDATE SET count = count + 1")
+    request.white_vid = vid
+    return None
+
+
+@app.after_request
+def set_visitor_cookie(resp):
+    vid = getattr(request, "white_vid", None)
+    if vid:
+        resp.set_cookie("white_vid", vid, max_age=60 * 60 * 24 * 3650, httponly=True, samesite="Lax")
+    return resp
 
 
 def load_nav():
@@ -411,10 +438,10 @@ def guestbook():
         else:
             db.execute(
                 "INSERT INTO guestbook_entries(name,message,website,status,created_at)"
-                " VALUES(?,?,?,'pending',?)",
+                " VALUES(?,?,?,'approved',?)",
                 (name, message, website or None, db.now_iso()),
             )
-            ctx["flash_msg"] = "Message sent! It'll appear once approved \u2726"
+            ctx["flash_msg"] = "Thanks for signing \u2726 your message is now live!"
     entries = [dict(r) for r in db.query(
         "SELECT * FROM guestbook_entries WHERE status='approved'"
         " ORDER BY created_at DESC LIMIT 50")]
