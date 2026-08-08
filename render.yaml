@@ -20,3 +20,10 @@ services:
         value: your-spotify-client-secret
       - key: SPOTIFY_REFRESH_TOKEN
         value: your-spotify-refresh-token
+      # Durable storage: without these, admin content resets to seed data on
+      # every redeploy. Set the real values in the Render dashboard from the
+      # Supabase project settings (Project URL + service_role key).
+      - key: SUPABASE_URL
+        value: https://your-project-ref.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: your-service-role-key
