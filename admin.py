@@ -1,6 +1,7 @@
 """Admin panel: password login + CRUD for every content table + seeder."""
 import json
 import os
+import re
 import uuid
 from functools import wraps
 
@@ -31,6 +32,20 @@ ALLOWED_EXT = {
     ".pdf", ".txt", ".zip",
 }
 MAX_UPLOAD = 50 * 1024 * 1024
+
+# Every column that can reference an uploaded file (by its /uploads/… URL).
+# Moving media rewrites each occurrence so the site follows automatically.
+REFC_COLUMNS = [
+    ("posts", "image_url"),
+    ("posts", "content"),
+    ("books", "cover_url"),
+    ("music", "cover_url"),
+    ("photos", "url"),
+    ("sections", "config"),
+    ("site_settings", "value"),
+]
+
+FOLDER_OK = re.compile(r"^[\w .\-]+$")
 
 
 def require_admin(f):
@@ -80,10 +95,10 @@ ENTITY_FIELDS = {
         ("status", "Status", "select:published,draft"),
     ],
     "photos": [
-        ("url", "URL", "text"),
+        ("url", "Photo URL", "text"),
         ("caption", "Caption", "text"),
+        ("album", "Albums (comma separated)", "albums"),
         ("alt_text", "Alt text", "text"),
-        ("album", "Album", "text"),
         ("visible", "Visible", "checkbox"),
     ],
     "links": [
@@ -127,6 +142,9 @@ def _parse_field_value(fname, ftype, raw):
             return None
     if ftype == "tags":
         return db.list_to_tags(raw or "")
+    if ftype == "albums":
+        parts = [p.strip() for p in (raw or "").split(",") if p.strip()]
+        return db.serialize_albums(parts)
     return (raw or "").strip() or None
 
 
@@ -135,6 +153,8 @@ def _display_row(entity, row):
     if entity == "posts":
         d["tab_name"] = (d.get("tab_name") or "—")
         d["status"] = "published" if d.get("published") and d.get("status") == "live" else d.get("status") or "draft"
+    if entity == "photos" and d.get("album"):
+        d["album"] = ", ".join(db.parse_albums(d["album"]))
     return d
 
 
@@ -253,6 +273,8 @@ def edit_entity(entity, item_id=None):
         record = dict(record)
         if entity == "posts" and record.get("tags"):
             record["tags"] = ", ".join(db.tags_to_list(record))
+        if entity == "photos" and record.get("album"):
+            record["album"] = ", ".join(db.parse_albums(record["album"]))
 
     if request.method == "POST":
         data = {}
@@ -276,14 +298,28 @@ def edit_entity(entity, item_id=None):
         backup.snapshot()
         return redirect(url_for("admin.list_entity", entity=entity))
 
+    albums_all = sorted({
+        a
+        for r in db.query("SELECT album FROM photos WHERE album IS NOT NULL AND album != ''")
+        for a in db.parse_albums(r["album"])
+    })
     return render_template(
         "admin/edit.html",
         entity=entity,
         record=record,
         fields=ENTITY_FIELDS[entity],
         tabs=db.query("SELECT id, name FROM tabs ORDER BY position"),
+        albums_all=albums_all,
         active=entity,
     )
+
+
+@admin_bp.route("/preview", methods=["POST"])
+@require_admin
+def preview():
+    """Render markdown for the posts editor live preview."""
+    from app import md
+    return md(request.form.get("content") or "")
 
 
 @admin_bp.route("/<entity>/<int:item_id>/delete", methods=["POST"])
@@ -334,31 +370,117 @@ def upload():
     blob = f.read()
     if len(blob) > MAX_UPLOAD:
         return jsonify({"error": "file too large (max 50MB)"}), 400
+    folder = request.form.get("folder", "").strip().strip("/\\")
+    if folder and not FOLDER_OK.match(folder):
+        return jsonify({"error": "invalid folder name"}), 400
     name = uuid.uuid4().hex[:12] + ext
-    os.makedirs(storage.UPLOAD_DIR, exist_ok=True)
-    with open(os.path.join(storage.UPLOAD_DIR, name), "wb") as fh:
+    rel = name if not folder else folder + "/" + name
+    os.makedirs(os.path.join(storage.UPLOAD_DIR, os.path.dirname(rel)), exist_ok=True)
+    with open(os.path.join(storage.UPLOAD_DIR, rel), "wb") as fh:
         fh.write(blob)
     if storage.durable():
         try:
             if len(blob) <= storage.MAX_MEDIA:
-                storage.save_media(name, blob)
+                storage.save_media(rel, blob)
             else:
                 flash("File stored locally only (over %dMB — won't survive a redeploy)" % (storage.MAX_MEDIA // (1024 * 1024)), "error")
         except Exception:
             pass
     media_id = db.execute(
         "INSERT INTO media(filename,url,content_type,size,created_at) VALUES(?,?,?,?,?)",
-        (name, "/uploads/" + name, f.mimetype or "application/octet-stream", len(blob), db.now_iso()),
+        (rel, "/uploads/" + rel, f.mimetype or "application/octet-stream", len(blob), db.now_iso()),
     )
     backup.snapshot()
-    return jsonify({"id": media_id, "url": "/uploads/" + name, "filename": f.filename, "size": len(blob)})
+    return jsonify({"id": media_id, "url": "/uploads/" + rel, "filename": f.filename, "size": len(blob)})
 
 
 @admin_bp.route("/media")
 @require_admin
 def media_library():
     rows = [dict(r) for r in db.query("SELECT * FROM media ORDER BY created_at DESC")]
-    return render_template("admin/media.html", rows=rows, active="media")
+    folders = set()
+    for r in rows:
+        r["folder"] = os.path.dirname(r["filename"].replace("\\", "/"))
+        r["refs"] = _count_refs(r["url"])
+        if r["folder"]:
+            folders.add(r["folder"])
+    return render_template("admin/media.html", rows=rows, folders=sorted(folders), active="media")
+
+
+def _count_refs(url):
+    n = 0
+    for table, col in REFC_COLUMNS:
+        r = db.query_one(
+            "SELECT COUNT(*) AS c FROM %s WHERE %s LIKE ?" % (table, col),
+            ("%" + url + "%",),
+        )
+        if r and r["c"]:
+            n += int(r["c"])
+    return n
+
+
+def _rewrite_url(old_url, new_url):
+    """Point every stored reference at the new URL. Returns rows touched."""
+    changed = 0
+    esc = old_url.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    for table, col in REFC_COLUMNS:
+        changed += db.execute_update(
+            "UPDATE %s SET %s = REPLACE(%s, ?, ?) WHERE %s LIKE ? ESCAPE '\\'"
+            % (table, col, col, col),
+            (old_url, new_url, "%" + esc + "%"),
+        )
+    return changed
+
+
+@admin_bp.route("/media/<int:item_id>/move", methods=["POST"])
+@require_admin
+def move_media(item_id):
+    row = db.query_one("SELECT * FROM media WHERE id=?", (item_id,))
+    if not row:
+        flash("media not found", "error")
+        return redirect(url_for("admin.media_library"))
+    folder = request.form.get("folder", "").strip().strip("/\\")
+    if folder and not FOLDER_OK.match(folder):
+        flash("invalid folder name", "error")
+        return redirect(url_for("admin.media_library"))
+    old_rel = row["filename"]
+    old_url = row["url"]
+    base = os.path.basename(old_rel.replace("\\", "/"))
+    new_rel = base if not folder else folder + "/" + base
+    if new_rel == old_rel:
+        flash("already in that folder", "ok")
+        return redirect(url_for("admin.media_library"))
+    dst = os.path.join(storage.UPLOAD_DIR, new_rel)
+    if os.path.exists(dst):
+        root, ext = os.path.splitext(base)
+        n = 1
+        while True:
+            candidate = "%s-%d%s" % (root, n, ext)
+            candidate_rel = candidate if not folder else folder + "/" + candidate
+            if not os.path.exists(os.path.join(storage.UPLOAD_DIR, candidate_rel)):
+                new_rel, base = candidate_rel, candidate
+                dst = os.path.join(storage.UPLOAD_DIR, candidate_rel)
+                break
+            n += 1
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    src = os.path.join(storage.UPLOAD_DIR, old_rel)
+    if os.path.exists(src):
+        os.rename(src, dst)
+    if storage.durable():
+        try:
+            storage.move_media(old_rel, new_rel)
+        except Exception:
+            pass
+    new_url = "/uploads/" + new_rel
+    db.execute("UPDATE media SET filename=?, url=? WHERE id=?", (new_rel, new_url, item_id))
+    changed = _rewrite_url(old_url, new_url)
+    backup.snapshot()
+    where = folder if folder else "root"
+    flash(
+        "Moved to %s (updated %d reference%s)" % (where, changed, "" if changed == 1 else "s"),
+        "ok",
+    )
+    return redirect(url_for("admin.media_library"))
 
 
 @admin_bp.route("/media/<int:item_id>/delete", methods=["POST"])

@@ -5,16 +5,28 @@
 <div class="page-subtitle">photos i've taken. mostly film. mostly moments i wanted to keep.</div>
 <div id="page-main-content">
   {% if items %}
-    <div id="album-tabs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;">
-      <button class="album-tab active" data-album="all" onclick="filterAlbum('all')">all ({{ items|length }})</button>
+    <div id="album-grid" class="album-grid">
+      <button class="album-card" onclick="enterAlbum('all')">
+        <img src="{{ (albums[0].cover if albums else items[0].url) }}" alt="all photos" loading="lazy" />
+        <div class="album-card-info">
+          <div class="album-card-name">all</div>
+          <div class="album-card-count">{{ items|length }} photos</div>
+        </div>
+      </button>
       {% for album in albums %}
-        <button class="album-tab" data-album="{{ album.name }}" onclick="filterAlbum({{ album.name|tojson }})">{{ album.name }} ({{ album.count }})</button>
+        <button class="album-card" onclick='enterAlbum({{ album.name|tojson }})'>
+          {% if album.cover %}<img src="{{ album.cover }}" alt="{{ album.name }}" loading="lazy" />{% endif %}
+          <div class="album-card-info">
+            <div class="album-card-name">{{ album.name }}</div>
+            <div class="album-card-count">{{ album.count }} photo{{ 's' if album.count != 1 }}</div>
+          </div>
+        </button>
       {% endfor %}
     </div>
-    <div class="gallery" id="gallery">
-      {% for p in items %}
-        <img src="{{ p.url }}" alt="{{ p.caption or '' }}" loading="lazy" decoding="async" data-idx="{{ loop.index0 }}" data-album="{{ p.album or 'misc' }}" onclick="openLBIdx({{ loop.index0 }})" title="{{ p.caption or p.album or '' }}" />
-      {% endfor %}
+    <div id="album-view" style="display:none">
+      <button class="album-back" onclick="showAlbumGrid()">← all albums</button>
+      <h2 class="album-view-title" id="album-view-title"></h2>
+      <div class="gallery" id="gallery"></div>
     </div>
   {% else %}
     <div class="gallery-empty">no photos yet — come back soon.</div>
@@ -24,9 +36,40 @@
 
 {% block extra_scripts %}
 <script>
-window._lbPhotos = ({{ items | tojson }}).map(function(p){ return Object.assign({}, p, { album: p.album || 'misc' }); });
-window._lbPhotosAll = [].concat(window._lbPhotos);
+window._lbPhotosAll = ({{ items | tojson }}).map(function(p){ return Object.assign({}, p, { albums: p.albums && p.albums.length ? p.albums : ['misc'] }); });
+window._lbPhotos = [].concat(window._lbPhotosAll);
 window._lbIdx = 0;
+
+function renderGallery(photos){
+  var g = document.getElementById('gallery');
+  if (!g) return;
+  g.innerHTML = '';
+  photos.forEach(function(p, i){
+    var img = document.createElement('img');
+    img.src = p.url;
+    img.alt = p.caption || '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.title = p.caption || '';
+    img.addEventListener('click', function(){ openLBIdx(i); });
+    g.appendChild(img);
+  });
+}
+
+function enterAlbum(album){
+  var photos = album === 'all' ? window._lbPhotosAll : window._lbPhotosAll.filter(function(p){ return p.albums.indexOf(album) !== -1; });
+  window._lbPhotos = photos;
+  document.getElementById('album-grid').style.display = 'none';
+  document.getElementById('album-view').style.display = 'block';
+  document.getElementById('album-view-title').textContent = album === 'all' ? 'all photos' : album;
+  renderGallery(photos);
+  window.scrollTo(0, 0);
+}
+function showAlbumGrid(){
+  document.getElementById('album-grid').style.display = 'grid';
+  document.getElementById('album-view').style.display = 'none';
+  window._lbPhotos = [].concat(window._lbPhotosAll);
+}
 
 function openLBIdx(i){
   var photos = window._lbPhotos;
@@ -52,19 +95,9 @@ function lbNav(dir){
   var ni = window._lbIdx + dir;
   if (ni >= 0 && ni < n) openLBIdx(ni);
 }
-function filterAlbum(album){
-  document.querySelectorAll('.album-tab').forEach(function(b){ b.classList.toggle('active', b.dataset.album === album); });
-  document.querySelectorAll('#gallery img').forEach(function(img){
-    img.style.display = (album === 'all' || img.dataset.album === album) ? 'block' : 'none';
-  });
-  var all = window._lbPhotosAll || (window._lbPhotosAll = [].concat(window._lbPhotos));
-  window._lbPhotos = album === 'all' ? all : all.filter(function(p){ return p.album === album; });
-  var idx = 0;
-  document.querySelectorAll('#gallery img').forEach(function(img){
-    if (img.style.display !== 'none') { img.setAttribute('onclick', 'openLBIdx(' + idx + ')'); img.dataset.idx = idx; idx++; }
-  });
-}
 document.getElementById('lightbox-close')?.addEventListener('click', function(){ document.getElementById('lightbox').classList.remove('open'); });
+document.getElementById('lb-prev')?.addEventListener('click', function(){ lbNav(-1); });
+document.getElementById('lb-next')?.addEventListener('click', function(){ lbNav(1); });
 document.getElementById('lightbox')?.addEventListener('click', function(e){
   if (e.target === document.getElementById('lightbox')) document.getElementById('lightbox').classList.remove('open');
 });
@@ -73,5 +106,19 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'ArrowLeft') lbNav(-1);
   if (e.key === 'ArrowRight') lbNav(1);
 });
+(function(){
+  var lb = document.getElementById('lightbox');
+  var img = document.getElementById('lightbox-img');
+  if (!lb || !img) return;
+  var sx = null, sy = null;
+  lb.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+  lb.addEventListener('touchend', function(e){
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx;
+    var dy = e.changedTouches[0].clientY - sy;
+    sx = null; sy = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) lbNav(dx < 0 ? 1 : -1);
+  }, {passive:true});
+})();
 </script>
 {% endblock %}

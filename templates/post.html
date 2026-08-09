@@ -8,6 +8,14 @@
 </div>
 {% if post.image_url %}<img src="{{ post.image_url }}" alt="{{ post.title }}" class="post-image" style="border:1.5px solid var(--dark);margin-bottom:24px;max-width:720px" />{% endif %}
 <div class="text-block">{{ post.content | md | safe }}</div>
+{% if gallery %}
+  <div class="photo-strip" id="post-gallery" data-photos='{{ gallery | tojson }}'>
+    {% for url in gallery %}
+      <img src="{{ url }}" alt="{{ post.title }}" loading="lazy" />
+    {% endfor %}
+  </div>
+  <div class="photo-strip-hint">hover to pause · click to enlarge · scroll ⇄ / swipe to browse</div>
+{% endif %}
 {% if post.tags %}
   <div style="margin:20px 0">
     {% for t in post.tags %}<span class="tag">{{ t }}</span>{% endfor %}

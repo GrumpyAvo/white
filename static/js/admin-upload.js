@@ -17,6 +17,8 @@
     if (!file) return;
     var fd = new FormData();
     fd.append('file', file);
+    var folderEl = document.getElementById('upload-folder');
+    if (folderEl && folderEl.value) fd.append('folder', folderEl.value);
     report('uploading ' + file.name + '…');
     fetch(UPLOAD_URL, { method: 'POST', body: fd })
       .then(function (r) { return r.json(); })
@@ -26,6 +28,7 @@
           var el = document.querySelector('[name="' + targetField + '"]');
           if (el) el.value = d.url;
         }
+        if (typeof window.onUploaded === 'function') window.onUploaded(d);
         report('done → ' + d.url);
       })
       .catch(function () { report('upload failed'); });

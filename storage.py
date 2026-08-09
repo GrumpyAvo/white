@@ -146,3 +146,18 @@ def load_media(name):
 
 def delete_media(name):
     _request(SUPABASE_URL + "/storage/v1/object/" + BUCKET + "/" + name, "DELETE")
+
+
+def move_media(src, dst):
+    """Relocate a stored object (keys may include a folder prefix). Falls back
+    to copy + delete if the move endpoint isn't available."""
+    _ensure_bucket()
+    payload = json.dumps({"bucketId": BUCKET, "sourceKey": src, "destinationKey": dst}).encode("utf-8")
+    status, _ = _request(SUPABASE_URL + "/storage/v1/object/move", "POST", payload, _headers(json_body=True))
+    if status in (200, 201, 204):
+        return
+    blob = load_media(src)
+    if blob is None:
+        return
+    save_media(dst, blob)
+    delete_media(src)

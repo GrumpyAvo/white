@@ -8,8 +8,7 @@ Run with:
 import json
 import os
 import re
-import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import (
     Flask,
@@ -21,6 +20,7 @@ from flask import (
     send_from_directory,
     url_for,
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import backup
 import db
@@ -32,6 +32,9 @@ from admin import admin_bp
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "white-dev-secret")
 app.register_blueprint(admin_bp, url_prefix="/admin")
+# Render sits behind a proxy: trust X-Forwarded-For so request.remote_addr
+# carries the real visitor IP (used for the unique-visitor tally).
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 
 def ensure_db():
@@ -155,32 +158,23 @@ def visitors_for(page):
 
 @app.before_request
 def count_visitor():
-    """Count each unique visitor once (tracked by a 10-year cookie), never per
-    refresh. Runs before rendering so the tally shown is already updated."""
+    """Tally unique visitors by IP — one person counts once per day, no matter
+    how many pages they open. The tally is global, so every page shows the same
+    number. Runs before rendering so the displayed count is already current."""
     path = request.path
-    if path.startswith("/static") or path.startswith("/api"):
+    if path.startswith("/static") or path.startswith("/api") or path.startswith("/admin"):
         return None
-    vid = request.cookies.get("white_vid")
-    already = False
-    if vid:
-        already = db.query_one("SELECT 1 FROM visitors_seen WHERE vid=?", (vid,))
-    if not already:
-        if not vid:
-            vid = uuid.uuid4().hex
-        db.execute("INSERT OR IGNORE INTO visitors_seen(vid, first_seen) VALUES(?, ?)", (vid, db.now_iso()))
+    ip = request.remote_addr or "unknown"
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    added = db.insert_ignore(
+        "INSERT OR IGNORE INTO visitor_ips(ip, day, first_seen) VALUES(?, ?, ?)",
+        (ip, day, db.now_iso()),
+    )
+    if added:
         db.execute(
             "INSERT INTO visitors(page, count) VALUES('site', 1)"
             " ON CONFLICT(page) DO UPDATE SET count = count + 1")
-    request.white_vid = vid
     return None
-
-
-@app.after_request
-def set_visitor_cookie(resp):
-    vid = getattr(request, "white_vid", None)
-    if vid:
-        resp.set_cookie("white_vid", vid, max_age=60 * 60 * 24 * 3650, httponly=True, samesite="Lax")
-    return resp
 
 
 def load_nav():
@@ -224,6 +218,29 @@ def post_row_to_dict(row):
     return d
 
 
+def photo_to_dict(row):
+    """Attach a parsed multi-album list to each photo row."""
+    d = dict(row)
+    d["albums"] = db.parse_albums(d.get("album")) if d.get("album") else []
+    return d
+
+
+IMG_URL_RE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)\)|\b(https?://[^\s<>'\"]+\.(?:jpe?g|png|gif|webp|avif))\b", re.IGNORECASE)
+
+
+def gallery_images(post):
+    """All images attached to a post: its cover + any images in its markdown."""
+    urls = []
+    if post.get("image_url"):
+        urls.append(post["image_url"])
+    content = post.get("content") or ""
+    for m in IMG_URL_RE.finditer(content):
+        url = m.group(1) or m.group(2)
+        if url and url not in urls:
+            urls.append(url)
+    return urls
+
+
 def load_sections(slug):
     """Return (tab, sections) for a generic page. Each section is a dict with
     cfg and pre-queried `items`."""
@@ -262,11 +279,11 @@ def load_sections(slug):
             sql = "SELECT * FROM photos WHERE visible=1"
             params = []
             if cfg.get("album"):
-                sql += " AND album=?"
-                params.append(cfg["album"])
+                sql += " AND album LIKE ?"
+                params.append("%" + cfg["album"] + "%")
             sql += " ORDER BY position LIMIT ?"
             params.append(limit)
-            sec["items"] = [dict(r) for r in db.query(sql, params)]
+            sec["items"] = [photo_to_dict(r) for r in db.query(sql, params)]
         elif sec["type"] == "music":
             sql = "SELECT * FROM music WHERE status='published'"
             params = []
@@ -294,7 +311,7 @@ def fallback_content(tab):
         return "books", [dict(r) for r in db.query(
             "SELECT * FROM books WHERE status='published' ORDER BY created_at DESC LIMIT 48")]
     if t == "photos":
-        return "photos", [dict(r) for r in db.query(
+        return "photos", [photo_to_dict(r) for r in db.query(
             "SELECT * FROM photos WHERE visible=1 ORDER BY position LIMIT 200")]
     if t == "music":
         return "music", [dict(r) for r in db.query(
@@ -350,10 +367,17 @@ def render_page(slug, template):
             ctx["items"] = []
         if template == "pics.html":
             counts = {}
+            covers = {}
             for ph in ctx["items"]:
-                album = ph.get("album") or "misc"
-                counts[album] = counts.get(album, 0) + 1
-            ctx["albums"] = [{"name": k, "count": v} for k, v in sorted(counts.items())]
+                albums = ph.get("albums") or ["misc"]
+                for album in albums:
+                    counts[album] = counts.get(album, 0) + 1
+                    if album not in covers:
+                        covers[album] = ph.get("url")
+            ctx["albums"] = [
+                {"name": k, "count": v, "cover": covers.get(k)}
+                for k, v in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+            ]
     return render_template(template, **ctx)
 
 
@@ -480,6 +504,7 @@ def post_view(post_id):
     post = post_row_to_dict(row)
     ctx = base_ctx("post", post.get("tab_name") or "Post")
     ctx["post"] = post
+    ctx["gallery"] = gallery_images(post)
     return render_template("post.html", **ctx)
 
 

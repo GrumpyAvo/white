@@ -14,34 +14,59 @@
 
   <form method="post" action="{{ url_for('admin.edit_entity', entity=entity, item_id=(record.id if record else None)) }}" style="max-width:900px;padding-bottom:80px">
     {% for field in fields %}
-      {% set fname, label, ftype, options = field[0], field[1], field[2], (field[2].split(':', 1)[1].split(',') if field[2].startswith('select:') else None) %}
+      {% set fname, label, ftype = field[0], field[1], field[2] %}
+      {% set options = (field[2].split(':', 1)[1].split(',') if field[2].startswith('select:') else None) %}
       <div class="editor-field">
         <label>{{ label }}</label>
+
         {% if ftype == 'textarea' %}
           <textarea name="{{ fname }}" rows="8" placeholder="{{ label }}" class="md-textarea">{{ record[fname] or '' if record else '' }}</textarea>
+
         {% elif ftype == 'checkbox' %}
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;">
             <input type="checkbox" name="{{ fname }}" {% if record and record[fname] %}checked{% endif %} /> Yes
           </label>
+
         {% elif ftype.startswith('select') %}
           <select name="{{ fname }}">
             {% for opt in (options or []) %}<option value="{{ opt }}" {% if record and record[fname] == opt %}selected{% endif %}>{{ opt }}</option>{% endfor %}
           </select>
+
         {% elif fname == 'tab_id' %}
           <select name="tab_id">
             <option value="">— none —</option>
             {% for t in tabs %}<option value="{{ t.id }}" {% if record and record['tab_id'] == t.id %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
           </select>
+
+        {% elif ftype == 'albums' %}
+          <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="e.g. trip, friends, film" list="album-list" />
+          <datalist id="album-list">
+            {% for a in albums_all %}<option value="{{ a }}"></option>{% endfor %}
+          </datalist>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">one photo can be in several albums — separate with commas</div>
+
         {% elif fname == 'url' or fname.endswith('_url') %}
           <div style="display:flex;gap:8px;align-items:center">
             <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="{{ label }}" style="flex:1" />
             <button type="button" class="qa-btn upload-pick-btn" data-target="{{ fname }}">📎 upload</button>
           </div>
+
         {% else %}
           <input type="text" name="{{ fname }}" value="{{ record[fname] if record else '' }}" placeholder="{{ label }}" />
         {% endif %}
       </div>
     {% endfor %}
+
+    {% if entity == 'posts' %}
+      <div class="editor-field">
+        <label style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="qa-btn" onclick="insertImageInto('content')">🖼 insert image</button>
+          <button type="button" class="qa-btn" onclick="togglePreview()">👁 preview</button>
+        </label>
+        <div id="preview-pane" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(139,63,200,0.3);padding:18px;margin-top:10px;line-height:1.7"></div>
+      </div>
+    {% endif %}
+
     <div class="spacer"></div>
     <button type="submit" class="save-btn">💾 Save</button>
   </form>
@@ -51,4 +76,32 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/admin-upload.js') }}"></script>
+{% if entity == 'posts' %}
+<script>
+var _pendingInsert = null;
+function insertImageInto(fieldName){
+  _pendingInsert = fieldName;
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-input').click();
+}
+window.onUploaded = function(d){
+  if (!_pendingInsert || d.error) { _pendingInsert = null; return; }
+  var ta = document.querySelector('[name="' + _pendingInsert + '"]');
+  var md = '![](' + d.url + ')\n\n';
+  if (ta) { var s = ta.selectionStart || 0; var e = ta.selectionEnd || 0; ta.value = ta.value.slice(0, s) + md + ta.value.slice(e); ta.focus(); }
+  _pendingInsert = null;
+};
+function togglePreview(){
+  var pane = document.getElementById('preview-pane');
+  if (pane.style.display !== 'none') { pane.style.display = 'none'; return; }
+  var content = document.querySelector('[name="content"]').value;
+  var fd = new FormData();
+  fd.append('content', content);
+  fetch('/admin/preview', { method: 'POST', body: fd })
+    .then(function(r){ return r.text(); })
+    .then(function(html){ pane.innerHTML = html; pane.style.display = 'block'; })
+    .catch(function(){ alert('preview failed'); });
+}
+</script>
+{% endif %}
 {% endblock %}

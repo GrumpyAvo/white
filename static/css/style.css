@@ -258,6 +258,12 @@
 .text-block code{background:var(--panel);padding:2px 6px;font-family:'Inconsolata',monospace;}
 .text-block pre{background:var(--dark);color:var(--cream);padding:16px;overflow-x:auto;margin:1rem 0;}
 .text-block ul,.text-block ol{padding-left:1.5rem;margin-bottom:1rem;}
+/* Post photo strip (keep-reading page) */
+.photo-strip{display:flex;gap:14px;overflow-x:auto;padding:14px 0 18px;margin:28px 0 4px;scroll-behavior:smooth;}
+.photo-strip img{height:280px;max-width:92vw;object-fit:cover;border:1.5px solid var(--dark);box-shadow:3px 3px 0 var(--dark);cursor:pointer;flex:0 0 auto;transition:transform 0.2s,box-shadow 0.2s;}
+.photo-strip img:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--dark);}
+.photo-strip.lb-open{overflow:hidden;pointer-events:none;}
+.photo-strip-hint{font-size:11px;color:var(--muted);letter-spacing:0.05em;margin-bottom:24px;}
 /* ── GUESTBOOK ── */
     .gb-form{background:white;border:1.5px solid var(--dark);box-shadow:3px 3px 0 var(--dark);padding:24px;margin-bottom:32px;}
 .gb-form h3{font-family:'SupremeDonuts','Syne',serif;font-weight:700;font-size:1rem;margin-bottom:16px;}
@@ -390,6 +396,17 @@
 /* --- pics.html components --- */
 .album-tab{background:none;border:1.5px solid var(--border);padding:5px 14px;font-family:'Inconsolata',monospace;font-size:11px;cursor:pointer;color:var(--dark);letter-spacing:0.08em;transition:all 0.15s;}
 .album-tab:hover,.album-tab.active{background:var(--accent1);color:white;border-color:var(--accent1);}
+/* Album gallery grid (pics page) */
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin:8px 0 24px;}
+.album-card{background:none;border:none;padding:0;text-align:left;cursor:pointer;color:var(--dark);font-family:'Inconsolata',monospace;}
+.album-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border:1.5px solid var(--dark);box-shadow:2px 2px 0 var(--dark);transition:transform 0.2s,box-shadow 0.2s;}
+.album-card:hover img{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--dark);}
+.album-card-info{padding:8px 2px 0;}
+.album-card-name{font-size:13px;font-weight:600;}
+.album-card-count{font-size:11px;color:var(--muted);}
+.album-back{background:none;border:1.5px solid var(--border);padding:6px 14px;font-family:'Inconsolata',monospace;font-size:11px;cursor:pointer;color:var(--dark);letter-spacing:0.08em;margin-bottom:16px;transition:all 0.15s;}
+.album-back:hover{background:var(--accent1);color:white;border-color:var(--accent1);}
+.album-view-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:16px;}
 /* Masonry gallery */
     .gallery{ columns:3; column-gap:12px; margin-top:8px; }
 .gallery img{ width:100%; display:block; margin-bottom:12px; border:1.5px solid var(--dark); box-shadow:2px 2px 0 var(--dark); break-inside:avoid; transition:transform 0.2s,box-shadow 0.2s; cursor:pointer; content-visibility:auto; contain-intrinsic-size:auto 300px; }

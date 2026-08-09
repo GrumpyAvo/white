@@ -106,6 +106,12 @@ CREATE TABLE IF NOT EXISTS visitors_seen (
   vid TEXT PRIMARY KEY,
   first_seen TEXT
 );
+CREATE TABLE IF NOT EXISTS visitor_ips (
+  ip TEXT NOT NULL,
+  day TEXT NOT NULL,
+  first_seen TEXT,
+  PRIMARY KEY (ip, day)
+);
 CREATE TABLE IF NOT EXISTS media (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filename TEXT NOT NULL,
@@ -160,6 +166,28 @@ def execute(sql, params=()):
         conn.close()
 
 
+def insert_ignore(sql, params=()):
+    """Run an INSERT OR IGNORE and report how many rows actually landed."""
+    conn = get_db()
+    try:
+        cur = conn.execute(sql, params)
+        conn.commit()
+        return cur.rowcount
+    finally:
+        conn.close()
+
+
+def execute_update(sql, params=()):
+    """Run an UPDATE and return the number of rows affected."""
+    conn = get_db()
+    try:
+        cur = conn.execute(sql, params)
+        conn.commit()
+        return cur.rowcount
+    finally:
+        conn.close()
+
+
 def execute_many(sql, seq):
     conn = get_db()
     try:
@@ -183,3 +211,21 @@ def list_to_tags(value):
     else:
         parts = list(value or [])
     return json.dumps(parts)
+
+
+def parse_albums(value):
+    """photos.album can be a JSON array (multi-album) or legacy plain text."""
+    if not value:
+        return []
+    v = str(value).strip()
+    if v.startswith("["):
+        try:
+            arr = json.loads(v)
+            return [a for a in arr if a] if isinstance(arr, list) else [v]
+        except (ValueError, TypeError):
+            return [v]
+    return [p.strip() for p in v.split(",") if p.strip()]
+
+
+def serialize_albums(albums):
+    return json.dumps([a for a in albums if a])
