@@ -2,51 +2,179 @@
 {% block title %}{{ entity }} · white{% endblock %}
 {% block content %}
 <div class="page active">
-  <div class="page-header">
-    <div class="page-title">{{ entity_label }}</div>
-    <div class="page-sub">{{ rows|length }} {{ entity }}</div>
-  </div>
-  <div class="filter-row">
-    <a class="add-btn" href="{{ url_for('admin.edit_entity', entity=entity) }}">＋ New {{ entity.rstrip('s') }}</a>
-  </div>
-  <div class="data-table">
-    <div class="table-head posts-head">
-      {% for key, label in columns %}<span>{{ label }}</span>{% endfor %}<span>Actions</span>
+  <div class="page-header ig-header">
+    <div class="ig-header-title">
+      <div class="page-title">{{ entity_label }}</div>
+      <div class="page-sub">{{ rows|length }} {{ entity }}</div>
     </div>
-    {% for row in rows %}
-    <div class="table-row">
-      {% for key, label in columns %}
-        {% if key == 'status' or key == 'visible' %}
-          <span><span class="status-pill {{ row[key] or 'draft' }}">{{ row[key] or 'draft' }}</span></span>
-        {% elif key == 'rating' %}
-          <span>{{ row[key] }}{% if row[key] is not none and row[key]|float > 5 %}/10{% endif %}</span>
-        {% else %}
-          <span>{{ row[key] }}</span>
-        {% endif %}
+    <div class="ig-header-actions">
+      {% if entity == 'books' %}
+        <form method="post" action="{{ url_for('admin.books_fetch_covers') }}">
+          <button class="qa-btn" type="submit">📚 fetch covers</button>
+        </form>
+      {% endif %}
+      {% if entity == 'photos' %}
+        <button class="qa-btn" id="photo-upload-btn">＋ upload photo</button>
+        <input type="file" id="photo-upload-input" accept="image/*" style="display:none" />
+      {% endif %}
+      <a class="qa-btn accent" href="{{ url_for('admin.edit_entity', entity=entity) }}">＋ New {{ entity.rstrip('s') }}</a>
+    </div>
+  </div>
+
+  {% if entity == 'photos' %}
+    <div class="ig-photo-grid" id="ig-photo-grid">
+      {% for p in rows %}
+        <div class="ig-photo-tile {{ '' if p.visible else 'hidden-photo' }}" title="{{ p.caption or '' }}">
+          <img src="{{ p.url }}" alt="{{ p.caption or '' }}" loading="lazy" />
+          <div class="ig-photo-overlay">
+            {% if p.caption %}<div class="ig-photo-caption">{{ p.caption }}</div>{% endif %}
+            {% if p.albums_list %}<div class="ig-photo-chips">{% for a in p.albums_list %}<span class="ig-chip">{{ a }}</span>{% endfor %}</div>{% endif %}
+            {% if p.tags_list %}<div class="ig-photo-chips">{% for t in p.tags_list %}<span class="ig-chip tag">{{ t }}</span>{% endfor %}</div>{% endif %}
+          </div>
+          <div class="ig-photo-actions">
+            <a class="ig-act" href="{{ url_for('admin.edit_entity', entity='photos', item_id=p.id) }}" title="edit">✎</a>
+            <form method="post" action="{{ url_for('admin.toggle_entity', entity='photos', item_id=p.id) }}" style="display:inline">
+              <button class="ig-act" type="submit" title="{{ 'hide' if p.visible else 'show' }}">{{ '👁' if p.visible else '🚫' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.delete_entity', entity='photos', item_id=p.id) }}" style="display:inline" onsubmit="return confirm('Delete this photo?')">
+              <button class="ig-act danger" type="submit" title="delete">🗑</button>
+            </form>
+          </div>
+        </div>
       {% endfor %}
-      <span class="row-actions">
-        {% if entity == 'posts' %}
-          <a class="qa-btn" href="{{ url_for('post_view', post_id=row.id) }}" target="_blank">view</a>
-        {% endif %}
-        <a class="qa-btn" href="{{ url_for('admin.edit_entity', entity=entity, item_id=row.id) }}">edit</a>
-        <form method="post" action="{{ url_for('admin.toggle_entity', entity=entity, item_id=row.id) }}" style="display:inline">
-          {% if entity == 'posts' %}
-            {% set hidden = row.status == 'hidden' %}
-          {% elif entity in ('books', 'music') %}
-            {% set hidden = row.status != 'published' %}
-          {% else %}
-            {% set hidden = row.visible == 0 %}
-          {% endif %}
-          <button class="qa-btn" type="submit" title="toggle visibility">{{ 'show' if hidden else 'hide' }}</button>
-        </form>
-        <form method="post" action="{{ url_for('admin.delete_entity', entity=entity, item_id=row.id) }}" style="display:inline" onsubmit="return confirm('Delete this {{ entity.rstrip('s') }}?')">
-          <button class="qa-btn danger" type="submit">✕</button>
-        </form>
-      </span>
+      <button class="ig-photo-tile ig-photo-add" id="ig-photo-add">＋</button>
     </div>
-    {% else %}
-    <div class="table-row"><span>Nothing here yet.</span></div>
-    {% endfor %}
-  </div>
+    <div class="empty" style="display:none" id="ig-photo-empty">No photos yet — hit ＋ to upload the first one.</div>
+
+  {% elif entity in ('books', 'music') %}
+    <div class="ig-cover-grid">
+      {% for r in rows %}
+        <div class="ig-cover-card">
+          <div class="ig-cover-wrap">
+            {% if r.cover_url %}<img class="ig-cover" src="{{ r.cover_url }}" alt="{{ r.title }}" loading="lazy" />
+            {% else %}<div class="ig-cover-ph">{{ '📚' if entity == 'books' else '♪' }}</div>{% endif %}
+            <div class="ig-cover-actions">
+              <a class="qa-btn mini" href="{{ url_for('admin.edit_entity', entity=entity, item_id=r.id) }}">✎ edit</a>
+              <form method="post" action="{{ url_for('admin.toggle_entity', entity=entity, item_id=r.id) }}" style="display:inline">
+                <button class="qa-btn mini" type="submit">{{ 'hide' if (r.status or 'published') == 'published' else 'show' }}</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.delete_entity', entity=entity, item_id=r.id) }}" style="display:inline" onsubmit="return confirm('Delete this {{ entity.rstrip('s') }}?')">
+                <button class="qa-btn mini danger" type="submit">✕</button>
+              </form>
+            </div>
+          </div>
+          <div class="ig-cover-title">{{ r.title }}</div>
+          <div class="ig-cover-sub">
+            {% if entity == 'books' %}{{ r.author or '—' }}{% else %}{{ r.artist or '—' }}{% endif %}
+          </div>
+          <div class="ig-cover-meta">
+            {% if r.rating %}<span class="ig-rating">{{ r.rating|int }}{% if entity == 'books' %}/10{% endif %}</span>{% endif %}
+            <span class="status-pill {{ r.status or 'draft' }}">{{ r.status or 'draft' }}</span>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty" style="grid-column:1/-1">No {{ entity }} yet.</div>
+      {% endfor %}
+    </div>
+
+  {% elif entity == 'posts' %}
+    <div class="ig-feed">
+      {% for p in rows %}
+        <div class="ig-feed-card">
+          <div class="ig-feed-thumb">
+            {% if p.image_url %}<img src="{{ p.image_url }}" alt="" loading="lazy" />
+            {% else %}<div class="ig-feed-ph">✎</div>{% endif %}
+          </div>
+          <div class="ig-feed-body">
+            <div class="ig-feed-title">{{ p.title }}</div>
+            {% if p.subtitle %}<div class="ig-feed-sub">{{ p.subtitle }}</div>{% endif %}
+            <div class="ig-feed-chips">
+              <span class="ig-chip page">{{ p.tab_name or '—' }}</span>
+              {% if p.tags_list %}{% for t in p.tags_list %}<span class="ig-chip tag">{{ t }}</span>{% endfor %}{% endif %}
+            </div>
+            <div class="ig-feed-date">{{ (p.created_at or '')[:10] or '—' }}</div>
+          </div>
+          <div class="ig-feed-meta">
+            <span class="status-pill {{ p.status or 'live' }}">{{ p.status or 'live' }}</span>
+          </div>
+          <div class="ig-feed-actions">
+            <a class="qa-btn mini" href="{{ url_for('post_view', post_id=p.id) }}" target="_blank">view</a>
+            <a class="qa-btn mini" href="{{ url_for('admin.edit_entity', entity='posts', item_id=p.id) }}">edit</a>
+            <form method="post" action="{{ url_for('admin.toggle_entity', entity='posts', item_id=p.id) }}" style="display:inline">
+              <button class="qa-btn mini" type="submit">{{ 'show' if p.status == 'hidden' else 'hide' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.delete_entity', entity='posts', item_id=p.id) }}" style="display:inline" onsubmit="return confirm('Delete this post?')">
+              <button class="qa-btn mini danger" type="submit">✕</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">No posts yet — write something!</div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="data-table">
+      <div class="table-head posts-head">
+        {% for key, label in columns %}<span>{{ label }}</span>{% endfor %}<span>Actions</span>
+      </div>
+      {% for row in rows %}
+        <div class="table-row posts-row">
+          {% for key, label in columns %}
+            {% if key == 'status' or key == 'visible' %}
+              <span><span class="status-pill {{ row[key] or 'draft' }}">{{ row[key] or '—' }}</span></span>
+            {% elif key == 'rating' %}
+              <span>{{ row[key] }}{% if row[key] is not none and row[key]|float > 5 %}/10{% endif %}</span>
+            {% elif key == 'url' %}
+              <span class="row-muted" style="word-break:break-all">{{ row[key] or '—' }}</span>
+            {% else %}
+              <span>{{ row[key] or '—' }}</span>
+            {% endif %}
+          {% endfor %}
+          <span class="row-actions">
+            <a class="qa-btn mini" href="{{ url_for('admin.edit_entity', entity=entity, item_id=row.id) }}">edit</a>
+            <form method="post" action="{{ url_for('admin.toggle_entity', entity=entity, item_id=row.id) }}" style="display:inline">
+              {% if entity == 'posts' %}
+                {% set hidden = row.status == 'hidden' %}
+              {% elif entity in ('books', 'music') %}
+                {% set hidden = row.status != 'published' %}
+              {% else %}
+                {% set hidden = row.visible == 0 %}
+              {% endif %}
+              <button class="qa-btn mini" type="submit">{{ 'show' if hidden else 'hide' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.delete_entity', entity=entity, item_id=row.id) }}" style="display:inline" onsubmit="return confirm('Delete this {{ entity.rstrip('s') }}?')">
+              <button class="qa-btn mini danger" type="submit">✕</button>
+            </form>
+          </span>
+        </div>
+      {% else %}
+        <div class="table-row"><span>Nothing here yet.</span></div>
+      {% endfor %}
+    </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if entity == 'photos' %}
+<script>
+(function(){
+  var input = document.getElementById('photo-upload-input');
+  var add = document.getElementById('ig-photo-add');
+  var addBtn = document.getElementById('photo-upload-btn');
+  add.addEventListener('click', function(){ input.click(); });
+  if (addBtn) addBtn.addEventListener('click', function(){ input.click(); });
+  input.addEventListener('change', function(){
+    if (!this.files[0]) return;
+    var fd = new FormData();
+    fd.append('file', this.files[0]);
+    this.value = '';
+    fetch('{{ url_for("admin.photo_upload") }}', { method: 'POST', body: fd })
+      .then(function(r){ window.location.reload(); })
+      .catch(function(){ alert('upload failed'); });
+  });
+})();
+</script>
+{% endif %}
 {% endblock %}

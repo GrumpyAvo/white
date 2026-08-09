@@ -98,6 +98,7 @@ ENTITY_FIELDS = {
         ("url", "Photo URL", "text"),
         ("caption", "Caption", "text"),
         ("album", "Albums (comma separated)", "albums"),
+        ("tags", "Tags (comma separated)", "tags"),
         ("alt_text", "Alt text", "text"),
         ("visible", "Visible", "checkbox"),
     ],
@@ -153,8 +154,14 @@ def _display_row(entity, row):
     if entity == "posts":
         d["tab_name"] = (d.get("tab_name") or "—")
         d["status"] = "published" if d.get("published") and d.get("status") == "live" else d.get("status") or "draft"
-    if entity == "photos" and d.get("album"):
-        d["album"] = ", ".join(db.parse_albums(d["album"]))
+        d["tags_list"] = db.tags_to_list(d)
+    if entity == "photos":
+        if d.get("album"):
+            d["album"] = ", ".join(db.parse_albums(d["album"]))
+        d["tags"] = ", ".join(db.tags_to_list(d))
+        d["albums_list"] = db.parse_albums(d.get("album")) if d.get("album") else []
+        d["tags_list"] = db.tags_to_list(d)
+        d["visible"] = 1 if d.get("visible") else 0
     return d
 
 
@@ -273,8 +280,11 @@ def edit_entity(entity, item_id=None):
         record = dict(record)
         if entity == "posts" and record.get("tags"):
             record["tags"] = ", ".join(db.tags_to_list(record))
-        if entity == "photos" and record.get("album"):
-            record["album"] = ", ".join(db.parse_albums(record["album"]))
+        if entity == "photos":
+            if record.get("album"):
+                record["album"] = ", ".join(db.parse_albums(record["album"]))
+            if record.get("tags"):
+                record["tags"] = ", ".join(db.tags_to_list(record))
 
     if request.method == "POST":
         data = {}
@@ -286,6 +296,9 @@ def edit_entity(entity, item_id=None):
             n = db.query_one("SELECT COUNT(*) AS n FROM %s" % entity)["n"]
             data.setdefault("position", n)
             data.setdefault("created_at", db.now_iso())
+        if entity == "books" and not data.get("cover_url"):
+            import books
+            data["cover_url"] = books.cover_for(data)
         if item_id:
             sets = ", ".join("%s=?" % k for k in data)
             db.execute("UPDATE %s SET %s WHERE id=?" % (entity, sets), list(data.values()) + [item_id])
@@ -500,6 +513,58 @@ def delete_media(item_id):
         backup.snapshot()
         flash("Deleted", "ok")
     return redirect(url_for("admin.media_library"))
+
+
+@admin_bp.route("/photos/upload", methods=["POST"])
+@require_admin
+def photo_upload():
+    """Upload an image and create a visible photo row in one step."""
+    f = request.files.get("file")
+    if not f or not f.filename:
+        flash("no file provided", "error")
+        return redirect(url_for("admin.list_entity", entity="photos"))
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in ALLOWED_EXT:
+        flash("unsupported file type: %s" % ext, "error")
+        return redirect(url_for("admin.list_entity", entity="photos"))
+    blob = f.read()
+    if len(blob) > MAX_UPLOAD:
+        flash("file too large (max 50MB)", "error")
+        return redirect(url_for("admin.list_entity", entity="photos"))
+    name = uuid.uuid4().hex[:12] + ext
+    os.makedirs(storage.UPLOAD_DIR, exist_ok=True)
+    with open(os.path.join(storage.UPLOAD_DIR, name), "wb") as fh:
+        fh.write(blob)
+    if storage.durable():
+        try:
+            if len(blob) <= storage.MAX_MEDIA:
+                storage.save_media(name, blob)
+        except Exception:
+            pass
+    url = "/uploads/" + name
+    n = db.query_one("SELECT COUNT(*) AS n FROM photos")["n"]
+    photo_id = db.execute(
+        "INSERT INTO photos(url,caption,album,tags,visible,position,created_at)"
+        " VALUES(?,?,?,?,1,?,?)",
+        (url, request.form.get("caption") or None, None, None, n, db.now_iso()),
+    )
+    db.execute(
+        "INSERT INTO media(filename,url,content_type,size,created_at) VALUES(?,?,?,?,?)",
+        (name, url, f.mimetype or "application/octet-stream", len(blob), db.now_iso()),
+    )
+    backup.snapshot()
+    flash("Photo added — live on /pics", "ok")
+    return redirect(url_for("admin.edit_entity", entity="photos", item_id=photo_id))
+
+
+@admin_bp.route("/books/fetch-covers", methods=["POST"])
+@require_admin
+def books_fetch_covers():
+    import books
+    n = books.fetch_missing()
+    backup.snapshot()
+    flash("Fetched %d cover%s from Open Library" % (n, "" if n == 1 else "s"), "ok")
+    return redirect(url_for("admin.list_entity", entity="books"))
 
 
 @admin_bp.route("/guestbook", methods=["GET", "POST"])

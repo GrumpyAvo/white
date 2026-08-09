@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS photos (
   caption TEXT,
   alt_text TEXT,
   album TEXT,
+  tags TEXT,
   visible INTEGER NOT NULL DEFAULT 1,
   position INTEGER NOT NULL DEFAULT 0,
   created_at TEXT
@@ -132,6 +133,10 @@ def get_db():
 def init_db():
     conn = get_db()
     conn.executescript(SCHEMA)
+    # Migrations for databases created before a column existed.
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(photos)")}
+    if "tags" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN tags TEXT")
     conn.commit()
     conn.close()
 

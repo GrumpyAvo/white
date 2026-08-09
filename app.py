@@ -23,6 +23,7 @@ from flask import (
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import backup
+import books
 import db
 import spotify
 import storage
@@ -219,9 +220,10 @@ def post_row_to_dict(row):
 
 
 def photo_to_dict(row):
-    """Attach a parsed multi-album list to each photo row."""
+    """Attach a parsed multi-album list + tag list to each photo row."""
     d = dict(row)
     d["albums"] = db.parse_albums(d.get("album")) if d.get("album") else []
+    d["tags"] = db.tags_to_list(d)
     return d
 
 
@@ -369,7 +371,9 @@ def render_page(slug, template):
             counts = {}
             covers = {}
             for ph in ctx["items"]:
-                albums = ph.get("albums") or ["misc"]
+                albums = ph.get("albums") or []
+                if not albums:
+                    continue
                 for album in albums:
                     counts[album] = counts.get(album, 0) + 1
                     if album not in covers:
@@ -541,6 +545,15 @@ def not_found(_e):
 
 
 # ── API (ported from the old Vercel backend) ───────────────────────────────────
+@app.route("/api/books")
+def api_books():
+    rows = [dict(r) for r in db.query(
+        "SELECT * FROM books WHERE status='published' ORDER BY created_at DESC")]
+    for r in rows:
+        r["cover_url"] = books.resolve(r)
+    return jsonify({"books": rows})
+
+
 @app.route("/api/now-playing")
 def api_now_playing():
     return jsonify(spotify.now_playing())
