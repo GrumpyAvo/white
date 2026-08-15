@@ -8,66 +8,6 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-  html,body{margin:0;padding:0;background:#F2EEE1;}
-  .budget-app { --ink:#0E1F1B; --ink-2:#16302A; --paper:#FBF8F1; --paper-dim:#F2EEE1; --gold:#C9A227; --gold-dim:#e8d488; --rust:#C1483D; --rust-light:#e0776c; --teal:#2F6F62; --slate:#5B6B66; --line:#E4DFD0; font-family:'Inter',sans-serif; color:var(--ink); box-sizing:border-box; min-height:100vh; }
-  .budget-app *, .budget-app *::before, .budget-app *::after { box-sizing:border-box; }
-  .budget-app button { font-family:inherit; cursor:pointer; }
-  .budget-app input, .budget-app select, .budget-app textarea { font-family:inherit; }
-  .font-display { font-family:'Fraunces', serif; }
-  .font-mono { font-family:'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
-
-  .sidebar { width:220px; background:var(--ink); display:flex; flex-direction:column; flex-shrink:0; }
-  .sidebar-brand { display:flex; align-items:center; gap:10px; padding:20px 18px 6px; }
-  .brand-mark { width:34px; height:34px; border-radius:8px; background:var(--gold); color:var(--ink); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-size:18px; }
-  .nav-item { display:flex; align-items:center; gap:11px; width:100%; padding:10px 18px; background:transparent; border:none; color:rgba(251,248,241,0.62); font-size:13.5px; font-weight:500; text-align:left; border-left:3px solid transparent; }
-  .nav-item:hover { color:var(--paper); background:rgba(251,248,241,0.05); }
-  .nav-item.active { color:var(--paper); background:rgba(201,162,39,0.12); border-left:3px solid var(--gold); }
-
-  .card { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:18px; }
-  .ledger-rule { border:none; border-top:2px solid var(--ink); border-bottom:1px solid var(--line); height:0; margin:8px 0 14px; }
-  .section-title { font-family:'Fraunces',serif; font-size:20px; font-weight:600; letter-spacing:-0.01em; }
-  .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--slate); }
-
-  .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid transparent; }
-  .btn-primary { background:var(--ink); color:var(--paper); }
-  .btn-primary:hover { background:var(--ink-2); }
-  .btn-gold { background:var(--gold); color:var(--ink); }
-  .btn-gold:hover { background:var(--gold-dim); }
-  .btn-ghost { background:transparent; color:var(--ink); border-color:var(--line); }
-  .btn-ghost:hover { background:var(--paper-dim); }
-  .btn-danger { background:transparent; color:var(--rust); border-color:var(--rust); }
-  .btn-danger:hover { background:rgba(193,72,61,0.08); }
-  .btn-sm { padding:6px 10px; font-size:12px; }
-  .icon-btn { background:transparent; border:none; padding:6px; border-radius:6px; color:var(--slate); display:flex; }
-  .icon-btn:hover { background:var(--paper-dim); color:var(--ink); }
-
-  .input, .select, .textarea { width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:var(--paper); font-size:13.5px; color:var(--ink); }
-  .input:focus, .select:focus, .textarea:focus { outline:2px solid var(--gold); outline-offset:1px; }
-  .label { font-size:11.5px; font-weight:600; color:var(--slate); margin-bottom:5px; display:block; }
-
-  .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600; }
-
-  .progress-track { background:var(--paper-dim); border-radius:99px; height:8px; overflow:hidden; border:1px solid var(--line); }
-  .progress-fill { height:100%; border-radius:99px; transition: width 0.4s ease; }
-
-  .txn-row { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line); }
-  .txn-row:last-child { border-bottom:none; }
-  .cat-badge { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Fraunces',serif; font-weight:700; font-size:15px; }
-  .cat-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-
-  .modal-backdrop { position:fixed; inset:0; background:rgba(14,31,27,0.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
-  .modal { background:var(--paper); border-radius:14px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; padding:22px; }
-
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-
-  @media (max-width: 820px) {
-    .sidebar { position:fixed; inset:0; z-index:40; }
-    .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
-  }
-</style>
 </head>
 <body>
 <div id="root"></div>
@@ -80,11 +20,11 @@ const { useState, useEffect, useRef, useMemo } = React;
 /* ---------------------------------------------------------------------- */
 const STORAGE_KEY = "ledgerline-data-v1";
 window.storage = {
-  get: async (key) => {
+  get: async (key, _default) => {
     const v = localStorage.getItem(key);
     return v !== null ? { key, value: v } : null;
   },
-  set: async (key, value) => {
+  set: async (key, value, _flag) => {
     localStorage.setItem(key, value);
     return { key, value };
   },
@@ -246,6 +186,17 @@ function LinesChart({ data, series, height = 220, fmtVal }) {
     </svg>
   );
 }
+function ChartLegend({ items }) {
+  return (
+    <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 6, fontSize: 11.5, color: "var(--slate)" }}>
+      {items.map(it => (
+        <span key={it.label} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 9, height: 9, borderRadius: 99, background: it.color, display: "inline-block" }} />{it.label}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 /* ---------------------------------------------------------------------- */
 /* Constants & helpers                                                     */
@@ -285,26 +236,34 @@ function num(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 function effectiveRate(a) { return (a.interestRate || 0) + (a.boostRate || 0); }
 
 const EXPENSE_CATS = [
-  { name: "Food & Groceries", color: "#C9A227" }, { name: "Transport", color: "#2F6F62" },
-  { name: "Rent & Housing", color: "#C1483D" }, { name: "Utilities", color: "#7A8B99" },
-  { name: "Entertainment", color: "#8E6C9C" }, { name: "Healthcare", color: "#4E8FA3" },
-  { name: "Shopping", color: "#D98A4B" }, { name: "Education", color: "#5B7C4F" },
-  { name: "Insurance", color: "#9E5B5B" }, { name: "Debt Payments", color: "#6B5B95" },
-  { name: "Subscriptions", color: "#4F7CAC" }, { name: "Other", color: "#8C8C8C" },
+  { name: "Food & Groceries", color: "#C9A227", icon: "ShoppingCart" },
+  { name: "Transport", color: "#2F6F62", icon: "Car" },
+  { name: "Rent & Housing", color: "#C1483D", icon: "Home" },
+  { name: "Utilities", color: "#7A8B99", icon: "Zap" },
+  { name: "Entertainment", color: "#8E6C9C", icon: "Film" },
+  { name: "Healthcare", color: "#4E8FA3", icon: "HeartPulse" },
+  { name: "Shopping", color: "#D98A4B", icon: "ShoppingBag" },
+  { name: "Education", color: "#5B7C4F", icon: "GraduationCap" },
+  { name: "Insurance", color: "#9E5B5B", icon: "ShieldCheck" },
+  { name: "Debt Payments", color: "#6B5B95", icon: "CreditCard" },
+  { name: "Subscriptions", color: "#4F7CAC", icon: "Repeat" },
+  { name: "Other", color: "#8C8C8C", icon: "MoreHorizontal" },
 ];
 const INCOME_CATS = [
-  { name: "Salary", color: "#2F6F62" }, { name: "Freelance", color: "#C9A227" },
-  { name: "Side Income", color: "#4E8FA3" }, { name: "Investments", color: "#8E6C9C" },
-  { name: "Gifts", color: "#D98A4B" }, { name: "Other", color: "#8C8C8C" },
+  { name: "Salary", color: "#2F6F62", icon: "Briefcase" },
+  { name: "Freelance", color: "#C9A227", icon: "Laptop" },
+  { name: "Side Income", color: "#4E8FA3", icon: "Coins" },
+  { name: "Investments", color: "#8E6C9C", icon: "TrendingUp" },
+  { name: "Gifts", color: "#D98A4B", icon: "Gift" },
+  { name: "Other", color: "#8C8C8C", icon: "MoreHorizontal" },
 ];
+const ICONS = {
+  ShoppingCart, Car, Home, Zap, Film, HeartPulse, ShoppingBag, GraduationCap,
+  ShieldCheck, CreditCard, Repeat, MoreHorizontal, Briefcase, Laptop, Coins,
+  TrendingUp, Gift,
+};
 const ACCOUNT_ICONS = { bank: Landmark, cash: Banknote, credit: CreditCard, savings: PiggyBank, wallet: Wallet };
 const CCY_SYMBOL = { ZAR: "R", EUR: "€", USD: "$" };
-
-function catColor(name, type) {
-  const list = type === "income" ? INCOME_CATS : EXPENSE_CATS;
-  const f = list.find(c => c.name === name);
-  return f ? f.color : "#8C8C8C";
-}
 
 function defaultAccounts() {
   return [
@@ -365,6 +324,17 @@ function defaultData() {
   };
 }
 
+function catColor(name, type) {
+  const list = type === "income" ? INCOME_CATS : EXPENSE_CATS;
+  const f = list.find(c => c.name === name);
+  return f ? f.color : "#8C8C8C";
+}
+function catIcon(name, type) {
+  const list = type === "income" ? INCOME_CATS : EXPENSE_CATS;
+  const f = list.find(c => c.name === name);
+  return f ? ICONS[f.icon] : MoreHorizontal;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Root component                                                          */
 /* ---------------------------------------------------------------------- */
@@ -385,7 +355,7 @@ function LedgerlineApp() {
     document.title = "Ledgerline · Personal Budget";
     (async () => {
       try {
-        const res = await window.storage.get(STORAGE_KEY);
+        const res = await window.storage.get(STORAGE_KEY, false);
         if (res && res.value) {
           const parsed = JSON.parse(res.value);
           setData(prev => ({ ...defaultData(), ...parsed }));
@@ -418,7 +388,7 @@ function LedgerlineApp() {
     if (!loadedOnce.current || loading) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      try { await window.storage.set(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+      try { await window.storage.set(STORAGE_KEY, JSON.stringify(data), false); } catch (e) {}
     }, 400);
     return () => clearTimeout(saveTimer.current);
   }, [data, loading]);
@@ -536,10 +506,14 @@ function LedgerlineApp() {
   }
 
   const NAV = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard }, { id: "transactions", label: "Transactions", icon: Receipt },
-    { id: "budgets", label: "Budgets", icon: Target }, { id: "accounts", label: "Accounts", icon: Wallet },
-    { id: "goals", label: "Goals", icon: PiggyBank }, { id: "reports", label: "Reports", icon: BarChart3 },
-    { id: "calculators", label: "Calculators", icon: Calculator }, { id: "settings", label: "Settings", icon: SettingsIcon },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "transactions", label: "Transactions", icon: Receipt },
+    { id: "budgets", label: "Budgets", icon: Target },
+    { id: "accounts", label: "Accounts", icon: Wallet },
+    { id: "goals", label: "Goals", icon: PiggyBank },
+    { id: "reports", label: "Reports", icon: BarChart3 },
+    { id: "calculators", label: "Calculators", icon: Calculator },
+    { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
   const ctx = {
@@ -550,13 +524,17 @@ function LedgerlineApp() {
   };
 
   if (loading) {
-    return <div className="budget-app" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)" }}>
-      <div className="font-mono" style={{ color: "var(--paper)", opacity: 0.7 }}>Loading your ledger…</div>
-    </div>;
+    return (
+      <div className="budget-app" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)" }}>
+        <AppStyles />
+        <div className="font-mono" style={{ color: "var(--paper)", opacity: 0.7 }}>Loading your ledger…</div>
+      </div>
+    );
   }
 
   return (
     <div className="budget-app" style={{ minHeight: "100vh", display: "flex", background: "var(--paper-dim)" }}>
+      <AppStyles />
       <div className="sidebar" style={{ display: mobileNavOpen ? "flex" : undefined }}>
         <div className="sidebar-brand">
           <div className="brand-mark">R</div>
@@ -601,12 +579,82 @@ function LedgerlineApp() {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Styles                                                                   */
+/* ---------------------------------------------------------------------- */
+function AppStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+      html, body { margin:0; padding:0; background:#F2EEE1; }
+      .budget-app { --ink:#0E1F1B; --ink-2:#16302A; --paper:#FBF8F1; --paper-dim:#F2EEE1; --gold:#C9A227; --gold-dim:#e8d488; --rust:#C1483D; --rust-light:#e0776c; --teal:#2F6F62; --slate:#5B6B66; --line:#E4DFD0; font-family:'Inter',sans-serif; color:var(--ink); box-sizing:border-box; }
+      .budget-app *, .budget-app *::before, .budget-app *::after { box-sizing:border-box; }
+      .budget-app button { font-family:inherit; cursor:pointer; }
+      .budget-app input, .budget-app select, .budget-app textarea { font-family:inherit; }
+      .font-display { font-family:'Fraunces', serif; }
+      .font-mono { font-family:'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+      .sidebar { width:220px; background:var(--ink); display:flex; flex-direction:column; flex-shrink:0; }
+      .sidebar-brand { display:flex; align-items:center; gap:10px; padding:20px 18px 6px; }
+      .brand-mark { width:34px; height:34px; border-radius:8px; background:var(--gold); color:var(--ink); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-size:18px; }
+      .nav-item { display:flex; align-items:center; gap:11px; width:100%; padding:10px 18px; background:transparent; border:none; color:rgba(251,248,241,0.62); font-size:13.5px; font-weight:500; text-align:left; border-left:3px solid transparent; }
+      .nav-item:hover { color:var(--paper); background:rgba(251,248,241,0.05); }
+      .nav-item.active { color:var(--paper); background:rgba(201,162,39,0.12); border-left:3px solid var(--gold); }
+
+      .card { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:18px; }
+      .ledger-rule { border:none; border-top:2px solid var(--ink); border-bottom:1px solid var(--line); height:0; margin:8px 0 14px; }
+      .section-title { font-family:'Fraunces',serif; font-size:20px; font-weight:600; letter-spacing:-0.01em; }
+      .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--slate); }
+
+      .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid transparent; }
+      .btn-primary { background:var(--ink); color:var(--paper); }
+      .btn-primary:hover { background:var(--ink-2); }
+      .btn-gold { background:var(--gold); color:var(--ink); }
+      .btn-gold:hover { background:var(--gold-dim); }
+      .btn-ghost { background:transparent; color:var(--ink); border-color:var(--line); }
+      .btn-ghost:hover { background:var(--paper-dim); }
+      .btn-danger { background:transparent; color:var(--rust); border-color:var(--rust); }
+      .btn-danger:hover { background:rgba(193,72,61,0.08); }
+      .btn-sm { padding:6px 10px; font-size:12px; }
+      .icon-btn { background:transparent; border:none; padding:6px; border-radius:6px; color:var(--slate); display:flex; }
+      .icon-btn:hover { background:var(--paper-dim); color:var(--ink); }
+
+      .input, .select, .textarea { width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:var(--paper); font-size:13.5px; color:var(--ink); }
+      .input:focus, .select:focus, .textarea:focus { outline:2px solid var(--gold); outline-offset:1px; }
+      .label { font-size:11.5px; font-weight:600; color:var(--slate); margin-bottom:5px; display:block; }
+
+      .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600; }
+
+      .progress-track { background:var(--paper-dim); border-radius:99px; height:8px; overflow:hidden; border:1px solid var(--line); }
+      .progress-fill { height:100%; border-radius:99px; transition: width 0.4s ease; }
+
+      .txn-row { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line); }
+      .txn-row:last-child { border-bottom:none; }
+      .cat-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+      .modal-backdrop { position:fixed; inset:0; background:rgba(14,31,27,0.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
+      .modal { background:var(--paper); border-radius:14px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; padding:22px; }
+
+      .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+      .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+
+      @media (max-width: 820px) {
+        .sidebar { position:fixed; inset:0; z-index:40; display:none; }
+        .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+      }
+    `}</style>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Top bar (currency switch, notifications, add button)                    */
+/* ---------------------------------------------------------------------- */
 function TopBar({ tab, NAV, data, setData, setMobileNavOpen, alerts, showBell, setShowBell, dismissAlert, onAdd }) {
   const current = NAV.find(n => n.id === tab);
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--line)", background: "var(--paper)", position: "sticky", top: 0, zIndex: 20, flexWrap: "wrap", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <button className="icon-btn" onClick={() => setMobileNavOpen(true)}><Menu size={20} /></button>
+        <button className="icon-btn" style={{ display: "flex" }} onClick={() => setMobileNavOpen(true)}><Menu size={20} /></button>
         {current && <current.icon size={19} color="var(--teal)" />}
         <span className="section-title">{current ? current.label : ""}</span>
       </div>
@@ -646,14 +694,27 @@ function TopBar({ tab, NAV, data, setData, setMobileNavOpen, alerts, showBell, s
   );
 }
 
+/* ---------------------------------------------------------------------- */
+/* Small shared bits                                                       */
+/* ---------------------------------------------------------------------- */
 function StatCard({ label, value, sub, tone }) {
   const color = tone === "rust" ? "var(--rust)" : tone === "gold" ? "var(--gold)" : tone === "teal" ? "var(--teal)" : "var(--ink)";
-  return <div className="card"><div className="eyebrow">{label}</div><div className="font-mono" style={{ fontSize: 24, fontWeight: 600, color, marginTop: 6 }}>{value}</div>{sub && <div style={{ fontSize: 11.5, color: "var(--slate)", marginTop: 4 }}>{sub}</div>}</div>;
+  return (
+    <div className="card">
+      <div className="eyebrow">{label}</div>
+      <div className="font-mono" style={{ fontSize: 24, fontWeight: 600, color, marginTop: 6 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11.5, color: "var(--slate)", marginTop: 4 }}>{sub}</div>}
+    </div>
+  );
 }
-function CategoryIcon({ name, type, size }) {
+function CategoryIcon({ name, type, size = 18 }) {
+  const Icon = catIcon(name, type);
   const color = catColor(name, type);
-  const letter = (name || "?").trim().charAt(0).toUpperCase();
-  return <div className="cat-badge" style={{ background: color + "22", color: color }}>{letter}</div>;
+  return (
+    <div className="cat-icon" style={{ background: color + "1E" }}>
+      <Icon size={size} color={color} />
+    </div>
+  );
 }
 function AccountIcon({ type, size = 16, color = "var(--paper)" }) { const Icon = ACCOUNT_ICONS[type] || Wallet; return <Icon size={size} color={color} />; }
 function ProgressBar({ pct, tone }) {
@@ -662,6 +723,8 @@ function ProgressBar({ pct, tone }) {
   return <div className="progress-track"><div className="progress-fill" style={{ width: clamped + "%", background: color }} /></div>;
 }
 
+/* ---------------------------------------------------------------------- */
+/* Dashboard                                                                */
 /* ---------------------------------------------------------------------- */
 function Dashboard({ ctx, incomeThisMonth, expenseThisMonth, remainingThisMonth, totalSavings, netWorth }) {
   const { data, fmt, effectiveBudget, budgetSpent } = ctx;
@@ -683,8 +746,11 @@ function Dashboard({ ctx, incomeThisMonth, expenseThisMonth, remainingThisMonth,
 
       <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16 }}>
         <div className="card">
-          <div className="section-title">Spending breakdown</div><div className="ledger-rule" />
-          {pieData.length === 0 ? <div style={{ color: "var(--slate)", fontSize: 13 }}>No expenses recorded this month yet.</div> : (
+          <div className="section-title">Spending breakdown</div>
+          <div className="ledger-rule" />
+          {pieData.length === 0 ? (
+            <div style={{ color: "var(--slate)", fontSize: 13 }}>No expenses recorded this month yet.</div>
+          ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
               <div style={{ width: 190 }}><DonutChart data={pieData} size={190} /></div>
               <div style={{ flex: 1, minWidth: 160 }}>
@@ -698,35 +764,49 @@ function Dashboard({ ctx, incomeThisMonth, expenseThisMonth, remainingThisMonth,
             </div>
           )}
         </div>
+
         <div className="card">
-          <div className="section-title">Budgets this month</div><div className="ledger-rule" />
+          <div className="section-title">Budgets this month</div>
+          <div className="ledger-rule" />
           {data.budgets.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>No budgets set yet.</div>}
           {data.budgets.slice(0, 5).map(b => {
             const eff = effectiveBudget(b); const spent = budgetSpent(b); const pct = eff > 0 ? (spent / eff) * 100 : 0;
-            return <div key={b.id} style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}><span>{b.category}</span><span className="font-mono">{fmt(spent)} / {fmt(eff)}</span></div>
-              <ProgressBar pct={pct} />
-            </div>;
+            return (
+              <div key={b.id} style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
+                  <span>{b.category}</span>
+                  <span className="font-mono">{fmt(spent)} / {fmt(eff)}</span>
+                </div>
+                <ProgressBar pct={pct} />
+              </div>
+            );
           })}
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginTop: 16 }}>
         <div className="card">
-          <div className="section-title">Recent transactions</div><div className="ledger-rule" />
+          <div className="section-title">Recent transactions</div>
+          <div className="ledger-rule" />
           {recent.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>Nothing logged yet — tap Add to get started.</div>}
           {recent.map(t => <TxnRow key={t.id} t={t} ctx={ctx} compact />)}
         </div>
         <div className="card">
-          <div className="section-title">Goal progress</div><div className="ledger-rule" />
+          <div className="section-title">Goal progress</div>
+          <div className="ledger-rule" />
           {data.goals.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>No goals yet.</div>}
           {data.goals.map(g => {
             const pct = g.target > 0 ? (g.saved / g.target) * 100 : 0;
-            return <div key={g.id} style={{ marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}><span style={{ fontWeight: 600 }}>{g.name}</span><span className="font-mono">{pct.toFixed(0)}%</span></div>
-              <ProgressBar pct={pct} tone="var(--gold)" />
-              <div style={{ fontSize: 11, color: "var(--slate)", marginTop: 3 }} className="font-mono">{fmt(g.saved)} of {fmt(g.target)}</div>
-            </div>;
+            return (
+              <div key={g.id} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600 }}>{g.name}</span>
+                  <span className="font-mono">{pct.toFixed(0)}%</span>
+                </div>
+                <ProgressBar pct={pct} tone="var(--gold)" />
+                <div style={{ fontSize: 11, color: "var(--slate)", marginTop: 3 }} className="font-mono">{fmt(g.saved)} of {fmt(g.target)}</div>
+              </div>
+            );
           })}
         </div>
       </div>
@@ -734,6 +814,9 @@ function Dashboard({ ctx, incomeThisMonth, expenseThisMonth, remainingThisMonth,
   );
 }
 
+/* ---------------------------------------------------------------------- */
+/* Transaction row + modal                                                 */
+/* ---------------------------------------------------------------------- */
 function TxnRow({ t, ctx, compact }) {
   const { data, fmt, deleteTransaction, setEditingTxn, setShowAddTxn, setTxnDraftType } = ctx;
   const acc = data.accounts.find(a => a.id === t.accountId);
@@ -743,16 +826,22 @@ function TxnRow({ t, ctx, compact }) {
   const color = isIncome ? "var(--teal)" : isTransfer ? "var(--slate)" : "var(--rust)";
   return (
     <div className="txn-row">
-      {isTransfer ? <div className="cat-icon" style={{ background: "rgba(91,107,102,0.14)" }}><ArrowLeftRight size={17} color="var(--slate)" /></div> : <CategoryIcon name={t.category} type={t.type} />}
+      {isTransfer ? (
+        <div className="cat-icon" style={{ background: "rgba(91,107,102,0.14)" }}><ArrowLeftRight size={17} color="var(--slate)" /></div>
+      ) : (
+        <CategoryIcon name={t.category} type={t.type} />
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13.5, fontWeight: 600 }}>{isTransfer ? `${acc?.name} → ${toAcc?.name}` : t.category}</div>
         <div style={{ fontSize: 11.5, color: "var(--slate)" }}>{fmtDateNice(t.date)}{acc && !isTransfer ? ` · ${acc.name}` : ""}{t.notes ? ` · ${t.notes}` : ""}{t.recurring ? " · recurring" : ""}</div>
       </div>
       <div className="font-mono" style={{ fontWeight: 600, color, fontSize: 13.5 }}>{sign}{fmt(t.amount)}</div>
-      {!compact && <div style={{ display: "flex", gap: 2 }}>
-        <button className="icon-btn" onClick={() => { setEditingTxn(t); setTxnDraftType(t.type); setShowAddTxn(true); }}><Pencil size={14} /></button>
-        <button className="icon-btn" onClick={() => { if (window.confirm("Delete this transaction?")) deleteTransaction(t.id); }}><Trash2 size={14} /></button>
-      </div>}
+      {!compact && (
+        <div style={{ display: "flex", gap: 2 }}>
+          <button className="icon-btn" onClick={() => { setEditingTxn(t); setTxnDraftType(t.type); setShowAddTxn(true); }}><Pencil size={14} /></button>
+          <button className="icon-btn" onClick={() => { if (window.confirm("Delete this transaction?")) deleteTransaction(t.id); }}><Trash2 size={14} /></button>
+        </div>
+      )}
     </div>
   );
 }
@@ -796,28 +885,47 @@ function TransactionModal({ ctx, initial, defaultType, onClose }) {
         </div>
         <label className="label">Amount (ZAR)</label>
         <input className="input" type="number" min="0" step="0.01" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} style={{ marginBottom: 12 }} />
-        {type !== "transfer" && <>
-          <label className="label">Category</label>
-          <select className="select" value={category} onChange={e => setCategory(e.target.value)} style={{ marginBottom: 12 }}>{cats.map(c => <option key={c} value={c}>{c}</option>)}</select>
-        </>}
+        {type !== "transfer" && (
+          <>
+            <label className="label">Category</label>
+            <select className="select" value={category} onChange={e => setCategory(e.target.value)} style={{ marginBottom: 12 }}>{cats.map(c => <option key={c} value={c}>{c}</option>)}</select>
+          </>
+        )}
         <div className="grid-2" style={{ marginBottom: 12 }}>
-          <div><label className="label">{type === "transfer" ? "From account" : "Account"}</label>
-            <select className="select" value={accountId} onChange={e => setAccountId(e.target.value)}>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-          {type === "transfer" ? <div><label className="label">To account</label>
-            <select className="select" value={toAccountId} onChange={e => setToAccountId(e.target.value)}>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-            : <div><label className="label">Date</label><input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>}
+          <div>
+            <label className="label">{type === "transfer" ? "From account" : "Account"}</label>
+            <select className="select" value={accountId} onChange={e => setAccountId(e.target.value)}>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          </div>
+          {type === "transfer" && (
+            <div>
+              <label className="label">To account</label>
+              <select className="select" value={toAccountId} onChange={e => setToAccountId(e.target.value)}>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
+            </div>
+          )}
+          {type !== "transfer" && (
+            <div>
+              <label className="label">Date</label>
+              <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+            </div>
+          )}
         </div>
-        {type === "transfer" && <div style={{ marginBottom: 12 }}><label className="label">Date</label><input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>}
+        {type === "transfer" && (
+          <div style={{ marginBottom: 12 }}><label className="label">Date</label><input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+        )}
         <label className="label">Notes</label>
         <input className="input" placeholder="Optional note" value={notes} onChange={e => setNotes(e.target.value)} style={{ marginBottom: 12 }} />
-        {type !== "transfer" && !initial && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5 }}><input type="checkbox" checked={recurring} onChange={e => setRecurring(e.target.checked)} /> Make this recurring</label>
-          {recurring && <select className="select" style={{ width: 130 }} value={frequency} onChange={e => setFrequency(e.target.value)}><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>}
-        </div>}
-        {type !== "transfer" && <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-          <input className="input" placeholder="Add a custom category…" value={customCat} onChange={e => setCustomCat(e.target.value)} />
-          <button className="btn btn-ghost btn-sm" onClick={() => { if (customCat.trim()) { addCategory(type, customCat.trim()); setCategory(customCat.trim()); setCustomCat(""); } }}>Add</button>
-        </div>}
+        {type !== "transfer" && !initial && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5 }}><input type="checkbox" checked={recurring} onChange={e => setRecurring(e.target.checked)} /> Make this recurring</label>
+            {recurring && <select className="select" style={{ width: 130 }} value={frequency} onChange={e => setFrequency(e.target.value)}><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>}
+          </div>
+        )}
+        {type !== "transfer" && (
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            <input className="input" placeholder="Add a custom category…" value={customCat} onChange={e => setCustomCat(e.target.value)} />
+            <button className="btn btn-ghost btn-sm" onClick={() => { if (customCat.trim()) { addCategory(type, customCat.trim()); setCategory(customCat.trim()); setCustomCat(""); } }}>Add</button>
+          </div>
+        )}
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
           <button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button>
@@ -828,11 +936,19 @@ function TransactionModal({ ctx, initial, defaultType, onClose }) {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Transactions tab                                                        */
+/* ---------------------------------------------------------------------- */
 function TransactionsTab({ ctx }) {
   const { data, setShowAddTxn, setEditingTxn, setTxnDraftType, deleteRecurring, updateRecurring, fmt } = ctx;
-  const [q, setQ] = useState(""); const [fType, setFType] = useState("all"); const [fCat, setFCat] = useState("all");
-  const [fAcc, setFAcc] = useState("all"); const [fFrom, setFFrom] = useState(""); const [fTo, setFTo] = useState("");
-  const [fMin, setFMin] = useState(""); const [fMax, setFMax] = useState(""); const [showFilters, setShowFilters] = useState(false);
+  const [q, setQ] = useState("");
+  const [fType, setFType] = useState("all");
+  const [fCat, setFCat] = useState("all");
+  const [fAcc, setFAcc] = useState("all");
+  const [fFrom, setFFrom] = useState("");
+  const [fTo, setFTo] = useState("");
+  const [fMin, setFMin] = useState("");
+  const [fMax, setFMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const allCats = [...new Set([...data.categories.income, ...data.categories.expense])];
 
   const filtered = data.transactions.filter(t => {
@@ -857,34 +973,45 @@ function TransactionsTab({ ctx }) {
         <button className="btn btn-ghost" onClick={() => setShowFilters(s => !s)}>{showFilters ? "Hide filters" : "More filters"} <ChevronDown size={14} /></button>
         <button className="btn btn-primary" onClick={() => { setEditingTxn(null); setTxnDraftType("expense"); setShowAddTxn(true); }}><Plus size={15} /> Add transaction</button>
       </div>
-      {showFilters && <div className="card" style={{ marginBottom: 14 }}>
-        <div className="grid-3">
-          <div><label className="label">Type</label><select className="select" value={fType} onChange={e => setFType(e.target.value)}><option value="all">All</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select></div>
-          <div><label className="label">Category</label><select className="select" value={fCat} onChange={e => setFCat(e.target.value)}><option value="all">All</option>{allCats.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
-          <div><label className="label">Account</label><select className="select" value={fAcc} onChange={e => setFAcc(e.target.value)}><option value="all">All</option>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-          <div><label className="label">From date</label><input className="input" type="date" value={fFrom} onChange={e => setFFrom(e.target.value)} /></div>
-          <div><label className="label">To date</label><input className="input" type="date" value={fTo} onChange={e => setFTo(e.target.value)} /></div>
-          <div style={{ display: "flex", gap: 6 }}><div><label className="label">Min R</label><input className="input" type="number" value={fMin} onChange={e => setFMin(e.target.value)} /></div><div><label className="label">Max R</label><input className="input" type="number" value={fMax} onChange={e => setFMax(e.target.value)} /></div></div>
+
+      {showFilters && (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div className="grid-3">
+            <div><label className="label">Type</label><select className="select" value={fType} onChange={e => setFType(e.target.value)}><option value="all">All</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select></div>
+            <div><label className="label">Category</label><select className="select" value={fCat} onChange={e => setFCat(e.target.value)}><option value="all">All</option>{allCats.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+            <div><label className="label">Account</label><select className="select" value={fAcc} onChange={e => setFAcc(e.target.value)}><option value="all">All</option>{data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+            <div><label className="label">From date</label><input className="input" type="date" value={fFrom} onChange={e => setFFrom(e.target.value)} /></div>
+            <div><label className="label">To date</label><input className="input" type="date" value={fTo} onChange={e => setFTo(e.target.value)} /></div>
+            <div style={{ display: "flex", gap: 6 }}><div><label className="label">Min R</label><input className="input" type="number" value={fMin} onChange={e => setFMin(e.target.value)} /></div><div><label className="label">Max R</label><input className="input" type="number" value={fMax} onChange={e => setFMax(e.target.value)} /></div></div>
+          </div>
         </div>
-      </div>}
+      )}
+
       <div className="card">
-        <div className="section-title">History <span style={{ fontSize: 12, color: "var(--slate)", fontWeight: 400 }}>({filtered.length})</span></div><div className="ledger-rule" />
+        <div className="section-title">History <span style={{ fontSize: 12, color: "var(--slate)", fontWeight: 400 }}>({filtered.length})</span></div>
+        <div className="ledger-rule" />
         {filtered.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>No transactions match your filters.</div>}
         {filtered.map(t => <TxnRow key={t.id} t={t} ctx={ctx} />)}
       </div>
+
       <div className="card" style={{ marginTop: 16 }}>
-        <div className="section-title">Recurring transactions</div><div className="ledger-rule" />
+        <div className="section-title">Recurring transactions</div>
+        <div className="ledger-rule" />
         {data.recurringTemplates.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>None set up. Tick "Make this recurring" when adding a transaction.</div>}
         {data.recurringTemplates.map(rt => {
           const acc = data.accounts.find(a => a.id === rt.accountId);
-          return <div key={rt.id} className="txn-row">
-            <div className="cat-icon" style={{ background: "rgba(47,111,98,0.14)" }}><Repeat size={16} color="var(--teal)" /></div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 13.5, fontWeight: 600 }}>{rt.category || "Transfer"} · {rt.frequency}</div>
-              <div style={{ fontSize: 11.5, color: "var(--slate)" }}>{acc?.name} · next {fmtDateNice(rt.nextDate)}{!rt.active ? " · paused" : ""}</div></div>
-            <div className="font-mono" style={{ fontWeight: 600 }}>{fmt(rt.amount)}</div>
-            <button className="btn btn-ghost btn-sm" onClick={() => updateRecurring({ ...rt, active: !rt.active })}>{rt.active ? "Pause" : "Resume"}</button>
-            <button className="icon-btn" onClick={() => { if (window.confirm("Delete this recurring transaction?")) deleteRecurring(rt.id); }}><Trash2 size={14} /></button>
-          </div>;
+          return (
+            <div key={rt.id} className="txn-row">
+              <div className="cat-icon" style={{ background: "rgba(47,111,98,0.14)" }}><Repeat size={16} color="var(--teal)" /></div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600 }}>{rt.category || "Transfer"} · {rt.frequency}</div>
+                <div style={{ fontSize: 11.5, color: "var(--slate)" }}>{acc?.name} · next {fmtDateNice(rt.nextDate)}{!rt.active ? " · paused" : ""}</div>
+              </div>
+              <div className="font-mono" style={{ fontWeight: 600 }}>{fmt(rt.amount)}</div>
+              <button className="btn btn-ghost btn-sm" onClick={() => updateRecurring({ ...rt, active: !rt.active })}>{rt.active ? "Pause" : "Resume"}</button>
+              <button className="icon-btn" onClick={() => { if (window.confirm("Delete this recurring transaction?")) deleteRecurring(rt.id); }}><Trash2 size={14} /></button>
+            </div>
+          );
         })}
       </div>
     </div>
@@ -892,9 +1019,13 @@ function TransactionsTab({ ctx }) {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Budgets tab                                                             */
+/* ---------------------------------------------------------------------- */
 function BudgetsTab({ ctx }) {
-  const { data, effectiveBudget, budgetSpent, fmt } = ctx;
-  const [showForm, setShowForm] = useState(false); const [editing, setEditing] = useState(null);
+  const { data, deleteBudget, effectiveBudget, budgetSpent, fmt } = ctx;
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
@@ -903,22 +1034,24 @@ function BudgetsTab({ ctx }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 14 }}>
         {data.budgets.map(b => {
           const eff = effectiveBudget(b); const spent = budgetSpent(b); const pct = eff > 0 ? (spent / eff) * 100 : 0; const remaining = eff - spent;
-          return <div className="card" key={b.id}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <CategoryIcon name={b.category} type="expense" />
-              <div style={{ display: "flex", gap: 2 }}>
-                <button className="icon-btn" onClick={() => { setEditing(b); setShowForm(true); }}><Pencil size={14} /></button>
-                <button className="icon-btn" onClick={() => { if (window.confirm("Delete this budget?")) ctx.deleteBudget(b.id); }}><Trash2 size={14} /></button>
+          return (
+            <div className="card" key={b.id}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <CategoryIcon name={b.category} type="expense" size={16} />
+                <div style={{ display: "flex", gap: 2 }}>
+                  <button className="icon-btn" onClick={() => { setEditing(b); setShowForm(true); }}><Pencil size={14} /></button>
+                  <button className="icon-btn" onClick={() => { if (window.confirm("Delete this budget?")) deleteBudget(b.id); }}><Trash2 size={14} /></button>
+                </div>
+              </div>
+              <div style={{ fontWeight: 600, fontSize: 14.5, marginTop: 8 }}>{b.category}</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{b.period}{b.carryOver ? " · carries over" : ""}</div>
+              <ProgressBar pct={pct} />
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
+                <span className="font-mono">{fmt(spent)} spent</span>
+                <span className="font-mono" style={{ color: remaining < 0 ? "var(--rust)" : "var(--slate)" }}>{remaining < 0 ? "over by " + fmt(-remaining) : fmt(remaining) + " left"}</span>
               </div>
             </div>
-            <div style={{ fontWeight: 600, fontSize: 14.5, marginTop: 8 }}>{b.category}</div>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>{b.period}{b.carryOver ? " · carries over" : ""}</div>
-            <ProgressBar pct={pct} />
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
-              <span className="font-mono">{fmt(spent)} spent</span>
-              <span className="font-mono" style={{ color: remaining < 0 ? "var(--rust)" : "var(--slate)" }}>{remaining < 0 ? "over by " + fmt(-remaining) : fmt(remaining) + " left"}</span>
-            </div>
-          </div>;
+          );
         })}
       </div>
       {showForm && <BudgetForm ctx={ctx} initial={editing} onClose={() => setShowForm(false)} />}
@@ -928,130 +1061,185 @@ function BudgetsTab({ ctx }) {
 function BudgetForm({ ctx, initial, onClose }) {
   const { data, addBudget, updateBudget } = ctx;
   const [category, setCategory] = useState(initial?.category || data.categories.expense[0]);
-  const [amount, setAmount] = useState(initial?.amount ?? ""); const [period, setPeriod] = useState(initial?.period || "monthly");
+  const [amount, setAmount] = useState(initial?.amount ?? "");
+  const [period, setPeriod] = useState(initial?.period || "monthly");
   const [carryOver, setCarryOver] = useState(initial?.carryOver || false);
-  function save() { if (!num(amount) || num(amount) <= 0) { alert("Enter a budget amount."); return; } const b = { id: initial?.id || uid(), category, amount: num(amount), period, carryOver }; initial ? updateBudget(b) : addBudget(b); onClose(); }
+  function save() {
+    if (!num(amount) || num(amount) <= 0) { alert("Enter a budget amount."); return; }
+    const b = { id: initial?.id || uid(), category, amount: num(amount), period, carryOver };
+    initial ? updateBudget(b) : addBudget(b);
+    onClose();
+  }
   return (
     <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 400 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}><div className="section-title">{initial ? "Edit budget" : "New budget"}</div><button className="icon-btn" onClick={onClose}><X size={18} /></button></div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
+          <div className="section-title">{initial ? "Edit budget" : "New budget"}</div>
+          <button className="icon-btn" onClick={onClose}><X size={18} /></button>
+        </div>
         <label className="label">Category</label>
         <select className="select" value={category} onChange={e => setCategory(e.target.value)} style={{ marginBottom: 12 }}>{data.categories.expense.map(c => <option key={c} value={c}>{c}</option>)}</select>
-        <label className="label">Amount (ZAR)</label><input className="input" type="number" value={amount} onChange={e => setAmount(e.target.value)} style={{ marginBottom: 12 }} />
+        <label className="label">Amount (ZAR)</label>
+        <input className="input" type="number" value={amount} onChange={e => setAmount(e.target.value)} style={{ marginBottom: 12 }} />
         <label className="label">Period</label>
         <select className="select" value={period} onChange={e => setPeriod(e.target.value)} style={{ marginBottom: 12 }}><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, marginBottom: 16 }}><input type="checkbox" checked={carryOver} onChange={e => setCarryOver(e.target.checked)} /> Carry over unspent amount to next period</label>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button></div>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, marginBottom: 16 }}>
+          <input type="checkbox" checked={carryOver} onChange={e => setCarryOver(e.target.checked)} /> Carry over unspent amount to next period
+        </label>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------- */
+/* Accounts tab — interest rate + optional boost % (default 0)             */
+/* ---------------------------------------------------------------------- */
 function AccountsTab({ ctx }) {
   const { data, accountBalance, fmt, deleteAccount, setShowAddTxn, setTxnDraftType, setEditingTxn } = ctx;
-  const [showForm, setShowForm] = useState(false); const [editing, setEditing] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
   const groups = [["bank", "Bank accounts"], ["cash", "Cash"], ["credit", "Credit cards"], ["savings", "Savings accounts"], ["wallet", "Digital wallets"]];
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 14 }}>
         <button className="btn btn-ghost" onClick={() => { setTxnDraftType("transfer"); setEditingTxn(null); setShowAddTxn(true); }}><ArrowLeftRight size={15} /> Transfer money</button>
         <button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}><Plus size={15} /> New account</button>
       </div>
+
       {groups.map(([type, label]) => {
         const accs = data.accounts.filter(a => a.type === type);
         if (accs.length === 0) return null;
-        return <div key={type} style={{ marginBottom: 20 }}>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>{label}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 14 }}>
-            {accs.map(a => {
-              const bal = accountBalance(a.id);
-              const eff = effectiveRate(a);
-              return <div className="card" key={a.id} style={{ background: type === "savings" ? "linear-gradient(135deg,var(--paper),#F5EFDD)" : "var(--paper)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div className="cat-icon" style={{ background: "var(--ink)" }}><AccountIcon type={a.type} /></div>
-                  <div style={{ display: "flex", gap: 2 }}>
-                    <button className="icon-btn" onClick={() => { setEditing(a); setShowForm(true); }}><Pencil size={14} /></button>
-                    <button className="icon-btn" onClick={() => { if (window.confirm("Delete this account and its transactions?")) deleteAccount(a.id); }}><Trash2 size={14} /></button>
+        return (
+          <div key={type} style={{ marginBottom: 20 }}>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>{label}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 14 }}>
+              {accs.map(a => {
+                const bal = accountBalance(a.id);
+                const eff = effectiveRate(a);
+                return (
+                  <div className="card" key={a.id} style={{ background: type === "savings" ? "linear-gradient(135deg,var(--paper),#F5EFDD)" : "var(--paper)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div className="cat-icon" style={{ background: "var(--ink)" }}><AccountIcon type={a.type} /></div>
+                      <div style={{ display: "flex", gap: 2 }}>
+                        <button className="icon-btn" onClick={() => { setEditing(a); setShowForm(true); }}><Pencil size={14} /></button>
+                        <button className="icon-btn" onClick={() => { if (window.confirm("Delete this account and its transactions?")) deleteAccount(a.id); }}><Trash2 size={14} /></button>
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 14.5, marginTop: 10 }}>{a.name}</div>
+                    {a.type === "savings" && (
+                      a.boostRate > 0
+                        ? <div className="eyebrow" style={{ color: "var(--gold)" }}>{a.interestRate}% base + {a.boostRate}% boost = {eff.toFixed(2)}% p.a.</div>
+                        : <div className="eyebrow" style={{ color: "var(--gold)" }}>{a.interestRate}% p.a.</div>
+                    )}
+                    <div className="font-mono" style={{ fontSize: 22, fontWeight: 600, marginTop: 6, color: bal < 0 ? "var(--rust)" : "var(--ink)" }}>{fmt(bal)}</div>
+                    {a.type === "savings" && bal > 0 && (
+                      <div style={{ fontSize: 11, color: "var(--slate)", marginTop: 6 }}>
+                        Projected in 12 months (no extra deposits): <span className="font-mono" style={{ color: "var(--teal)" }}>{fmt(bal * Math.pow(1 + eff / 100 / 12, 12))}</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div style={{ fontWeight: 600, fontSize: 14.5, marginTop: 10 }}>{a.name}</div>
-                {a.type === "savings" && (
-                  a.boostRate > 0
-                    ? <div className="eyebrow" style={{ color: "var(--gold)" }}>{a.interestRate}% base + {a.boostRate}% boost = {eff.toFixed(2)}% p.a.</div>
-                    : <div className="eyebrow" style={{ color: "var(--gold)" }}>{a.interestRate}% p.a.</div>
-                )}
-                <div className="font-mono" style={{ fontSize: 22, fontWeight: 600, marginTop: 6, color: bal < 0 ? "var(--rust)" : "var(--ink)" }}>{fmt(bal)}</div>
-                {a.type === "savings" && bal > 0 && <div style={{ fontSize: 11, color: "var(--slate)", marginTop: 6 }}>
-                  Projected in 12 months (no extra deposits): <span className="font-mono" style={{ color: "var(--teal)" }}>{fmt(bal * Math.pow(1 + eff / 100 / 12, 12))}</span>
-                </div>}
-              </div>;
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>;
+        );
       })}
+
       {showForm && <AccountForm ctx={ctx} initial={editing} onClose={() => setShowForm(false)} />}
     </div>
   );
 }
 function AccountForm({ ctx, initial, onClose }) {
   const { addAccount, updateAccount } = ctx;
-  const [name, setName] = useState(initial?.name || ""); const [type, setType] = useState(initial?.type || "bank");
-  const [opening, setOpening] = useState(initial?.opening ?? 0); const [interestRate, setInterestRate] = useState(initial?.interestRate ?? 0);
+  const [name, setName] = useState(initial?.name || "");
+  const [type, setType] = useState(initial?.type || "bank");
+  const [opening, setOpening] = useState(initial?.opening ?? 0);
+  const [interestRate, setInterestRate] = useState(initial?.interestRate ?? 0);
   const [boostRate, setBoostRate] = useState(initial?.boostRate ?? 0);
   function save() {
     if (!name.trim()) { alert("Give the account a name."); return; }
     const acc = { id: initial?.id || uid(), name: name.trim(), type, opening: num(opening), interestRate: num(interestRate), boostRate: num(boostRate) };
-    initial ? updateAccount(acc) : addAccount(acc); onClose();
+    initial ? updateAccount(acc) : addAccount(acc);
+    onClose();
   }
   return (
     <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 400 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}><div className="section-title">{initial ? "Edit account" : "New account"}</div><button className="icon-btn" onClick={onClose}><X size={18} /></button></div>
-        <label className="label">Name</label><input className="input" value={name} onChange={e => setName(e.target.value)} style={{ marginBottom: 12 }} placeholder="e.g. Capitec Savings" />
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
+          <div className="section-title">{initial ? "Edit account" : "New account"}</div>
+          <button className="icon-btn" onClick={onClose}><X size={18} /></button>
+        </div>
+        <label className="label">Name</label>
+        <input className="input" value={name} onChange={e => setName(e.target.value)} style={{ marginBottom: 12 }} placeholder="e.g. Capitec Savings" />
         <label className="label">Type</label>
         <select className="select" value={type} onChange={e => setType(e.target.value)} style={{ marginBottom: 12 }}>
           <option value="bank">Bank account</option><option value="cash">Cash</option><option value="credit">Credit card</option><option value="savings">Savings account</option><option value="wallet">Digital wallet</option>
         </select>
         <label className="label">{initial ? "Opening balance (ZAR)" : "Starting balance (ZAR)"}</label>
         <input className="input" type="number" value={opening} onChange={e => setOpening(e.target.value)} style={{ marginBottom: 12 }} />
-        {type === "savings" && <>
-          <label className="label">Base interest rate (% per year)</label>
-          <input className="input" type="number" step="0.01" value={interestRate} onChange={e => setInterestRate(e.target.value)} style={{ marginBottom: 12 }} />
-          <label className="label">Boost / bonus rate (% per year) — optional, on top of the base rate</label>
-          <input className="input" type="number" step="0.01" value={boostRate} onChange={e => setBoostRate(e.target.value)} style={{ marginBottom: 4 }} placeholder="0" />
-          <div style={{ fontSize: 11, color: "var(--slate)", marginBottom: 12 }}>Effective rate: <span className="font-mono" style={{ fontWeight: 600, color: "var(--ink)" }}>{(num(interestRate) + num(boostRate)).toFixed(2)}%</span></div>
-        </>}
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 6 }}><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button></div>
+        {type === "savings" && (
+          <>
+            <label className="label">Interest rate (% per year)</label>
+            <input className="input" type="number" step="0.01" value={interestRate} onChange={e => setInterestRate(e.target.value)} style={{ marginBottom: 12 }} placeholder="0" />
+            <label className="label">Boost rate (% per year) — optional, added on top</label>
+            <input className="input" type="number" step="0.01" value={boostRate} onChange={e => setBoostRate(e.target.value)} style={{ marginBottom: 4 }} placeholder="0" />
+            <div style={{ fontSize: 11, color: "var(--slate)", marginBottom: 12 }}>Effective rate: <span className="font-mono" style={{ fontWeight: 600, color: "var(--ink)" }}>{(num(interestRate) + num(boostRate)).toFixed(2)}%</span></div>
+          </>
+        )}
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 6 }}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------- */
+/* Goals tab                                                               */
+/* ---------------------------------------------------------------------- */
 function GoalsTab({ ctx }) {
   const { data, fmt, deleteGoal } = ctx;
-  const [showForm, setShowForm] = useState(false); const [editing, setEditing] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}><button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}><Plus size={15} /> New goal</button></div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}><Plus size={15} /> New goal</button>
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 14 }}>
         {data.goals.map(g => {
           const pct = g.target > 0 ? (g.saved / g.target) * 100 : 0;
           const monthsLeft = g.targetDate ? Math.max(1, Math.round(daysBetween(todayStr(), g.targetDate) / 30)) : null;
           const suggested = monthsLeft ? Math.max(0, (g.target - g.saved) / monthsLeft) : null;
-          return <div className="card" key={g.id}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div className="cat-icon" style={{ background: "rgba(201,162,39,0.16)" }}><Target size={17} color="var(--gold)" /></div>
-              <div style={{ display: "flex", gap: 2 }}><button className="icon-btn" onClick={() => { setEditing(g); setShowForm(true); }}><Pencil size={14} /></button><button className="icon-btn" onClick={() => { if (window.confirm("Delete this goal?")) deleteGoal(g.id); }}><Trash2 size={14} /></button></div>
+          return (
+            <div className="card" key={g.id}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div className="cat-icon" style={{ background: "rgba(201,162,39,0.16)" }}><Target size={17} color="var(--gold)" /></div>
+                <div style={{ display: "flex", gap: 2 }}>
+                  <button className="icon-btn" onClick={() => { setEditing(g); setShowForm(true); }}><Pencil size={14} /></button>
+                  <button className="icon-btn" onClick={() => { if (window.confirm("Delete this goal?")) deleteGoal(g.id); }}><Trash2 size={14} /></button>
+                </div>
+              </div>
+              <div style={{ fontWeight: 600, fontSize: 15, marginTop: 8 }}>{g.name}</div>
+              {g.targetDate && <div className="eyebrow">by {fmtDateNice(g.targetDate)}</div>}
+              <div style={{ margin: "10px 0 6px" }}><ProgressBar pct={pct} tone="var(--gold)" /></div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }} className="font-mono">
+                <span>{fmt(g.saved)}</span><span style={{ color: "var(--slate)" }}>of {fmt(g.target)}</span>
+              </div>
+              {pct >= 100 ? (
+                <div style={{ marginTop: 8, fontSize: 12, color: "var(--teal)", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}><CheckCircle2 size={14} /> Goal reached!</div>
+              ) : suggested !== null && (
+                <div style={{ marginTop: 8, fontSize: 11.5, color: "var(--slate)" }}>Save about <span className="font-mono" style={{ color: "var(--ink)", fontWeight: 600 }}>{fmt(suggested)}</span>/month to hit this on time.</div>
+              )}
             </div>
-            <div style={{ fontWeight: 600, fontSize: 15, marginTop: 8 }}>{g.name}</div>
-            {g.targetDate && <div className="eyebrow">by {fmtDateNice(g.targetDate)}</div>}
-            <div style={{ margin: "10px 0 6px" }}><ProgressBar pct={pct} tone="var(--gold)" /></div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }} className="font-mono"><span>{fmt(g.saved)}</span><span style={{ color: "var(--slate)" }}>of {fmt(g.target)}</span></div>
-            {pct >= 100 ? <div style={{ marginTop: 8, fontSize: 12, color: "var(--teal)", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}><CheckCircle2 size={14} /> Goal reached!</div>
-              : suggested !== null && <div style={{ marginTop: 8, fontSize: 11.5, color: "var(--slate)" }}>Save about <span className="font-mono" style={{ color: "var(--ink)", fontWeight: 600 }}>{fmt(suggested)}</span>/month to hit this on time.</div>}
-          </div>;
+          );
         })}
       </div>
       {showForm && <GoalForm ctx={ctx} initial={editing} onClose={() => setShowForm(false)} />}
@@ -1060,81 +1248,130 @@ function GoalsTab({ ctx }) {
 }
 function GoalForm({ ctx, initial, onClose }) {
   const { data, addGoal, updateGoal } = ctx;
-  const [name, setName] = useState(initial?.name || ""); const [target, setTarget] = useState(initial?.target ?? "");
-  const [saved, setSaved] = useState(initial?.saved ?? 0); const [targetDate, setTargetDate] = useState(initial?.targetDate || "");
+  const [name, setName] = useState(initial?.name || "");
+  const [target, setTarget] = useState(initial?.target ?? "");
+  const [saved, setSaved] = useState(initial?.saved ?? 0);
+  const [targetDate, setTargetDate] = useState(initial?.targetDate || "");
   const [linkedAccountId, setLinkedAccountId] = useState(initial?.linkedAccountId || "");
-  function save() { if (!name.trim() || !num(target)) { alert("Give the goal a name and target amount."); return; } const g = { id: initial?.id || uid(), name: name.trim(), target: num(target), saved: num(saved), targetDate: targetDate || null, linkedAccountId: linkedAccountId || null }; initial ? updateGoal(g) : addGoal(g); onClose(); }
+  function save() {
+    if (!name.trim() || !num(target)) { alert("Give the goal a name and target amount."); return; }
+    const g = { id: initial?.id || uid(), name: name.trim(), target: num(target), saved: num(saved), targetDate: targetDate || null, linkedAccountId: linkedAccountId || null };
+    initial ? updateGoal(g) : addGoal(g);
+    onClose();
+  }
   return (
     <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 400 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}><div className="section-title">{initial ? "Edit goal" : "New goal"}</div><button className="icon-btn" onClick={onClose}><X size={18} /></button></div>
-        <label className="label">Goal name</label><input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. New laptop" style={{ marginBottom: 12 }} />
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
+          <div className="section-title">{initial ? "Edit goal" : "New goal"}</div>
+          <button className="icon-btn" onClick={onClose}><X size={18} /></button>
+        </div>
+        <label className="label">Goal name</label>
+        <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. New laptop" style={{ marginBottom: 12 }} />
         <div className="grid-2" style={{ marginBottom: 12 }}>
           <div><label className="label">Target amount (ZAR)</label><input className="input" type="number" value={target} onChange={e => setTarget(e.target.value)} /></div>
           <div><label className="label">Already saved (ZAR)</label><input className="input" type="number" value={saved} onChange={e => setSaved(e.target.value)} /></div>
         </div>
-        <label className="label">Target date (optional)</label><input className="input" type="date" value={targetDate || ""} onChange={e => setTargetDate(e.target.value)} style={{ marginBottom: 12 }} />
+        <label className="label">Target date (optional)</label>
+        <input className="input" type="date" value={targetDate || ""} onChange={e => setTargetDate(e.target.value)} style={{ marginBottom: 12 }} />
         <label className="label">Link to a savings account (optional)</label>
         <select className="select" value={linkedAccountId} onChange={e => setLinkedAccountId(e.target.value)} style={{ marginBottom: 16 }}>
-          <option value="">None</option>{data.accounts.filter(a => a.type === "savings").map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+          <option value="">None</option>
+          {data.accounts.filter(a => a.type === "savings").map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button></div>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-gold" onClick={save}><Check size={15} /> Save</button>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------- */
+/* Reports tab                                                             */
+/* ---------------------------------------------------------------------- */
 function ReportsTab({ ctx }) {
   const { data, fmt, conv, ccy, totalIncome, totalExpense } = ctx;
-  const months = useMemo(() => { const arr = []; const d = new Date(); for (let i = 5; i >= 0; i--) { const dd = new Date(d.getFullYear(), d.getMonth() - i, 1); arr.push(dd.getFullYear() + "-" + String(dd.getMonth() + 1).padStart(2, "0")); } return arr; }, []);
+  const months = useMemo(() => {
+    const arr = [];
+    const d = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const dd = new Date(d.getFullYear(), d.getMonth() - i, 1);
+      arr.push(dd.getFullYear() + "-" + String(dd.getMonth() + 1).padStart(2, "0"));
+    }
+    return arr;
+  }, []);
+
   const currFmt = v => CCY_SYMBOL[ccy] + " " + Math.round(v).toLocaleString("en-ZA");
   const barData = months.map(mk => ({ label: monthLabel(mk), Income: conv(totalIncome(mk)), Expenses: conv(totalExpense(mk)) }));
   const cashflowData = months.map(mk => ({ label: monthLabel(mk), Net: conv(totalIncome(mk) - totalExpense(mk)) }));
-  const savingsRateData = months.map(mk => { const inc = totalIncome(mk), exp = totalExpense(mk); return { label: monthLabel(mk), Rate: inc > 0 ? Math.round(((inc - exp) / inc) * 100) : 0 }; });
-  const catTotals = {}; data.transactions.filter(t => t.type === "expense").forEach(t => { catTotals[t.category] = (catTotals[t.category] || 0) + t.amount; });
+  const savingsRateData = months.map(mk => { const inc = totalIncome(mk); const exp = totalExpense(mk); return { label: monthLabel(mk), Rate: inc > 0 ? Math.round(((inc - exp) / inc) * 100) : 0 }; });
+
+  const catTotals = {};
+  data.transactions.filter(t => t.type === "expense").forEach(t => { catTotals[t.category] = (catTotals[t.category] || 0) + t.amount; });
   const topCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const thisMonthPie = useMemo(() => { const map = {}; data.transactions.filter(t => t.type === "expense" && monthKey(t.date) === monthKey(todayStr())).forEach(t => { map[t.category] = (map[t.category] || 0) + t.amount; }); return Object.entries(map).map(([name, value]) => ({ name, value, color: catColor(name, "expense") })); }, [data.transactions]);
+
+  const thisMonthPie = useMemo(() => {
+    const map = {};
+    data.transactions.filter(t => t.type === "expense" && monthKey(t.date) === monthKey(todayStr())).forEach(t => { map[t.category] = (map[t.category] || 0) + t.amount; });
+    return Object.entries(map).map(([name, value]) => ({ name, value, color: catColor(name, "expense") }));
+  }, [data.transactions]);
+
   const currentSavingsRate = savingsRateData[savingsRateData.length - 1]?.Rate ?? 0;
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div className="card">
-          <div className="section-title">Income vs. expenses</div><div className="eyebrow">Last 6 months</div><div className="ledger-rule" />
+          <div className="section-title">Income vs. expenses</div>
+          <div className="eyebrow">Last 6 months</div>
+          <div className="ledger-rule" />
+          <ChartLegend items={[{ label: "Income", color: "var(--teal)" }, { label: "Expenses", color: "var(--rust)" }]} />
           <BarsChart data={barData} series={[{ key: "Income", color: "var(--teal)", label: "Income" }, { key: "Expenses", color: "var(--rust)", label: "Expenses" }]} fmtVal={currFmt} />
         </div>
         <div className="card">
-          <div className="section-title">Cash-flow trend</div><div className="eyebrow">Net income minus expenses, monthly</div><div className="ledger-rule" />
+          <div className="section-title">Cash-flow trend</div>
+          <div className="eyebrow">Net income minus expenses, monthly</div>
+          <div className="ledger-rule" />
           <LinesChart data={cashflowData} series={[{ key: "Net", color: "var(--gold)", label: "Net" }]} fmtVal={currFmt} />
         </div>
       </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div className="card">
-          <div className="section-title">This month's spending by category</div><div className="ledger-rule" />
+          <div className="section-title">This month's spending by category</div>
+          <div className="ledger-rule" />
           {thisMonthPie.length === 0 ? <div style={{ color: "var(--slate)", fontSize: 13 }}>No expenses yet this month.</div> : (
             <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
               <div style={{ width: 170 }}><DonutChart data={thisMonthPie} size={170} /></div>
-              <div style={{ flex: 1, minWidth: 140 }}>{[...thisMonthPie].sort((a, b) => b.value - a.value).map(e => (
-                <div key={e.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: 99, background: e.color, display: "inline-block" }} />{e.name}</span>
-                  <span className="font-mono">{fmt(e.value)}</span>
-                </div>))}</div>
+              <div style={{ flex: 1, minWidth: 140 }}>
+                {[...thisMonthPie].sort((a, b) => b.value - a.value).map(e => (
+                  <div key={e.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: 99, background: e.color, display: "inline-block" }} />{e.name}</span>
+                    <span className="font-mono">{fmt(e.value)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
         <div className="card">
-          <div className="section-title">Savings rate</div><div className="eyebrow">Current month: {currentSavingsRate}% of income saved</div><div className="ledger-rule" />
+          <div className="section-title">Savings rate</div>
+          <div className="eyebrow">Current month: {currentSavingsRate}% of income saved</div>
+          <div className="ledger-rule" />
           <LinesChart data={savingsRateData} series={[{ key: "Rate", color: "var(--teal)", label: "Rate" }]} fmtVal={v => v + "%"} />
         </div>
       </div>
+
       <div className="card">
-        <div className="section-title">Biggest spending categories (all time)</div><div className="ledger-rule" />
+        <div className="section-title">Biggest spending categories (all time)</div>
+        <div className="ledger-rule" />
         {topCats.length === 0 && <div style={{ color: "var(--slate)", fontSize: 13 }}>No expenses recorded yet.</div>}
         {topCats.map(([name, value], i) => (
           <div key={name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--line)" }}>
             <span className="font-mono" style={{ color: "var(--slate)", width: 18 }}>{i + 1}</span>
-            <CategoryIcon name={name} type="expense" />
+            <CategoryIcon name={name} type="expense" size={15} />
             <span style={{ flex: 1, fontSize: 13 }}>{name}</span>
             <span className="font-mono" style={{ fontWeight: 600 }}>{fmt(value)}</span>
           </div>
@@ -1144,6 +1381,8 @@ function ReportsTab({ ctx }) {
   );
 }
 
+/* ---------------------------------------------------------------------- */
+/* Calculators tab                                                         */
 /* ---------------------------------------------------------------------- */
 function CalculatorsTab({ ctx }) {
   return (
@@ -1157,27 +1396,42 @@ function CalculatorsTab({ ctx }) {
 function SavingsGrowthCalculator({ ctx }) {
   const { data, fmt } = ctx;
   const savingsAccs = data.accounts.filter(a => a.type === "savings");
-  const [principal, setPrincipal] = useState(10000); const [monthly, setMonthly] = useState(1000);
-  const [rate, setRate] = useState(savingsAccs[0] ? effectiveRate(savingsAccs[0]) : 7); const [years, setYears] = useState(5);
+  const [principal, setPrincipal] = useState(10000);
+  const [monthly, setMonthly] = useState(1000);
+  const [rate, setRate] = useState(savingsAccs[0] ? effectiveRate(savingsAccs[0]) : 7);
+  const [years, setYears] = useState(5);
+
   const chartData = useMemo(() => {
-    const arr = []; let bal = num(principal); const r = num(rate) / 100 / 12;
-    for (let m = 0; m <= num(years) * 12; m++) { if (m > 0) bal = bal * (1 + r) + num(monthly); if (m % 12 === 0) arr.push({ label: "Yr " + (m / 12), Balance: Math.round(bal) }); }
+    const arr = [];
+    let bal = num(principal);
+    const r = num(rate) / 100 / 12;
+    for (let m = 0; m <= num(years) * 12; m++) {
+      if (m > 0) bal = bal * (1 + r) + num(monthly);
+      if (m % 12 === 0) arr.push({ label: "Yr " + (m / 12), Balance: Math.round(bal) });
+    }
     return arr;
   }, [principal, monthly, rate, years]);
+
   const finalBalance = chartData[chartData.length - 1]?.Balance || 0;
   const totalContributed = num(principal) + num(monthly) * num(years) * 12;
   const totalInterest = finalBalance - totalContributed;
+
   return (
     <div className="card">
-      <div className="section-title">Savings growth calculator</div><div className="eyebrow">Compound interest projection (base rate + boost)</div><div className="ledger-rule" />
+      <div className="section-title">Savings growth calculator</div>
+      <div className="eyebrow">Compound interest projection (base rate + boost)</div>
+      <div className="ledger-rule" />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div>
-          {savingsAccs.length > 0 && <div style={{ marginBottom: 10 }}>
-            <label className="label">Prefill from an account</label>
-            <select className="select" onChange={e => { const a = savingsAccs.find(x => x.id === e.target.value); if (a) setRate(effectiveRate(a)); }}>
-              <option value="">Choose…</option>{savingsAccs.map(a => <option key={a.id} value={a.id}>{a.name} (eff. {effectiveRate(a).toFixed(2)}%)</option>)}
-            </select>
-          </div>}
+          {savingsAccs.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <label className="label">Prefill from an account</label>
+              <select className="select" onChange={e => { const a = savingsAccs.find(x => x.id === e.target.value); if (a) setRate(effectiveRate(a)); }}>
+                <option value="">Choose…</option>
+                {savingsAccs.map(a => <option key={a.id} value={a.id}>{a.name} (eff. {effectiveRate(a).toFixed(2)}%)</option>)}
+              </select>
+            </div>
+          )}
           <div className="grid-2" style={{ marginBottom: 10 }}>
             <div><label className="label">Starting amount (R)</label><input className="input" type="number" value={principal} onChange={e => setPrincipal(e.target.value)} /></div>
             <div><label className="label">Monthly deposit (R)</label><input className="input" type="number" value={monthly} onChange={e => setMonthly(e.target.value)} /></div>
@@ -1197,17 +1451,31 @@ function SavingsGrowthCalculator({ ctx }) {
     </div>
   );
 }
-function StatLine({ label, value, tone }) { return <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: "var(--slate)" }}>{label}</span><span className="font-mono" style={{ fontWeight: 600, color: tone === "teal" ? "var(--teal)" : "var(--ink)" }}>{value}</span></div>; }
+function StatLine({ label, value, tone }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+      <span style={{ color: "var(--slate)" }}>{label}</span>
+      <span className="font-mono" style={{ fontWeight: 600, color: tone === "teal" ? "var(--teal)" : "var(--ink)" }}>{value}</span>
+    </div>
+  );
+}
 function GoalPlannerCalculator({ ctx }) {
   const { fmt } = ctx;
-  const [target, setTarget] = useState(50000); const [current, setCurrent] = useState(5000); const [months, setMonths] = useState(24); const [rate, setRate] = useState(6);
+  const [target, setTarget] = useState(50000);
+  const [current, setCurrent] = useState(5000);
+  const [months, setMonths] = useState(24);
+  const [rate, setRate] = useState(6);
+
   const r = num(rate) / 100 / 12, n = num(months), fv = num(target), pv = num(current);
   let monthlyNeeded;
   if (r === 0) monthlyNeeded = n > 0 ? Math.max(0, (fv - pv) / n) : 0;
   else { const growthOfPV = pv * Math.pow(1 + r, n); const denom = (Math.pow(1 + r, n) - 1) / r; monthlyNeeded = denom > 0 ? Math.max(0, (fv - growthOfPV) / denom) : 0; }
+
   return (
     <div className="card">
-      <div className="section-title">Goal planner</div><div className="eyebrow">How much to save each month to hit a target</div><div className="ledger-rule" />
+      <div className="section-title">Goal planner</div>
+      <div className="eyebrow">How much to save each month to hit a target</div>
+      <div className="ledger-rule" />
       <div className="grid-2" style={{ marginBottom: 10 }}>
         <div><label className="label">Target amount (R)</label><input className="input" type="number" value={target} onChange={e => setTarget(e.target.value)} /></div>
         <div><label className="label">Already saved (R)</label><input className="input" type="number" value={current} onChange={e => setCurrent(e.target.value)} /></div>
@@ -1227,57 +1495,84 @@ function RuleCalculator({ ctx }) {
   const { fmt, thisMonthKey, monthTxns } = ctx;
   const [income, setIncome] = useState(30000);
   const needs = num(income) * 0.5, wants = num(income) * 0.3, save = num(income) * 0.2;
+
   const actualExpense = monthTxns(thisMonthKey).filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const actualIncome = monthTxns(thisMonthKey).filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const actualSaveRate = actualIncome > 0 ? ((actualIncome - actualExpense) / actualIncome) * 100 : 0;
+
   return (
     <div className="card">
-      <div className="section-title">50 / 30 / 20 budget rule</div><div className="eyebrow">A quick guideline: needs / wants / savings</div><div className="ledger-rule" />
-      <label className="label">Monthly income (R)</label><input className="input" type="number" value={income} onChange={e => setIncome(e.target.value)} style={{ marginBottom: 14, maxWidth: 220 }} />
+      <div className="section-title">50 / 30 / 20 budget rule</div>
+      <div className="eyebrow">A quick guideline: needs / wants / savings</div>
+      <div className="ledger-rule" />
+      <label className="label">Monthly income (R)</label>
+      <input className="input" type="number" value={income} onChange={e => setIncome(e.target.value)} style={{ marginBottom: 14, maxWidth: 220 }} />
       <div className="grid-3">
         <div className="card" style={{ background: "var(--paper-dim)", border: "none" }}><div className="eyebrow">Needs · 50%</div><div className="font-mono" style={{ fontSize: 19, fontWeight: 700 }}>{fmt(needs)}</div><div style={{ fontSize: 11, color: "var(--slate)" }}>Rent, food, transport, insurance</div></div>
         <div className="card" style={{ background: "var(--paper-dim)", border: "none" }}><div className="eyebrow">Wants · 30%</div><div className="font-mono" style={{ fontSize: 19, fontWeight: 700 }}>{fmt(wants)}</div><div style={{ fontSize: 11, color: "var(--slate)" }}>Entertainment, shopping, subscriptions</div></div>
         <div className="card" style={{ background: "var(--paper-dim)", border: "none" }}><div className="eyebrow">Savings · 20%</div><div className="font-mono" style={{ fontSize: 19, fontWeight: 700, color: "var(--teal)" }}>{fmt(save)}</div><div style={{ fontSize: 11, color: "var(--slate)" }}>Savings accounts & goals</div></div>
       </div>
-      <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--slate)" }}>This month you're actually saving about <span className="font-mono" style={{ color: actualSaveRate >= 20 ? "var(--teal)" : "var(--rust)", fontWeight: 600 }}>{actualSaveRate.toFixed(0)}%</span> of your income.</div>
+      <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--slate)" }}>
+        This month you're actually saving about <span className="font-mono" style={{ color: actualSaveRate >= 20 ? "var(--teal)" : "var(--rust)", fontWeight: 600 }}>{actualSaveRate.toFixed(0)}%</span> of your income.
+      </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------- */
+/* Settings tab                                                            */
+/* ---------------------------------------------------------------------- */
 function SettingsTab({ ctx, fileInputRef, restoreBackup }) {
   const { data, setData, exportCSV, exportBackup, deleteAllData, addCategory } = ctx;
-  const [newExpCat, setNewExpCat] = useState(""); const [newIncCat, setNewIncCat] = useState("");
+  const [newExpCat, setNewExpCat] = useState("");
+  const [newIncCat, setNewIncCat] = useState("");
+
   return (
     <div style={{ display: "grid", gap: 16, maxWidth: 700 }}>
       <div className="card">
-        <div className="section-title">Currency</div><div className="ledger-rule" />
+        <div className="section-title">Currency</div>
+        <div className="ledger-rule" />
         <div style={{ fontSize: 12.5, color: "var(--slate)", marginBottom: 10 }}>All amounts are entered and stored in South African Rand. Choose a display currency, and set the exchange rates to keep conversions accurate.</div>
         <div className="grid-2">
           <div><label className="label">1 ZAR in EUR</label><input className="input" type="number" step="0.0001" value={data.settings.rates.EUR} onChange={e => setData(d => ({ ...d, settings: { ...d.settings, rates: { ...d.settings.rates, EUR: num(e.target.value) } } }))} /></div>
           <div><label className="label">1 ZAR in USD</label><input className="input" type="number" step="0.0001" value={data.settings.rates.USD} onChange={e => setData(d => ({ ...d, settings: { ...d.settings, rates: { ...d.settings.rates, USD: num(e.target.value) } } }))} /></div>
         </div>
       </div>
+
       <div className="card">
-        <div className="section-title">Alerts</div><div className="ledger-rule" />
+        <div className="section-title">Alerts</div>
+        <div className="ledger-rule" />
         <label className="label">Warn me when I've spent this % of a budget</label>
-        <input className="input" type="number" min="1" max="100" style={{ maxWidth: 120 }} value={data.settings.alertThreshold} onChange={e => setData(d => ({ ...d, settings: { ...d.settings, alertThreshold: num(e.target.value) } }))} />
+        <input className="input" type="number" min="1" max="100" style={{ maxWidth: 120 }} value={data.settings.alertThreshold}
+          onChange={e => setData(d => ({ ...d, settings: { ...d.settings, alertThreshold: num(e.target.value) } }))} />
       </div>
+
       <div className="card">
-        <div className="section-title">Categories</div><div className="ledger-rule" />
+        <div className="section-title">Categories</div>
+        <div className="ledger-rule" />
         <div className="grid-2">
-          <div><div className="eyebrow" style={{ marginBottom: 6 }}>Expense categories</div>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Expense categories</div>
             {data.categories.expense.map(c => <span key={c} className="pill" style={{ background: "var(--paper-dim)", marginRight: 5, marginBottom: 5 }}>{c}</span>)}
-            <div style={{ display: "flex", gap: 6, marginTop: 8 }}><input className="input" placeholder="New category" value={newExpCat} onChange={e => setNewExpCat(e.target.value)} /><button className="btn btn-ghost btn-sm" onClick={() => { if (newExpCat.trim()) { addCategory("expense", newExpCat.trim()); setNewExpCat(""); } }}>Add</button></div>
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <input className="input" placeholder="New category" value={newExpCat} onChange={e => setNewExpCat(e.target.value)} />
+              <button className="btn btn-ghost btn-sm" onClick={() => { if (newExpCat.trim()) { addCategory("expense", newExpCat.trim()); setNewExpCat(""); } }}>Add</button>
+            </div>
           </div>
-          <div><div className="eyebrow" style={{ marginBottom: 6 }}>Income categories</div>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Income categories</div>
             {data.categories.income.map(c => <span key={c} className="pill" style={{ background: "var(--paper-dim)", marginRight: 5, marginBottom: 5 }}>{c}</span>)}
-            <div style={{ display: "flex", gap: 6, marginTop: 8 }}><input className="input" placeholder="New category" value={newIncCat} onChange={e => setNewIncCat(e.target.value)} /><button className="btn btn-ghost btn-sm" onClick={() => { if (newIncCat.trim()) { addCategory("income", newIncCat.trim()); setNewIncCat(""); } }}>Add</button></div>
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <input className="input" placeholder="New category" value={newIncCat} onChange={e => setNewIncCat(e.target.value)} />
+              <button className="btn btn-ghost btn-sm" onClick={() => { if (newIncCat.trim()) { addCategory("income", newIncCat.trim()); setNewIncCat(""); } }}>Add</button>
+            </div>
           </div>
         </div>
       </div>
+
       <div className="card">
-        <div className="section-title">Export & backup</div><div className="ledger-rule" />
+        <div className="section-title">Export & backup</div>
+        <div className="ledger-rule" />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
           <button className="btn btn-ghost" onClick={exportCSV}><Download size={15} /> Export transactions (CSV)</button>
           <button className="btn btn-ghost" onClick={exportBackup}><Download size={15} /> Download full backup (JSON)</button>
@@ -1286,11 +1581,14 @@ function SettingsTab({ ctx, fileInputRef, restoreBackup }) {
         </div>
         <div style={{ fontSize: 11.5, color: "var(--slate)", display: "flex", gap: 6, alignItems: "flex-start" }}><Info size={13} style={{ marginTop: 1, flexShrink: 0 }} /> For a printable report, open Reports and use your browser's Print → Save as PDF.</div>
       </div>
+
       <div className="card" style={{ borderColor: "var(--rust)" }}>
-        <div className="section-title" style={{ color: "var(--rust)" }}>Danger zone</div><div className="ledger-rule" style={{ borderTopColor: "var(--rust)" }} />
+        <div className="section-title" style={{ color: "var(--rust)" }}>Danger zone</div>
+        <div className="ledger-rule" style={{ borderTopColor: "var(--rust)" }} />
         <div style={{ fontSize: 12.5, color: "var(--slate)", marginBottom: 10 }}>Permanently erase every account, transaction, budget and goal stored in this browser.</div>
         <button className="btn btn-danger" onClick={deleteAllData}><Trash2 size={15} /> Delete all data</button>
       </div>
+
       <div style={{ fontSize: 11, color: "var(--slate)", textAlign: "center", paddingBottom: 8 }}>
         <Sparkles size={12} style={{ display: "inline", marginRight: 4, verticalAlign: -2 }} /> Your data is stored privately in this browser's local storage on this device, and never sent anywhere.
       </div>
