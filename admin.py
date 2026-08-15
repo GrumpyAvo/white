@@ -8,11 +8,13 @@ from functools import wraps
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     jsonify,
     redirect,
     render_template,
     request,
+    send_from_directory,
     session,
     url_for,
 )
@@ -565,6 +567,15 @@ def books_fetch_covers():
     backup.snapshot()
     flash("Fetched %d cover%s from Open Library" % (n, "" if n == 1 else "s"), "ok")
     return redirect(url_for("admin.list_entity", entity="books"))
+
+
+@admin_bp.route("/ledgerline")
+@require_admin
+def ledgerline():
+    """Backend-exclusive tool — only reachable when logged in. The file is a
+    self-contained React app (own CSS + CDN scripts), so it's served as-is;
+    Jinja would choke on its JSX braces."""
+    return send_from_directory(current_app.root_path, "ledgerline.html")
 
 
 @admin_bp.route("/guestbook", methods=["GET", "POST"])

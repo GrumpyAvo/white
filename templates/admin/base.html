@@ -26,6 +26,7 @@
       <a class="nav-item {% if active == 'users' %}active{% endif %}" href="{{ url_for('admin.users_admin') }}">users</a>
       <a class="nav-item {% if active == 'settings' %}active{% endif %}" href="{{ url_for('admin.settings_admin') }}">settings</a>
       <a class="nav-item {% if active == 'import' %}active{% endif %}" href="{{ url_for('admin.import_admin') }}">import</a>
+      <a class="nav-item {% if active == 'ledgerline' %}active{% endif %}" href="{{ url_for('admin.ledgerline') }}">ledgerline</a>
     </nav>
     <a class="logout-btn" href="{{ url_for('admin.logout') }}">↪ logout</a>
   </aside>
